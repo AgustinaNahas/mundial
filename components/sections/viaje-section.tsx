@@ -89,16 +89,16 @@ function FlightPath() {
 export function ViajeSection() {
   const { getIndicador, loading } = useData()
   
-  const vuelo = getIndicador("VUELO")
-  const paquete = getIndicador("PAQUETE_BASICO")
-  const salario = getIndicador("SALARIO_MINIMO")
-  const dolar = getIndicador("DOLAR_OFICIAL")
+  const vuelo2022 = getIndicador("BSAS_DOHA")
+  const vuelo2026 = getIndicador("BSAS_MIAMI")
+  const salario = getIndicador("SUELDO_MIN_PESOS")
+  const dolar = getIndicador("VALOR_DOLAR_PESO")
   
   // Vuelos en USD
-  const vuelo_2022 = vuelo?.valor_2022 ?? 2800
-  const vuelo_2026 = vuelo?.valor_2026 ?? 1800
-  const paquete_2022 = paquete?.valor_2022 ?? 8500
-  const paquete_2026 = paquete?.valor_2026 ?? 12000
+  const vuelo_2022 = vuelo2022?.valor_2022 ?? 2800
+  const vuelo_2026 = vuelo2026?.valor_2026 ?? 1800
+  const paquete_2022 = vuelo_2022
+  const paquete_2026 = vuelo_2026
   
   const salario_2022 = salario?.valor_2022 ?? 57900
   const salario_2026 = salario?.valor_2026 ?? 279718
@@ -114,7 +114,7 @@ export function ViajeSection() {
   
   if (loading) {
     return (
-      <SectionWrapper number="05" title="Viajar al Mundial" insight="Cargando datos...">
+      <SectionWrapper number="05" title="Viajar al Mundial" intro="Cargando datos...">
         <div className="h-48 animate-pulse bg-muted rounded-lg" />
       </SectionWrapper>
     )
@@ -124,7 +124,7 @@ export function ViajeSection() {
     <SectionWrapper
       number="05"
       title="Viajar al Mundial"
-      insight={`El viaje al Mundial equivalia a ${salarios2022} salarios minimos en 2022. En 2026 equivale a ${salarios2026}.`}
+      intro={`El viaje al Mundial equivalia a ${salarios2022} salarios minimos en 2022. En 2026 equivale a ${salarios2026}.`}
     >
       <FlightPath />
       

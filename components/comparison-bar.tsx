@@ -24,8 +24,17 @@ export function ComparisonBar({
   showChange = true
 }: ComparisonBarProps) {
   const max = maxValue || Math.max(value2022, value2026) * 1.2
-  const width2022 = (value2022 / max) * 100
-  const width2026 = (value2026 / max) * 100
+
+  const MIN_WIDTH = 12 // % de ancho mínimo para que se vea el número
+
+  const rawWidth2022 = (value2022 / max) * 100
+  const rawWidth2026 = (value2026 / max) * 100
+
+  const width2022 = Math.max(rawWidth2022, value2022 === 0 ? 0 : MIN_WIDTH)
+  const width2026 = Math.max(rawWidth2026, value2026 === 0 ? 0 : MIN_WIDTH)
+
+  const compact2022 = rawWidth2022 < MIN_WIDTH
+  const compact2026 = rawWidth2026 < MIN_WIDTH
   const percentChange = value2022 > 0 ? ((value2026 - value2022) / value2022 * 100).toFixed(0) : "0"
   
   const displayValue = (v: number) => formatValue ? formatValue(v) : `${unit}${v.toLocaleString('es-AR')}`
@@ -59,10 +68,17 @@ export function ComparisonBar({
               transition={{ delay: delay + 0.3, duration: 0.8, ease: "easeOut" }}
               className="h-full bg-primary flex items-center justify-end pr-3"
             >
-              <span className="text-xs font-medium text-primary-foreground">
-                {displayValue(value2022)}
-              </span>
+              {!compact2022 && (
+                <span className="text-xs font-medium text-primary-foreground whitespace-nowrap">
+                  {displayValue(value2022)}
+                </span>
+              )}
             </motion.div>
+            {compact2022 && (
+              <div className="absolute translate-x-[calc(100%+0.5rem)] text-xs font-medium text-primary whitespace-nowrap">
+                {displayValue(value2022)}
+              </div>
+            )}
           </div>
         </div>
         
@@ -77,10 +93,17 @@ export function ComparisonBar({
               transition={{ delay: delay + 0.5, duration: 0.8, ease: "easeOut" }}
               className="h-full bg-accent flex items-center justify-end pr-3"
             >
-              <span className="text-xs font-medium text-accent-foreground">
-                {displayValue(value2026)}
-              </span>
+              {!compact2026 && (
+                <span className="text-xs font-medium text-accent-foreground whitespace-nowrap">
+                  {displayValue(value2026)}
+                </span>
+              )}
             </motion.div>
+            {compact2026 && (
+              <div className="absolute translate-x-[calc(100%+0.5rem)] text-xs font-medium text-foreground whitespace-nowrap">
+                {displayValue(value2026)}
+              </div>
+            )}
           </div>
         </div>
       </div>

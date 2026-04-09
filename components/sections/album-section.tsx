@@ -17,9 +17,9 @@ function StickerPackIcon({ className }: { className?: string }) {
 export function AlbumSection() {
   const { getIndicador, loading } = useData()
   
-  const album = getIndicador("ALBUM")
-  const sobre = getIndicador("SOBRE_FIGURITAS")
-  const salario = getIndicador("SALARIO_MINIMO")
+  const album = getIndicador("PRECIO_ALBUM_FIGURITAS")
+  const sobre = getIndicador("PRECIO_SOBRE_FIGURITAS")
+  const salario = getIndicador("SUELDO_MIN_PESOS")
   
   const sobre_2022 = sobre?.valor_2022 ?? 150
   const sobre_2026 = sobre?.valor_2026 ?? 800
@@ -40,7 +40,7 @@ export function AlbumSection() {
   
   if (loading) {
     return (
-      <SectionWrapper number="02" title="El album del Mundial" insight="Cargando datos..." bgColor="muted">
+      <SectionWrapper number="02" title="El album del Mundial" intro="Cargando datos..." bgColor="muted">
         <div className="h-48 animate-pulse bg-muted rounded-lg" />
       </SectionWrapper>
     )
@@ -50,7 +50,7 @@ export function AlbumSection() {
     <SectionWrapper
       number="02"
       title="El album del Mundial"
-      insight="Completar el album paso de ser un hobby familiar a un lujo cada vez mas dificil de alcanzar."
+      intro="Completar el album paso de ser un hobby familiar a un lujo cada vez mas dificil de alcanzar."
       bgColor="muted"
     >
       <div className="space-y-8">

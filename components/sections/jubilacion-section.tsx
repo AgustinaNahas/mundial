@@ -5,12 +5,12 @@ import { SectionWrapper } from "@/components/section-wrapper"
 import { useData } from "@/lib/data-context"
 
 export function JubilacionSection() {
-  const { getItem, loading } = useData()
+  const { getIndicador, loading } = useData()
   
-  const jubilacion = getItem("jubilacion", "Jubilacion minima")
-  const alquiler = getItem("alquiler", "Alquiler monoambiente CABA")
-  const asado = getItem("asado", "Asado 10 personas")
-  const album = getItem("album", "Costo total album")
+  const jubilacion = getIndicador("JUBILACION_MIN_DOLARES")
+  const alquiler = getIndicador("ALQUILER_FESTEJO")
+  const asado = getIndicador("ASADO_FINAL")
+  const album = getIndicador("PRECIO_ALBUM_FIGURITAS")
   
   const jubilacion_2022 = jubilacion?.valor_2022 ?? 220
   const jubilacion_2026 = jubilacion?.valor_2026 ?? 190
@@ -36,7 +36,7 @@ export function JubilacionSection() {
   
   if (loading) {
     return (
-      <SectionWrapper number="12" title="La abuela que festejó" insight="Cargando datos..." bgColor="muted">
+      <SectionWrapper number="12" title="La abuela que festejó" intro="Cargando datos..." bgColor="muted">
         <div className="h-48 animate-pulse bg-muted rounded-lg" />
       </SectionWrapper>
     )
@@ -46,7 +46,7 @@ export function JubilacionSection() {
     <SectionWrapper
       number="12"
       title="La abuela que festejó"
-      insight="Este es uno de los golpes emocionales más fuertes de la comparación."
+      intro="Este es uno de los golpes emocionales más fuertes de la comparación."
       bgColor="muted"
     >
       <motion.div

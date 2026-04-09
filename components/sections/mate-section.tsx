@@ -20,8 +20,8 @@ function MateIcon({ className }: { className?: string }) {
 export function MateSection() {
   const { getIndicador, loading } = useData()
   
-  const yerba = getIndicador("YERBA_KG")
-  const salario = getIndicador("SALARIO_MINIMO")
+  const yerba = getIndicador("KILO_YERBA")
+  const salario = getIndicador("SUELDO_MIN_PESOS")
   
   const yerba_2022 = yerba?.valor_2022 ?? 650
   const yerba_2026 = yerba?.valor_2026 ?? 4500
@@ -36,7 +36,7 @@ export function MateSection() {
   
   if (loading) {
     return (
-      <SectionWrapper number="06" title="El mate mundialista" insight="Cargando datos..." bgColor="muted">
+      <SectionWrapper number="06" title="El mate mundialista" intro="Cargando datos..." bgColor="muted">
         <div className="h-48 animate-pulse bg-muted rounded-lg" />
       </SectionWrapper>
     )
@@ -46,7 +46,7 @@ export function MateSection() {
     <SectionWrapper
       number="06"
       title="El mate mundialista"
-      insight="El mate nunca falta. Veamos cuanto cuesta el ritual mas argentino."
+      intro="El mate nunca falta. Veamos cuanto cuesta el ritual mas argentino."
       bgColor="muted"
     >
       <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">

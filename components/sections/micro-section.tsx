@@ -29,8 +29,8 @@ function BusIcon({ className }: { className?: string }) {
 export function MicroSection() {
   const { getIndicador, loading } = useData()
   
-  const micro = getIndicador("MICRO_BSAS_ROSARIO")
-  const salario = getIndicador("SALARIO_MINIMO")
+  const micro = getIndicador("BOLETO_AMBA")
+  const salario = getIndicador("SUELDO_MIN_PESOS")
   
   const micro_2022 = micro?.valor_2022 ?? 3500
   const micro_2026 = micro?.valor_2026 ?? 25000
@@ -46,7 +46,7 @@ export function MicroSection() {
   
   if (loading) {
     return (
-      <SectionWrapper number="11" title="El micro que no avanzaba" insight="Cargando datos...">
+      <SectionWrapper number="11" title="El micro que no avanzaba" intro="Cargando datos...">
         <div className="h-48 animate-pulse bg-muted rounded-lg" />
       </SectionWrapper>
     )
@@ -56,7 +56,7 @@ export function MicroSection() {
     <SectionWrapper
       number="11"
       title="El micro que no avanzaba"
-      insight="Si el recorrido del festejo hubiese sido en colectivo comun..."
+      intro="Si el recorrido del festejo hubiese sido en colectivo comun..."
     >
       <motion.div
         initial={{ opacity: 0 }}

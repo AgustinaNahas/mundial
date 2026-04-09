@@ -49,8 +49,8 @@ function GrillIcon({ className }: { className?: string }) {
 export function AsadoSection() {
   const { getIndicador, loading } = useData()
   
-  const asado = getIndicador("ASADO_10P")
-  const salario = getIndicador("SALARIO_MINIMO")
+  const asado = getIndicador("ASADO_FINAL")
+  const salario = getIndicador("SUELDO_MIN_PESOS")
   
   const asado_2022 = asado?.valor_2022 ?? 12000
   const asado_2026 = asado?.valor_2026 ?? 85000
@@ -65,7 +65,7 @@ export function AsadoSection() {
   
   if (loading) {
     return (
-      <SectionWrapper number="07" title="El asado de la final" insight="Cargando datos...">
+      <SectionWrapper number="07" title="El asado de la final" intro="Cargando datos...">
         <div className="h-48 animate-pulse bg-muted rounded-lg" />
       </SectionWrapper>
     )
@@ -75,7 +75,7 @@ export function AsadoSection() {
     <SectionWrapper
       number="07"
       title="El asado de la final"
-      insight="El ritual argentino por excelencia tambien sintio la inflacion."
+      intro="El ritual argentino por excelencia tambien sintio la inflacion."
     >
       <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-start">
         <div className="space-y-8">

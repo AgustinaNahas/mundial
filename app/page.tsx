@@ -25,7 +25,6 @@ export default function Home() {
     <DataProvider>
       <main className="bg-background min-h-screen pb-20">
         <HeroSection />
-        <TimelineSection />
         
         {/* BLOQUE 01: LA PREVIA */}
         <section id="previa">

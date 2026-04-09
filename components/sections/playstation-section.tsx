@@ -9,7 +9,7 @@ export function PlayStationSection() {
   const { getIndicador, getValue, loading } = useData()
   
   const ps5 = getIndicador("PLAY_STATION")
-  const salario = getIndicador("SALARIO_MINIMO")
+  const salario = getIndicador("SUELDO_MIN_PESOS")
   
   const ps5_2022 = ps5?.valor_2022 ?? 299999
   const ps5_2026 = ps5?.valor_2026 ?? 1499999
@@ -26,7 +26,7 @@ export function PlayStationSection() {
   
   if (loading) {
     return (
-      <SectionWrapper number="01" title="La Play en la previa" insight="Cargando datos...">
+      <SectionWrapper number="01" title="La Play en la previa" intro="Cargando datos...">
         <div className="h-48 animate-pulse bg-muted rounded-lg" />
       </SectionWrapper>
     )
@@ -36,7 +36,7 @@ export function PlayStationSection() {
     <SectionWrapper
       number="01"
       title="La Play en la previa"
-      insight="Jugar al FIFA antes del mundial ya no es lo mismo. Aunque la consola cuesta mas en pesos, el poder adquisitivo cambio."
+      intro="Jugar al FIFA antes del mundial ya no es lo mismo. Aunque la consola cuesta mas en pesos, el poder adquisitivo cambio."
     >
       <div className="space-y-8">
         <ComparisonBar

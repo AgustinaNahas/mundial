@@ -35,8 +35,8 @@ function BuildingIcon({ className }: { className?: string }) {
 export function AlquilerSection() {
   const { getIndicador, loading } = useData()
   
-  const alquiler = getIndicador("ALQUILER_MONOAMBIENTE")
-  const salario = getIndicador("SALARIO_MINIMO")
+  const alquiler = getIndicador("ALQUILER_FESTEJO")
+  const salario = getIndicador("SUELDO_MIN_PESOS")
   
   const alquiler_2022 = alquiler?.valor_2022 ?? 45000
   const alquiler_2026 = alquiler?.valor_2026 ?? 450000
@@ -50,7 +50,7 @@ export function AlquilerSection() {
   
   if (loading) {
     return (
-      <SectionWrapper number="10" title="El depto 2 ambientes" insight="Cargando datos..." bgColor="muted">
+      <SectionWrapper number="10" title="El depto 2 ambientes" intro="Cargando datos..." bgColor="muted">
         <div className="h-48 animate-pulse bg-muted rounded-lg" />
       </SectionWrapper>
     )
@@ -60,7 +60,7 @@ export function AlquilerSection() {
     <SectionWrapper
       number="10"
       title="El depto 2 ambientes"
-      insight="El balcon del festejo ahora cuesta mas meses de trabajo."
+      intro="El balcon del festejo ahora cuesta mas meses de trabajo."
       bgColor="muted"
     >
       <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-start">

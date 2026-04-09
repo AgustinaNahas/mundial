@@ -53,7 +53,7 @@ function ClockIcon({ time, className }: { time: string; className?: string }) {
 export function TrabajoSection() {
   const { getIndicador, loading } = useData()
   
-  const salario = getIndicador("SALARIO_MINIMO")
+  const salario = getIndicador("SUELDO_MIN_PESOS")
   
   const salario_2022 = salario?.valor_2022 ?? 57900
   const salario_2026 = salario?.valor_2026 ?? 279718
@@ -66,7 +66,7 @@ export function TrabajoSection() {
   
   if (loading) {
     return (
-      <SectionWrapper number="08" title="El que falto al laburo" insight="Cargando datos..." bgColor="muted">
+      <SectionWrapper number="08" title="El que falto al laburo" intro="Cargando datos..." bgColor="muted">
         <div className="h-48 animate-pulse bg-muted rounded-lg" />
       </SectionWrapper>
     )
@@ -76,7 +76,7 @@ export function TrabajoSection() {
     <SectionWrapper
       number="08"
       title="El que falto al laburo"
-      insight="Faltar en 2022 costaba menos. En 2026, con nuevas reglas, el costo puede ser mayor."
+      intro="Faltar en 2022 costaba menos. En 2026, con nuevas reglas, el costo puede ser mayor."
       bgColor="muted"
     >
       <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">

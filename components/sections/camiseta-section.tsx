@@ -19,8 +19,8 @@ function JerseyIcon({ className, year }: { className?: string; year: "2022" | "2
 export function CamisetaSection() {
   const { getIndicador, loading } = useData()
   
-  const camiseta = getIndicador("CAMISETA_OFICIAL")
-  const salario = getIndicador("SALARIO_MINIMO")
+  const camiseta = getIndicador("CAMISETA_ADIDAS")
+  const salario = getIndicador("SUELDO_MIN_PESOS")
   
   const camiseta_2022 = camiseta?.valor_2022 ?? 22000
   const camiseta_2026 = camiseta?.valor_2026 ?? 189999
@@ -35,7 +35,7 @@ export function CamisetaSection() {
   
   if (loading) {
     return (
-      <SectionWrapper number="03" title="La camiseta" insight="Cargando datos...">
+      <SectionWrapper number="03" title="La camiseta" intro="Cargando datos...">
         <div className="h-48 animate-pulse bg-muted rounded-lg" />
       </SectionWrapper>
     )
@@ -45,7 +45,7 @@ export function CamisetaSection() {
     <SectionWrapper
       number="03"
       title="La camiseta"
-      insight="Vestir los colores de la Seleccion requiere mas dias de trabajo que hace 4 anos."
+      intro="Vestir los colores de la Seleccion requiere mas dias de trabajo que hace 4 anos."
     >
       <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
         <div className="space-y-8">

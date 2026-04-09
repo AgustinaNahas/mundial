@@ -4,18 +4,18 @@ import { motion } from "framer-motion"
 import { useData } from "@/lib/data-context"
 
 export function CierreSection() {
-  const { getItem, loading } = useData()
+  const { getIndicador, loading } = useData()
   
   // Get data for index calculation
-  const ps5 = getItem("playstation", "PlayStation 5")
-  const fifa = getItem("playstation", "EA Sports FC")
-  const salario = getItem("playstation", "Salario Minimo")
-  const album = getItem("album", "Costo total album")
-  const camiseta = getItem("camiseta", "Camiseta oficial")
-  const viaje = getItem("viaje", "Paquete basico")
-  const asado = getItem("asado", "Asado 10 personas")
-  const alquiler = getItem("alquiler", "Alquiler monoambiente CABA")
-  const jubilacion = getItem("jubilacion", "Jubilacion minima")
+  const ps5 = getIndicador("PLAY_STATION")
+  const fifa = getIndicador("FIFA")
+  const salario = getIndicador("SUELDO_MIN_PESOS")
+  const album = getIndicador("PRECIO_ALBUM_FIGURITAS")
+  const camiseta = getIndicador("CAMISETA_ADIDAS")
+  const viaje = getIndicador("BSAS_MIAMI")
+  const asado = getIndicador("ASADO_FINAL")
+  const alquiler = getIndicador("ALQUILER_FESTEJO")
+  const jubilacion = getIndicador("JUBILACION_MIN_DOLARES")
   
   // Calculate values in minimum wages
   const salario_2022 = salario?.valor_2022 ?? 234

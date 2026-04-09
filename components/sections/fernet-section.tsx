@@ -30,8 +30,8 @@ function BottleIcon({ className, variant }: { className?: string; variant: "fern
 export function FernetSection() {
   const { getIndicador, loading } = useData()
   
-  const fernet = getIndicador("FERNET")
-  const salario = getIndicador("SALARIO_MINIMO")
+  const fernet = getIndicador("FERNET_COCA")
+  const salario = getIndicador("SUELDO_MIN_PESOS")
   
   const fernet_2022 = fernet?.valor_2022 ?? 1800
   const fernet_2026 = fernet?.valor_2026 ?? 12500
@@ -45,7 +45,7 @@ export function FernetSection() {
   
   if (loading) {
     return (
-      <SectionWrapper number="09" title="El fernet del campeon" insight="Cargando datos...">
+      <SectionWrapper number="09" title="El fernet del campeon" intro="Cargando datos...">
         <div className="h-48 animate-pulse bg-muted rounded-lg" />
       </SectionWrapper>
     )
@@ -55,7 +55,7 @@ export function FernetSection() {
     <SectionWrapper
       number="09"
       title="El fernet del campeon"
-      insight="El festejo tambien tiene inflacion."
+      intro="El festejo tambien tiene inflacion."
     >
       <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
         <div className="space-y-8">

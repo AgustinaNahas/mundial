@@ -129,7 +129,7 @@ export function DerechosSection() {
     <SectionWrapper
       number="13"
       title="Derechos: Qatar vs EEUU vs Canadá vs México"
-      insight="No todos los Mundiales se juegan en la cancha."
+      intro="No todos los Mundiales se juegan en la cancha."
     >
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
         <RadarChart />

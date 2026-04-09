@@ -1,10 +1,10 @@
-import type { Metadata } from 'next'
-import { Geist, Geist_Mono } from 'next/font/google'
-import { Analytics } from '@vercel/analytics/next'
-import './globals.css'
+import type { Metadata } from "next"
+import { Analytics } from "@vercel/analytics/next"
+import { DM_Sans, Barlow_Condensed } from "next/font/google"
+import "./globals.css"
 
-const _geist = Geist({ subsets: ["latin"] });
-const _geistMono = Geist_Mono({ subsets: ["latin"] });
+const dmSans = DM_Sans({ subsets: ["latin"], variable: "--font-dm-sans" })
+const barlowCondensed = Barlow_Condensed({ subsets: ["latin"], weight: ["600", "700", "800", "900"], variable: "--font-barlow" })
 
 export const metadata: Metadata = {
   title: '¿Cuánto cuesta ser campeón del mundo? | Argentina Qatar 2022 vs EEUU 2026',
@@ -35,8 +35,8 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="es">
-      <body className="font-sans antialiased">
+    <html lang="es" className={`${dmSans.variable} ${barlowCondensed.variable}`}>
+      <body className="font-sans antialiased bg-background text-foreground">
         {children}
         <Analytics />
       </body>

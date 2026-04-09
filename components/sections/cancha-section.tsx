@@ -8,20 +8,17 @@ import { useData } from "@/lib/data-context"
 export function CanchaSection() {
   const { getIndicador, loading } = useData()
   
-  const entradaGrupo = getIndicador("ENTRADA_GRUPO")
-  const entradaFinal = getIndicador("ENTRADA_FINAL")
+  const entradaPrimera = getIndicador("ENTRADA_PRIMERA")
+  const tituloEntrada = entradaPrimera?.descripcion || "Entrada partido de primera"
   
-  // Entradas en USD
-  const grupo_2022 = entradaGrupo?.valor_2022 ?? 220
-  const grupo_2026 = entradaGrupo?.valor_2026 ?? 300
-  const final_2022 = entradaFinal?.valor_2022 ?? 1600
-  const final_2026 = entradaFinal?.valor_2026 ?? 2500
+  const entrada_2022 = entradaPrimera?.valor_2022 ?? 1360
+  const entrada_2026 = entradaPrimera?.valor_2026 ?? 30000
   
-  const cambio = Math.round(((grupo_2026 - grupo_2022) / grupo_2022) * 100)
+  const cambio = Math.round(((entrada_2026 - entrada_2022) / entrada_2022) * 100)
   
   if (loading) {
     return (
-      <SectionWrapper number="04" title="Ver a la Seleccion en el Mundial" insight="Cargando datos..." bgColor="muted">
+      <SectionWrapper number="04" title="Ver a la Seleccion en el Mundial" intro="Cargando datos..." bgColor="muted">
         <div className="h-48 animate-pulse bg-muted rounded-lg" />
       </SectionWrapper>
     )
@@ -30,38 +27,30 @@ export function CanchaSection() {
   return (
     <SectionWrapper
       number="04"
-      title="Ver a la Seleccion en el Mundial"
-      insight="Las entradas al Mundial aumentaron significativamente entre ediciones."
+      title="Ir a la cancha"
+      intro="Comparamos una entrada de partido de primera entre 2022 y 2026."
       bgColor="muted"
     >
       <div className="space-y-8">
         <ComparisonBar
-          label="Entrada fase de grupos"
-          value2022={grupo_2022}
-          value2026={grupo_2026}
-          unit="USD "
+          label={tituloEntrada}
+          value2022={entrada_2022}
+          value2026={entrada_2026}
+          unit="$ "
           delay={0}
-        />
-        
-        <ComparisonBar
-          label="Entrada final"
-          value2022={final_2022}
-          value2026={final_2026}
-          unit="USD "
-          delay={0.2}
         />
       </div>
       
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-12">
         <StatCard
-          value={`USD ${grupo_2022}`}
-          label="Entrada grupo 2022"
+          value={`$ ${entrada_2022.toLocaleString("es-AR")}`}
+          label="Entrada 2022"
           subtext="Precio mas accesible"
           delay={0.4}
         />
         <StatCard
-          value={`USD ${grupo_2026}`}
-          label="Entrada grupo 2026"
+          value={`$ ${entrada_2026.toLocaleString("es-AR")}`}
+          label="Entrada 2026"
           subtext="Precio mas alto"
           delay={0.5}
         />
