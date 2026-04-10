@@ -164,7 +164,7 @@ export function JubilacionSection() {
       >
         <p className="text-lg md:text-xl font-light max-w-2xl mx-auto text-balance">
           Una jubilación mínima no alcanza para un alquiler de monoambiente.
-          <span className="block mt-2 text-secondary">
+          <span className="block mt-2 text-primary">
             Ni en 2022, ni en 2026.
           </span>
         </p>

@@ -21,8 +21,8 @@ const radarData: RadarDataPoint[] = [
 ]
 
 const countries = [
-  { name: "Argentina", key: "argentina" as const, color: "var(--secondary)" },
-  { name: "Qatar", key: "qatar" as const, color: "var(--chart-4)" },
+  { name: "Argentina", key: "argentina" as const, color: "var(--primary)" },
+  { name: "Qatar", key: "qatar" as const, color: "var(--muted-foreground)" },
   { name: "EEUU", key: "eeuu" as const, color: "var(--accent)" },
   { name: "Canadá", key: "canada" as const, color: "var(--chart-3)" },
   { name: "México", key: "mexico" as const, color: "var(--chart-5)" },
@@ -190,11 +190,11 @@ export function DerechosSection() {
             <div className="space-y-1">
               <div className="flex justify-between text-xs">
                 <span>Argentina</span>
-                <span className="font-medium" style={{ color: "var(--secondary)" }}>{d.argentina}</span>
+                <span className="font-medium" style={{ color: "var(--primary)" }}>{d.argentina}</span>
               </div>
               <div className="flex justify-between text-xs">
                 <span>Qatar</span>
-                <span className="font-medium" style={{ color: "var(--chart-4)" }}>{d.qatar}</span>
+                <span className="font-medium" style={{ color: "var(--muted-foreground)" }}>{d.qatar}</span>
               </div>
               <div className="flex justify-between text-xs">
                 <span>EEUU</span>

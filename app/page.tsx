@@ -6,6 +6,7 @@ import { TimelineSection } from "@/components/sections/timeline-section"
 import { PlayStationSection } from "@/components/sections/playstation-section"
 import { AlbumSection } from "@/components/sections/album-section"
 import { CamisetaSection } from "@/components/sections/camiseta-section"
+import { PelotaSection } from "@/components/sections/pelota-section"
 import { CanchaSection } from "@/components/sections/cancha-section"
 import { ViajeSection } from "@/components/sections/viaje-section"
 import { MateSection } from "@/components/sections/mate-section"
@@ -35,6 +36,7 @@ export default function Home() {
           />
           <PlayStationSection />
           <AlbumSection />
+          <PelotaSection />
           <CamisetaSection />
         </section>
         

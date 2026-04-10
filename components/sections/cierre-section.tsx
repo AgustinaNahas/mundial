@@ -92,7 +92,7 @@ export function CierreSection() {
           transition={{ duration: 0.8 }}
           className="text-center mb-16"
         >
-          <p className="text-secondary text-sm uppercase tracking-[0.3em] mb-4">
+          <p className="text-primary text-sm uppercase tracking-[0.3em] mb-4">
             Cierre
           </p>
           <h2 className="text-3xl md:text-5xl font-light tracking-tight text-balance">
@@ -120,13 +120,13 @@ export function CierreSection() {
               whileInView={{ scale: 1, opacity: 1 }}
               viewport={{ once: true }}
               transition={{ delay: 0.5, duration: 0.5 }}
-              className="text-7xl md:text-9xl font-light text-secondary"
+              className="text-7xl md:text-9xl font-light text-accent"
             >
               {indexPromedio}
             </motion.p>
             
             <p className="mt-4 text-lg text-primary-foreground/70">
-              El costo de vivir el Mundial {indexPromedio > 100 ? "subió" : "bajó"} un <span className="text-secondary font-medium">{Math.abs(indexPromedio - 100)}%</span>
+              El costo de vivir el Mundial {indexPromedio > 100 ? "subió" : "bajó"} un <span className="text-accent font-medium">{Math.abs(indexPromedio - 100)}%</span>
             </p>
           </div>
         </motion.div>
@@ -159,18 +159,14 @@ export function CierreSection() {
                     whileInView={{ width: `${Math.min((item.value2026 / 250) * 100, 100)}%` }}
                     viewport={{ once: true }}
                     transition={{ delay: 0.6 + i * 0.05, duration: 0.6 }}
-                    className={`h-full rounded flex items-center justify-end pr-2 ${
-                      item.value2026 > 100 ? "bg-secondary" : "bg-accent"
-                    }`}
+                    className="h-full rounded flex items-center justify-end pr-2 bg-accent"
                   >
-                    <span className="text-xs font-medium text-primary">
+                    <span className="text-xs font-medium text-accent-foreground">
                       {item.value2026}
                     </span>
                   </motion.div>
                 </div>
-                <span className={`text-sm font-medium w-16 text-right ${
-                  item.value2026 > 100 ? "text-secondary" : "text-accent"
-                }`}>
+                <span className="text-sm font-medium w-16 text-right text-accent">
                   {item.value2026 > 100 ? "+" : ""}{item.value2026 - 100}%
                 </span>
               </motion.div>
@@ -197,7 +193,7 @@ export function CierreSection() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 1.2, duration: 0.6 }}
-            className="mt-8 text-2xl md:text-3xl font-light text-secondary"
+            className="mt-8 text-2xl md:text-3xl font-light text-primary"
           >
             La pregunta es:
           </motion.p>
@@ -207,7 +203,7 @@ export function CierreSection() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 1.5, duration: 0.6 }}
-            className="mt-4 text-3xl md:text-5xl font-light text-secondary text-balance"
+            className="mt-4 text-3xl md:text-5xl font-light text-primary text-balance"
           >
             ¿cuánto cuesta hoy ese sueño?
           </motion.p>
@@ -224,9 +220,9 @@ export function CierreSection() {
             Una visualización de datos
           </p>
           <div className="mt-8 flex items-center justify-center gap-4">
-            <div className="w-8 h-1 bg-secondary/30" />
+            <div className="w-8 h-1 bg-primary/30" />
             <div className="w-8 h-1 bg-primary-foreground/20" />
-            <div className="w-8 h-1 bg-secondary/30" />
+            <div className="w-8 h-1 bg-primary/30" />
           </div>
         </motion.div>
       </div>

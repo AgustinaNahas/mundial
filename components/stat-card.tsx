@@ -24,7 +24,7 @@ export function StatCard({ value, label, subtext, delay = 0, variant = "default"
       }`}
     >
       <p className={`text-3xl md:text-4xl font-light ${
-        variant === "highlight" ? "text-secondary" : "text-accent"
+        variant === "highlight" ? "text-primary-foreground" : "text-primary"
       }`}>
         {value}
       </p>

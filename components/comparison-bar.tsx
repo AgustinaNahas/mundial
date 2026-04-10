@@ -60,13 +60,13 @@ export function ComparisonBar({
         {/* 2022 Bar */}
         <div className="flex items-center gap-4">
           <span className="text-xs text-muted-foreground w-12">2022</span>
-          <div className="flex-1 h-8 bg-muted rounded overflow-hidden">
+          <div className="flex-1 h-8 bg-muted rounded overflow-hidden flex items-center">
             <motion.div
               initial={{ width: 0 }}
               whileInView={{ width: `${width2022}%` }}
               viewport={{ once: true }}
               transition={{ delay: delay + 0.3, duration: 0.8, ease: "easeOut" }}
-              className="h-full bg-primary flex items-center justify-end pr-3"
+              className="h-full bg-primary flex items-center justify-end pr-3 shrink-0"
             >
               {!compact2022 && (
                 <span className="text-xs font-medium text-primary-foreground whitespace-nowrap">
@@ -75,7 +75,7 @@ export function ComparisonBar({
               )}
             </motion.div>
             {compact2022 && (
-              <div className="absolute translate-x-[calc(100%+0.5rem)] text-xs font-medium text-primary whitespace-nowrap">
+              <div className="pl-2 text-xs font-medium text-primary whitespace-nowrap shrink-0">
                 {displayValue(value2022)}
               </div>
             )}
@@ -85,13 +85,13 @@ export function ComparisonBar({
         {/* 2026 Bar */}
         <div className="flex items-center gap-4">
           <span className="text-xs text-muted-foreground w-12">2026</span>
-          <div className="flex-1 h-8 bg-muted rounded overflow-hidden">
+          <div className="flex-1 h-8 bg-muted rounded overflow-hidden flex items-center">
             <motion.div
               initial={{ width: 0 }}
               whileInView={{ width: `${width2026}%` }}
               viewport={{ once: true }}
               transition={{ delay: delay + 0.5, duration: 0.8, ease: "easeOut" }}
-              className="h-full bg-accent flex items-center justify-end pr-3"
+              className="h-full bg-accent flex items-center justify-end pr-3 shrink-0"
             >
               {!compact2026 && (
                 <span className="text-xs font-medium text-accent-foreground whitespace-nowrap">
@@ -100,7 +100,7 @@ export function ComparisonBar({
               )}
             </motion.div>
             {compact2026 && (
-              <div className="absolute translate-x-[calc(100%+0.5rem)] text-xs font-medium text-foreground whitespace-nowrap">
+              <div className="pl-2 text-xs font-medium text-accent whitespace-nowrap shrink-0">
                 {displayValue(value2026)}
               </div>
             )}

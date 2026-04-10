@@ -1,6 +1,8 @@
 "use client"
 
 import { motion } from "framer-motion"
+import { SourcesPanel } from "@/components/sources-panel"
+import { DataItem } from "@/lib/data-context"
 
 interface SectionWrapperProps {
   children: React.ReactNode
@@ -8,6 +10,7 @@ interface SectionWrapperProps {
   title: string
   intro?: string
   bgColor?: "background" | "muted"
+  sources?: (DataItem | undefined)[]
 }
 
 export function SectionWrapper({
@@ -15,7 +18,8 @@ export function SectionWrapper({
   number,
   title,
   intro,
-  bgColor = "background"
+  bgColor = "background",
+  sources,
 }: SectionWrapperProps) {
   return (
     <section className={`py-20 md:py-28 ${bgColor === "muted" ? "bg-muted" : "bg-background"}`}>
@@ -39,6 +43,8 @@ export function SectionWrapper({
         </motion.div>
 
         {children}
+
+        {sources && <SourcesPanel items={sources} />}
       </div>
     </section>
   )

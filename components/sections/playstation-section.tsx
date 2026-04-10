@@ -37,6 +37,7 @@ export function PlayStationSection() {
       number="01"
       title="La Play en la previa"
       intro="Jugar al FIFA antes del mundial ya no es lo mismo. Aunque la consola cuesta mas en pesos, el poder adquisitivo cambio."
+      sources={[ps5, salario]}
     >
       <div className="space-y-8">
         <ComparisonBar

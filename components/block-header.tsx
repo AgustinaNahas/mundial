@@ -19,14 +19,14 @@ export function BlockHeader({ number, title, subtitle }: BlockHeaderProps) {
     >
       <div className="container mx-auto px-6 md:px-12 max-w-5xl">
         <div className="flex items-baseline gap-4 md:gap-6">
-          <span className="text-secondary text-6xl md:text-8xl font-light opacity-60">
+          <span className="text-white/25 text-6xl md:text-8xl font-light">
             {number}
           </span>
           <div>
-            <h2 className="text-3xl md:text-5xl font-light tracking-tight text-balance">
+            <h2 className="text-3xl md:text-5xl font-light tracking-tight text-balance text-white">
               {title}
             </h2>
-            <p className="mt-3 text-lg md:text-xl text-primary-foreground/70 max-w-xl">
+            <p className="mt-3 text-lg md:text-xl text-white/65 max-w-xl">
               {subtitle}
             </p>
           </div>
