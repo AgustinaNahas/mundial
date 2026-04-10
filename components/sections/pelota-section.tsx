@@ -105,7 +105,7 @@ export function PelotaSection() {
               transition={{ repeat: Infinity, duration: 14, ease: "linear" }}
               className="w-full h-full"
             >
-              <img src="./pelota2022.webp"/>
+              <img src="./mundial/pelota2022.webp"/>
             </motion.div>
           </div>
 
@@ -145,7 +145,7 @@ export function PelotaSection() {
               transition={{ repeat: Infinity, duration: 14, ease: "linear" }}
               className="w-full h-full"
             >
-              <img src="./pelota2026.png"/>
+              <img src="./mundial/pelota2026.png"/>
             </motion.div>
           </div>
 

@@ -6,10 +6,10 @@ import { useData } from "@/lib/data-context"
 
 /** Visualización tipo calendario: muestra N días laborables como celdas en grilla Mon–Fri */
 function WorkCalendar({ days, color, delay = 0 }: { days: number; color: string; delay?: number }) {
-  const cols   = 5   // L M M J V
+  const cols = 5   // L M M J V
   const maxDays = Math.ceil(days / cols) * cols  // redondear a semana completa
-  const weeks  = Math.ceil(days / cols)
-  const labels = ["L","M","M","J","V"]
+  const weeks = Math.ceil(days / cols)
+  const labels = ["L", "M", "M", "J", "V"]
 
   return (
     <div className="space-y-1.5">
@@ -47,15 +47,15 @@ export function CamisetaSection() {
   const { getIndicador, loading } = useData()
 
   const camiseta = getIndicador("CAMISETA_ADIDAS")
-  const salario  = getIndicador("SUELDO_MIN_PESOS")
-  const dolar    = getIndicador("VALOR_DOLAR_PESO")
+  const salario = getIndicador("SUELDO_MIN_PESOS")
+  const dolar = getIndicador("VALOR_DOLAR_PESO")
 
   const camiseta_2022 = camiseta?.valor_2022 ?? 22000
   const camiseta_2026 = camiseta?.valor_2026 ?? 189999
-  const salario_2022  = salario?.valor_2022  ?? 57900
-  const salario_2026  = salario?.valor_2026  ?? 279718
-  const dolar_2022    = dolar?.valor_2022    ?? 177
-  const dolar_2026    = dolar?.valor_2026    ?? 1070
+  const salario_2022 = salario?.valor_2022 ?? 57900
+  const salario_2026 = salario?.valor_2026 ?? 279718
+  const dolar_2022 = dolar?.valor_2022 ?? 177
+  const dolar_2026 = dolar?.valor_2026 ?? 1070
 
   const diasTrabajo2022 = Math.ceil(camiseta_2022 / (salario_2022 / 22))
   const diasTrabajo2026 = Math.ceil(camiseta_2026 / (salario_2026 / 22))
@@ -93,7 +93,7 @@ export function CamisetaSection() {
         >
           {/* Jersey */}
           <div className="w-40 h-40 mx-auto">
-              <img src="./camiseta2022.png"/>
+            <img src="./mundial/camiseta2022.png" />
           </div>
 
           {/* Precios */}
@@ -130,7 +130,7 @@ export function CamisetaSection() {
         >
           {/* Jersey */}
           <div className="w-40 h-40 mx-auto">
-              <img src="./camiseta2026.png" style={{transform: "rotateY(180deg)"}}/>
+            <img src="./mundial/camiseta2026.png" style={{ transform: "rotateY(180deg)" }} />
           </div>
 
           {/* Precios */}

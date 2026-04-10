@@ -6,6 +6,7 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
+  basePath: "/mundial",
 }
 
 export default nextConfig

@@ -8,16 +8,16 @@ import { useData } from "@/lib/data-context"
 import { cn } from "@/lib/utils"
 
 /* ─── Constantes ────────────────────────────────────────────── */
-const FIGUS     = [
-  "/album/figu1.webp", "/album/figu2.webp", "/album/figu3.webp", 
-  "/album/figu4.webp", "/album/figu5.webp", "/album/figu6.webp", 
-  "/album/figu7.webp", "/album/figu8.webp", "/album/figu9.webp", 
-  "/album/figu10.webp", "/album/figu11.webp", "/album/figu12.webp", 
+const FIGUS = [
+  "/mundial/album/figu1.webp", "/mundial/album/figu2.webp", "/mundial/album/figu3.webp",
+  "/mundial/album/figu4.webp", "/mundial/album/figu5.webp", "/mundial/album/figu6.webp",
+  "/mundial/album/figu7.webp", "/mundial/album/figu8.webp", "/mundial/album/figu9.webp",
+  "/mundial/album/figu10.webp", "/mundial/album/figu11.webp", "/mundial/album/figu12.webp",
 
 ]
-const COLS      = 4
-const ROWS      = 3   // 4 × 4 = 16 slots por álbum
-const TOTAL     = COLS * ROWS
+const COLS = 4
+const ROWS = 3   // 4 × 4 = 16 slots por álbum
+const TOTAL = COLS * ROWS
 
 /* ─── Types ──────────────────────────────────────────────────── */
 interface PlacedFigu { src: string; price: number }
@@ -96,7 +96,7 @@ function Slot({
     <div
       onClick={figu === null ? onPlace : undefined}
       className={cn(
-        "relative aspect-2/3 rounded-md overflow-visible",
+        "relative aspect-[10/13] rounded-md overflow-visible",
         figu === null
           ? "cursor-pointer group border border-dashed border-border/40 hover:border-primary/60 transition-colors"
           : "",
@@ -237,16 +237,16 @@ function Album({
 export function AlbumSection() {
   const { getIndicador, loading } = useData()
 
-  const sobreItem  = getIndicador("PRECIO_SOBRE_FIGURITAS")
-  const albumItem  = getIndicador("PRECIO_ALBUM_FIGURITAS")
-  const salario    = getIndicador("SUELDO_MIN_PESOS")
+  const sobreItem = getIndicador("PRECIO_SOBRE_FIGURITAS")
+  const albumItem = getIndicador("PRECIO_ALBUM_FIGURITAS")
+  const salario = getIndicador("SUELDO_MIN_PESOS")
 
-  const sobre_2022  = sobreItem?.valor_2022  ?? 150
-  const sobre_2026  = sobreItem?.valor_2026  ?? 2500
-  const album_2022  = albumItem?.valor_2022  ?? 750
-  const album_2026  = albumItem?.valor_2026  ?? 4500
-  const salario_2022 = salario?.valor_2022   ?? 61953
-  const salario_2026 = salario?.valor_2026   ?? 346800
+  const sobre_2022 = sobreItem?.valor_2022 ?? 150
+  const sobre_2026 = sobreItem?.valor_2026 ?? 2500
+  const album_2022 = albumItem?.valor_2022 ?? 750
+  const album_2026 = albumItem?.valor_2026 ?? 4500
+  const salario_2022 = salario?.valor_2022 ?? 61953
+  const salario_2026 = salario?.valor_2026 ?? 346800
 
   const pricePerFigu2022 = sobre_2022 / 5
   const pricePerFigu2026 = sobre_2026 / 5
@@ -259,8 +259,8 @@ export function AlbumSection() {
   const [placed2026, setPlaced2026] = useState<Slot[]>(Array(TOTAL).fill(null))
   const [badges2022, setBadges2022] = useState<PriceBadge[]>([])
   const [badges2026, setBadges2026] = useState<PriceBadge[]>([])
-  const [figuIdx, setFiguIdx]       = useState(0)
-  const badgeCounter                = useRef(0)
+  const [figuIdx, setFiguIdx] = useState(0)
+  const badgeCounter = useRef(0)
 
   const totalCost2022 = placed2022.reduce((s, p) => s + (p?.price ?? 0), 0)
   const totalCost2026 = placed2026.reduce((s, p) => s + (p?.price ?? 0), 0)
@@ -287,8 +287,8 @@ export function AlbumSection() {
   const placeSticker = useCallback(
     (year: "2022" | "2026", idx: number) => {
       const price = year === "2022" ? pricePerFigu2022 : pricePerFigu2026
-      const src   = FIGUS[figuIdx]
-      const id    = ++badgeCounter.current
+      const src = FIGUS[figuIdx]
+      const id = ++badgeCounter.current
 
       if (year === "2022") {
         setPlaced2022(prev => {
@@ -334,6 +334,7 @@ export function AlbumSection() {
 
       <div
         ref={sectionRef}
+        id="album"
         onMouseMove={handleMouseMove}
         onMouseEnter={() => setInSection(true)}
         onMouseLeave={() => setInSection(false)}
