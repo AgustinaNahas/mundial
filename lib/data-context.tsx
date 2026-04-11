@@ -4,24 +4,31 @@ import { createContext, useContext, useEffect, useState, ReactNode } from "react
 
 const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSzYyEETGt1UHh8grdJj-q4dO63InOpLTQ-La74Jx-AT9QTdS3qlxNECjcpD7DW_d_2M3JA_mN1Jz_S/pub?gid=0&single=true&output=csv"
 
-// Estructura del CSV:
-// INDICADOR | INDICADOR_DESCRIPCION | PERIODO | VALOR | FUENTES | METODOLOGIA | VARIACION
+export interface FuenteInfo {
+  url: string
+  corta: string
+  fecha: string
+}
 
 export interface RawDataRow {
   indicador: string
   descripcion: string
   periodo: number
   valor: number
+  unidad: string
   fuente: string
+  fuente_corta: string
+  fecha_fuente: string
 }
 
 export interface DataItem {
   indicador: string
   descripcion: string
+  unidad: string
   valor_2022: number
   valor_2026: number
-  fuente_2022?: string
-  fuente_2026?: string
+  fuente_2022?: FuenteInfo
+  fuente_2026?: FuenteInfo
 }
 
 interface DataContextType {
@@ -39,12 +46,8 @@ const DataContext = createContext<DataContextType | undefined>(undefined)
 // Parse Argentine number format: $1.499.999,00 -> 1499999.00
 function parseArgentineNumber(value: string): number {
   if (!value) return 0
-  // Remove currency symbol and whitespace
   let cleaned = value.replace(/[$\s]/g, "").trim()
-  // Argentine format uses . for thousands and , for decimals
-  // Remove thousand separators (dots)
   cleaned = cleaned.replace(/\./g, "")
-  // Replace decimal comma with dot
   cleaned = cleaned.replace(",", ".")
   const num = parseFloat(cleaned)
   return isNaN(num) ? 0 : num
@@ -54,14 +57,11 @@ function parseCSV(csv: string): RawDataRow[] {
   const lines = csv.trim().split("\n")
   if (lines.length < 2) return []
   
-  // Skip header row
   return lines.slice(1).map(line => {
-    // Handle commas inside quotes and tabs
     const values: string[] = []
     let current = ""
     let inQuotes = false
     
-    // Support both comma and tab as delimiters
     const delimiter = line.includes("\t") ? "\t" : ","
     
     for (let i = 0; i < line.length; i++) {
@@ -82,7 +82,10 @@ function parseCSV(csv: string): RawDataRow[] {
       descripcion: values[1] || "",
       periodo: parseInt(values[2]) || 0,
       valor: parseArgentineNumber(values[3] || "0"),
-      fuente: values[4] || ""
+      unidad: values[4] || "",
+      fuente: values[6] || "",
+      fuente_corta: values[7] || "",
+      fecha_fuente: values[8] || ""
     }
   }).filter(row => row.indicador && row.periodo)
 }
@@ -95,17 +98,20 @@ function groupByIndicador(rawData: RawDataRow[]): DataItem[] {
       grouped[row.indicador] = {
         indicador: row.indicador,
         descripcion: row.descripcion,
+        unidad: row.unidad,
         valor_2022: 0,
         valor_2026: 0
       }
     }
     
+    const fuente = row.fuente ? { url: row.fuente, corta: row.fuente_corta || "Fuente", fecha: row.fecha_fuente || "" } : undefined
+
     if (row.periodo === 2022) {
       grouped[row.indicador].valor_2022 = row.valor
-      grouped[row.indicador].fuente_2022 = row.fuente
+      if (fuente) grouped[row.indicador].fuente_2022 = fuente
     } else if (row.periodo === 2026) {
       grouped[row.indicador].valor_2026 = row.valor
-      grouped[row.indicador].fuente_2026 = row.fuente
+      if (fuente) grouped[row.indicador].fuente_2026 = fuente
     }
   }
   
@@ -129,7 +135,6 @@ export function DataProvider({ children }: { children: ReactNode }) {
         setData(groupByIndicador(parsed))
       } catch (err) {
         setError(err instanceof Error ? err.message : "Error loading data")
-        // Fallback data if fetch fails
         const fallback = getFallbackData()
         setRawData(fallback.raw)
         setData(fallback.grouped)
@@ -171,41 +176,41 @@ export function useData() {
   return context
 }
 
-// Fallback data - valores en dolares aproximados
+// Fallback data
 function getFallbackData(): { raw: RawDataRow[], grouped: DataItem[] } {
   const raw: RawDataRow[] = [
-    { indicador: "PLAY_STATION", descripcion: "PlayStation 5", periodo: 2022, valor: 299999, fuente: "" },
-    { indicador: "PLAY_STATION", descripcion: "PlayStation 5", periodo: 2026, valor: 1499999, fuente: "" },
-    { indicador: "FIFA", descripcion: "Juego FIFA", periodo: 2022, valor: 5500, fuente: "" },
-    { indicador: "FIFA", descripcion: "Juego FIFA", periodo: 2026, valor: 68490, fuente: "" },
-    { indicador: "CAMISETA_ADIDAS", descripcion: "Camiseta oficial", periodo: 2022, valor: 16999, fuente: "" },
-    { indicador: "CAMISETA_ADIDAS", descripcion: "Camiseta oficial", periodo: 2026, valor: 129999, fuente: "" },
-    { indicador: "PRECIO_SOBRE_FIGURITAS", descripcion: "Precio sobre figuritas", periodo: 2022, valor: 150, fuente: "" },
-    { indicador: "PRECIO_SOBRE_FIGURITAS", descripcion: "Precio sobre figuritas", periodo: 2026, valor: 2500, fuente: "" },
-    { indicador: "PRECIO_ALBUM_FIGURITAS", descripcion: "Precio album figuritas", periodo: 2022, valor: 750, fuente: "" },
-    { indicador: "PRECIO_ALBUM_FIGURITAS", descripcion: "Precio album figuritas", periodo: 2026, valor: 0, fuente: "" },
-    { indicador: "CANT_FIGURITAS", descripcion: "Cantidad de figuritas", periodo: 2022, valor: 670, fuente: "" },
-    { indicador: "CANT_FIGURITAS", descripcion: "Cantidad de figuritas", periodo: 2026, valor: 1000, fuente: "" },
-    { indicador: "ENTRADA_PRIMERA", descripcion: "Entrada partido de primera", periodo: 2022, valor: 1360, fuente: "" },
-    { indicador: "ENTRADA_PRIMERA", descripcion: "Entrada partido de primera", periodo: 2026, valor: 30000, fuente: "" },
-    { indicador: "BSAS_DOHA", descripcion: "Vuelo Buenos Aires - Doha", periodo: 2022, valor: 374124, fuente: "" },
-    { indicador: "BSAS_MIAMI", descripcion: "Vuelo Buenos Aires - Miami", periodo: 2026, valor: 2860000, fuente: "" },
-    { indicador: "KILO_YERBA", descripcion: "Kilo de yerba", periodo: 2022, valor: 870, fuente: "" },
-    { indicador: "KILO_YERBA", descripcion: "Kilo de yerba", periodo: 2026, valor: 4655, fuente: "" },
-    { indicador: "ASADO_FINAL", descripcion: "Asado final", periodo: 2022, valor: 1220, fuente: "" },
-    { indicador: "ASADO_FINAL", descripcion: "Asado final", periodo: 2026, valor: 16019, fuente: "" },
-    { indicador: "FERNET_COCA", descripcion: "Fernet con coca", periodo: 2022, valor: 1000, fuente: "" },
-    { indicador: "FERNET_COCA", descripcion: "Fernet con coca", periodo: 2026, valor: 14200, fuente: "" },
-    { indicador: "ALQUILER_FESTEJO", descripcion: "Alquiler", periodo: 2022, valor: 60000, fuente: "" },
-    { indicador: "ALQUILER_FESTEJO", descripcion: "Alquiler", periodo: 2026, valor: 429953, fuente: "" },
-    { indicador: "BOLETO_AMBA", descripcion: "Boleto AMBA", periodo: 2022, valor: 25.2, fuente: "" },
-    { indicador: "BOLETO_AMBA", descripcion: "Boleto AMBA", periodo: 2026, valor: 681, fuente: "" },
-    { indicador: "SUELDO_MIN_PESOS", descripcion: "Sueldo minimo", periodo: 2022, valor: 61953, fuente: "" },
-    { indicador: "SUELDO_MIN_PESOS", descripcion: "Sueldo minimo", periodo: 2026, valor: 346800, fuente: "" },
-    { indicador: "JUBILACION_MIN_DOLARES", descripcion: "Jubilacion minima", periodo: 2022, valor: 50124, fuente: "" },
-    { indicador: "JUBILACION_MIN_DOLARES", descripcion: "Jubilacion minima", periodo: 2026, valor: 359254, fuente: "" },
-    { indicador: "VALOR_DOLAR_PESO", descripcion: "Valor dolar peso", periodo: 2022, valor: 266.43, fuente: "" },
-    { indicador: "VALOR_DOLAR_PESO", descripcion: "Valor dolar peso", periodo: 2026, valor: 1430, fuente: "" },
+    { indicador: "PLAY_STATION", descripcion: "PlayStation 5", periodo: 2022, valor: 299999, unidad: "ARS", fuente: "", fuente_corta: "", fecha_fuente: "" },
+    { indicador: "PLAY_STATION", descripcion: "PlayStation 5", periodo: 2026, valor: 1499999, unidad: "ARS", fuente: "", fuente_corta: "", fecha_fuente: "" },
+    { indicador: "FIFA", descripcion: "Juego FIFA", periodo: 2022, valor: 5500, unidad: "ARS", fuente: "", fuente_corta: "", fecha_fuente: "" },
+    { indicador: "FIFA", descripcion: "Juego FIFA", periodo: 2026, valor: 68490, unidad: "ARS", fuente: "", fuente_corta: "", fecha_fuente: "" },
+    { indicador: "CAMISETA_ADIDAS", descripcion: "Camiseta oficial", periodo: 2022, valor: 16999, unidad: "ARS", fuente: "", fuente_corta: "", fecha_fuente: "" },
+    { indicador: "CAMISETA_ADIDAS", descripcion: "Camiseta oficial", periodo: 2026, valor: 129999, unidad: "ARS", fuente: "", fuente_corta: "", fecha_fuente: "" },
+    { indicador: "PRECIO_SOBRE_FIGURITAS", descripcion: "Precio sobre figuritas", periodo: 2022, valor: 150, unidad: "ARS", fuente: "", fuente_corta: "", fecha_fuente: "" },
+    { indicador: "PRECIO_SOBRE_FIGURITAS", descripcion: "Precio sobre figuritas", periodo: 2026, valor: 2500, unidad: "ARS", fuente: "", fuente_corta: "", fecha_fuente: "" },
+    { indicador: "PRECIO_ALBUM_FIGURITAS", descripcion: "Precio album figuritas", periodo: 2022, valor: 750, unidad: "ARS", fuente: "", fuente_corta: "", fecha_fuente: "" },
+    { indicador: "PRECIO_ALBUM_FIGURITAS", descripcion: "Precio album figuritas", periodo: 2026, valor: 0, unidad: "ARS", fuente: "", fuente_corta: "", fecha_fuente: "" },
+    { indicador: "CANT_FIGURITAS", descripcion: "Cantidad de figuritas", periodo: 2022, valor: 670, unidad: "ARS", fuente: "", fuente_corta: "", fecha_fuente: "" },
+    { indicador: "CANT_FIGURITAS", descripcion: "Cantidad de figuritas", periodo: 2026, valor: 1000, unidad: "ARS", fuente: "", fuente_corta: "", fecha_fuente: "" },
+    { indicador: "ENTRADA_PRIMERA", descripcion: "Entrada partido de primera", periodo: 2022, valor: 1360, unidad: "ARS", fuente: "", fuente_corta: "", fecha_fuente: "" },
+    { indicador: "ENTRADA_PRIMERA", descripcion: "Entrada partido de primera", periodo: 2026, valor: 30000, unidad: "ARS", fuente: "", fuente_corta: "", fecha_fuente: "" },
+    { indicador: "BSAS_DOHA", descripcion: "Vuelo Buenos Aires - Doha", periodo: 2022, valor: 374124, unidad: "USD", fuente: "", fuente_corta: "", fecha_fuente: "" },
+    { indicador: "BSAS_MIAMI", descripcion: "Vuelo Buenos Aires - Miami", periodo: 2026, valor: 2860000, unidad: "USD", fuente: "", fuente_corta: "", fecha_fuente: "" },
+    { indicador: "KILO_YERBA", descripcion: "Kilo de yerba", periodo: 2022, valor: 870, unidad: "ARS", fuente: "", fuente_corta: "", fecha_fuente: "" },
+    { indicador: "KILO_YERBA", descripcion: "Kilo de yerba", periodo: 2026, valor: 4655, unidad: "ARS", fuente: "", fuente_corta: "", fecha_fuente: "" },
+    { indicador: "ASADO_FINAL", descripcion: "Asado final", periodo: 2022, valor: 1220, unidad: "ARS", fuente: "", fuente_corta: "", fecha_fuente: "" },
+    { indicador: "ASADO_FINAL", descripcion: "Asado final", periodo: 2026, valor: 16019, unidad: "ARS", fuente: "", fuente_corta: "", fecha_fuente: "" },
+    { indicador: "FERNET_COCA", descripcion: "Fernet con coca", periodo: 2022, valor: 1000, unidad: "ARS", fuente: "", fuente_corta: "", fecha_fuente: "" },
+    { indicador: "FERNET_COCA", descripcion: "Fernet con coca", periodo: 2026, valor: 14200, unidad: "ARS", fuente: "", fuente_corta: "", fecha_fuente: "" },
+    { indicador: "ALQUILER_FESTEJO", descripcion: "Alquiler", periodo: 2022, valor: 60000, unidad: "ARS", fuente: "", fuente_corta: "", fecha_fuente: "" },
+    { indicador: "ALQUILER_FESTEJO", descripcion: "Alquiler", periodo: 2026, valor: 429953, unidad: "ARS", fuente: "", fuente_corta: "", fecha_fuente: "" },
+    { indicador: "BOLETO_AMBA", descripcion: "Boleto AMBA", periodo: 2022, valor: 25.2, unidad: "ARS", fuente: "", fuente_corta: "", fecha_fuente: "" },
+    { indicador: "BOLETO_AMBA", descripcion: "Boleto AMBA", periodo: 2026, valor: 681, unidad: "ARS", fuente: "", fuente_corta: "", fecha_fuente: "" },
+    { indicador: "SUELDO_MIN_PESOS", descripcion: "Sueldo minimo", periodo: 2022, valor: 61953, unidad: "ARS", fuente: "", fuente_corta: "", fecha_fuente: "" },
+    { indicador: "SUELDO_MIN_PESOS", descripcion: "Sueldo minimo", periodo: 2026, valor: 346800, unidad: "ARS", fuente: "", fuente_corta: "", fecha_fuente: "" },
+    { indicador: "JUBILACION_MIN_DOLARES", descripcion: "Jubilacion minima", periodo: 2022, valor: 50124, unidad: "ARS", fuente: "", fuente_corta: "", fecha_fuente: "" },
+    { indicador: "JUBILACION_MIN_DOLARES", descripcion: "Jubilacion minima", periodo: 2026, valor: 359254, unidad: "ARS", fuente: "", fuente_corta: "", fecha_fuente: "" },
+    { indicador: "VALOR_DOLAR_PESO", descripcion: "Valor dolar peso", periodo: 2022, valor: 266.43, unidad: "ARS", fuente: "", fuente_corta: "", fecha_fuente: "" },
+    { indicador: "VALOR_DOLAR_PESO", descripcion: "Valor dolar peso", periodo: 2026, valor: 1430, unidad: "ARS", fuente: "", fuente_corta: "", fecha_fuente: "" },
   ]
   
   return {

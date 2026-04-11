@@ -1,6 +1,7 @@
 "use client"
 
 import { motion } from "framer-motion"
+import { formatCurrency } from "@/lib/utils"
 import { SectionWrapper } from "@/components/section-wrapper"
 import { useData } from "@/lib/data-context"
 
@@ -40,7 +41,7 @@ export function MicroSection() {
   const pasajes2022 = Math.floor(salario_2022 / micro_2022)
   const pasajes2026 = Math.floor(salario_2026 / micro_2026)
   
-  const formatARS = (n: number) => n.toLocaleString("es-AR", { style: "currency", currency: "ARS", maximumFractionDigits: 0 })
+  const formatARS = (n: number) => formatCurrency(n, micro?.unidad)
   
   const jugadores = 26
   
@@ -110,12 +111,12 @@ export function MicroSection() {
           
           <div className="flex items-center gap-4">
             <div className="flex-1 p-4 bg-card rounded-lg border border-border text-center">
-              <p className="text-xl font-light text-primary">{formatARS(micro_2022)}</p>
+              <p className="text-xl font-light text-primary">{formatCurrency(micro_2022, micro?.unidad)}</p>
               <p className="text-xs text-muted-foreground mt-1">2022</p>
             </div>
             <span className="text-muted-foreground">→</span>
             <div className="flex-1 p-4 bg-card rounded-lg border border-border text-center">
-              <p className="text-xl font-light text-accent">{formatARS(micro_2026)}</p>
+              <p className="text-xl font-light text-accent">{formatCurrency(micro_2026, micro?.unidad)}</p>
               <p className="text-xs text-muted-foreground mt-1">2026</p>
             </div>
           </div>

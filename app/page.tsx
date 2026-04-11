@@ -24,7 +24,7 @@ import { ProgressTracker } from "@/components/progress-tracker"
 export default function Home() {
   return (
     <DataProvider>
-      <main className="bg-background min-h-screen pb-20">
+      <main className="bg-background min-h-screen pb-20 overflow-x-hidden">
         <HeroSection />
         
         {/* BLOQUE 01: LA PREVIA */}

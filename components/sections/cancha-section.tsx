@@ -4,6 +4,7 @@ import { SectionWrapper } from "@/components/section-wrapper"
 import { ComparisonBar } from "@/components/comparison-bar"
 import { StatCard } from "@/components/stat-card"
 import { useData } from "@/lib/data-context"
+import { formatCurrency } from "@/lib/utils"
 
 export function CanchaSection() {
   const { getIndicador, loading } = useData()
@@ -36,20 +37,20 @@ export function CanchaSection() {
           label={tituloEntrada}
           value2022={entrada_2022}
           value2026={entrada_2026}
-          unit="$ "
+          unit={entradaPrimera?.unidad}
           delay={0}
         />
       </div>
       
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-12">
         <StatCard
-          value={`$ ${entrada_2022.toLocaleString("es-AR")}`}
+          value={formatCurrency(entrada_2022, entradaPrimera?.unidad)}
           label="Entrada 2022"
           subtext="Precio mas accesible"
           delay={0.4}
         />
         <StatCard
-          value={`$ ${entrada_2026.toLocaleString("es-AR")}`}
+          value={formatCurrency(entrada_2026, entradaPrimera?.unidad)}
           label="Entrada 2026"
           subtext="Precio mas alto"
           delay={0.5}

@@ -1,6 +1,7 @@
 "use client"
 
 import { motion } from "framer-motion"
+import { formatCurrency } from "@/lib/utils"
 import { SectionWrapper } from "@/components/section-wrapper"
 import { ComparisonBar } from "@/components/comparison-bar"
 import { StatCard } from "@/components/stat-card"
@@ -46,8 +47,6 @@ export function AlquilerSection() {
   const salarios2022 = (alquiler_2022 / salario_2022).toFixed(1)
   const salarios2026 = (alquiler_2026 / salario_2026).toFixed(1)
   
-  const formatARS = (n: number) => n.toLocaleString("es-AR", { style: "currency", currency: "ARS", maximumFractionDigits: 0 })
-  
   if (loading) {
     return (
       <SectionWrapper number="10" title="El depto 2 ambientes" intro="Cargando datos..." bgColor="muted">
@@ -62,6 +61,7 @@ export function AlquilerSection() {
       title="El depto 2 ambientes"
       intro="El balcon del festejo ahora cuesta mas meses de trabajo."
       bgColor="muted"
+      sources={[alquiler, salario]}
     >
       <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-start">
         <div>
@@ -69,7 +69,7 @@ export function AlquilerSection() {
             label="Alquiler promedio monoambiente CABA"
             value2022={alquiler_2022}
             value2026={alquiler_2026}
-            formatValue={formatARS}
+            unit={alquiler?.unidad}
             delay={0}
           />
           
@@ -119,18 +119,6 @@ export function AlquilerSection() {
                 </div>
               </div>
             </div>
-          </motion.div>
-          
-          <motion.div
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.6, duration: 0.6 }}
-            className="mt-8 p-4 bg-card rounded-lg border border-border"
-          >
-            <p className="text-sm text-muted-foreground">
-              Con la derogacion de la ley de alquileres, los precios en pesos se actualizan mas frecuentemente
-            </p>
           </motion.div>
         </div>
         

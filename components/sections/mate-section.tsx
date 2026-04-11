@@ -1,6 +1,7 @@
 "use client"
 
 import { motion } from "framer-motion"
+import { formatCurrency } from "@/lib/utils"
 import { SectionWrapper } from "@/components/section-wrapper"
 import { ComparisonBar } from "@/components/comparison-bar"
 import { useData } from "@/lib/data-context"
@@ -32,7 +33,7 @@ export function MateSection() {
   const kilos2022 = Math.floor(salario_2022 / yerba_2022)
   const kilos2026 = Math.floor(salario_2026 / yerba_2026)
   
-  const formatARS = (n: number) => n.toLocaleString("es-AR", { style: "currency", currency: "ARS", maximumFractionDigits: 0 })
+  const formatARS = (n: number) => formatCurrency(n, yerba?.unidad)
   
   if (loading) {
     return (
@@ -55,7 +56,7 @@ export function MateSection() {
             label="Kilo de yerba mate"
             value2022={yerba_2022}
             value2026={yerba_2026}
-            formatValue={formatARS}
+            unit={yerba?.unidad}
             delay={0}
           />
           

@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { DataItem } from "@/lib/data-context"
+import { DataItem, FuenteInfo } from "@/lib/data-context"
 
 interface SourcesPanelProps {
   items: (DataItem | undefined)[]
@@ -11,13 +11,17 @@ interface SourcesPanelProps {
 export function SourcesPanel({ items }: SourcesPanelProps) {
   const [open, setOpen] = useState(false)
 
-  const sources = Array.from(
-    new Set(
-      items.flatMap(item =>
-        item ? [item.fuente_2022, item.fuente_2026].filter(Boolean) : []
-      )
-    )
-  ) as string[]
+  const sourcesMap = new Map<string, FuenteInfo>()
+  items.forEach(item => {
+    if (item?.fuente_2022?.url) {
+      sourcesMap.set(item.fuente_2022.url, item.fuente_2022)
+    }
+    if (item?.fuente_2026?.url) {
+      sourcesMap.set(item.fuente_2026.url, item.fuente_2026)
+    }
+  })
+  
+  const sources = Array.from(sourcesMap.values())
 
   if (sources.length === 0) return null
 
@@ -45,17 +49,17 @@ export function SourcesPanel({ items }: SourcesPanelProps) {
           >
             {sources.map((src, i) => (
               <li key={i} className="text-[12px] text-muted-foreground/75 leading-relaxed">
-                {src.startsWith("http") ? (
+                {src.url.startsWith("http") ? (
                   <a
-                    href={src}
+                    href={src.url}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="cursor-pointer hover:text-primary transition-colors underline underline-offset-2"
                   >
-                    {src}
+                    {src.corta} {src.fecha && `(${src.fecha})`}
                   </a>
                 ) : (
-                  <span>{src}</span>
+                  <span>{src.corta} {src.fecha && `(${src.fecha})`}</span>
                 )}
               </li>
             ))}

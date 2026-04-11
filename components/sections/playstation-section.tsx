@@ -6,7 +6,7 @@ import { StatCard } from "@/components/stat-card"
 import { useData } from "@/lib/data-context"
 
 export function PlayStationSection() {
-  const { getIndicador, getValue, loading } = useData()
+  const { getIndicador, loading } = useData()
   
   const ps5 = getIndicador("PLAY_STATION")
   const salario = getIndicador("SUELDO_MIN_PESOS")
@@ -18,11 +18,6 @@ export function PlayStationSection() {
   
   const salarios_2022 = (ps5_2022 / salario_2022).toFixed(1)
   const salarios_2026 = (ps5_2026 / salario_2026).toFixed(1)
-  
-  // Format numbers in Argentine style
-  const formatARS = (n: number) => {
-    return n.toLocaleString("es-AR", { style: "currency", currency: "ARS", maximumFractionDigits: 0 })
-  }
   
   if (loading) {
     return (
@@ -44,8 +39,7 @@ export function PlayStationSection() {
           label="PlayStation 5"
           value2022={ps5_2022}
           value2026={ps5_2026}
-          unit="$"
-          formatValue={(v) => formatARS(v)}
+          unit={ps5?.unidad}
           delay={0}
         />
         
@@ -53,8 +47,7 @@ export function PlayStationSection() {
           label="Salario Minimo"
           value2022={salario_2022}
           value2026={salario_2026}
-          unit="$"
-          formatValue={(v) => formatARS(v)}
+          unit={salario?.unidad}
           delay={0.2}
         />
       </div>

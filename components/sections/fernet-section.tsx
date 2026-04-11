@@ -1,6 +1,7 @@
 "use client"
 
 import { motion } from "framer-motion"
+import { formatCurrency } from "@/lib/utils"
 import { SectionWrapper } from "@/components/section-wrapper"
 import { ComparisonBar } from "@/components/comparison-bar"
 import { useData } from "@/lib/data-context"
@@ -41,7 +42,7 @@ export function FernetSection() {
   const fernetsSalario2022 = Math.floor(salario_2022 / fernet_2022)
   const fernetsSalario2026 = Math.floor(salario_2026 / fernet_2026)
   
-  const formatARS = (n: number) => n.toLocaleString("es-AR", { style: "currency", currency: "ARS", maximumFractionDigits: 0 })
+  const formatARS = (n: number) => formatCurrency(n, fernet?.unidad)
   
   if (loading) {
     return (
@@ -63,7 +64,7 @@ export function FernetSection() {
             label="Fernet Branca (750ml)"
             value2022={fernet_2022}
             value2026={fernet_2026}
-            formatValue={formatARS}
+            unit={fernet?.unidad}
             delay={0}
           />
           

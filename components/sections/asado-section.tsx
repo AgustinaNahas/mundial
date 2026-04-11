@@ -1,6 +1,7 @@
 "use client"
 
 import { motion } from "framer-motion"
+import { formatCurrency } from "@/lib/utils"
 import { SectionWrapper } from "@/components/section-wrapper"
 import { ComparisonBar } from "@/components/comparison-bar"
 import { useData } from "@/lib/data-context"
@@ -61,7 +62,7 @@ export function AsadoSection() {
   const asados2022 = Math.floor(salario_2022 / asado_2022)
   const asados2026 = Math.floor(salario_2026 / asado_2026)
   
-  const formatARS = (n: number) => n.toLocaleString("es-AR", { style: "currency", currency: "ARS", maximumFractionDigits: 0 })
+  
   
   if (loading) {
     return (
@@ -83,7 +84,7 @@ export function AsadoSection() {
             label="Asado para 10 personas"
             value2022={asado_2022}
             value2026={asado_2026}
-            formatValue={formatARS}
+            unit={asado?.unidad}
             delay={0}
           />
           
@@ -97,12 +98,12 @@ export function AsadoSection() {
             <p className="text-sm text-muted-foreground mb-2">Costo total del asado</p>
             <div className="flex items-baseline gap-4 mt-2">
               <div>
-                <p className="text-2xl font-light text-primary">{formatARS(asado_2022)}</p>
+                <p className="text-2xl font-light text-primary">{formatCurrency(asado_2022, asado?.unidad)}</p>
                 <p className="text-xs text-muted-foreground">2022</p>
               </div>
               <span className="text-muted-foreground">→</span>
               <div>
-                <p className="text-2xl font-light text-accent">{formatARS(asado_2026)}</p>
+                <p className="text-2xl font-light text-accent">{formatCurrency(asado_2026, asado?.unidad)}</p>
                 <p className="text-xs text-muted-foreground">2026</p>
               </div>
             </div>

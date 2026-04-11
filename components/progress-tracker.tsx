@@ -4,10 +4,10 @@ import { motion } from "framer-motion"
 import { useEffect, useState, useCallback } from "react"
 
 const sections = [
-  { id: "previa",  label: "La Previa",  short: "Previa",  subsections: 3 },
+  { id: "previa", label: "La Previa", short: "Previa", subsections: 3 },
   { id: "mundial", label: "El Mundial", short: "Mundial", subsections: 5 },
   { id: "festejo", label: "El Festejo", short: "Festejo", subsections: 3 },
-  { id: "gente",   label: "La Gente",   short: "Gente",   subsections: 2 },
+  { id: "gente", label: "La Gente", short: "Gente", subsections: 2 },
 ]
 
 const totalSubs = sections.reduce((a, s) => a + s.subsections, 0) // 13
@@ -30,9 +30,9 @@ export function ProgressTracker() {
   const [activeSection, setActiveSection] = useState(-1)
 
   const handleScroll = useCallback(() => {
-    const scrollY   = window.scrollY
-    const windowH   = window.innerHeight
-    const docH      = document.documentElement.scrollHeight
+    const scrollY = window.scrollY
+    const windowH = window.innerHeight
+    const docH = document.documentElement.scrollHeight
 
     setIsVisible(scrollY > windowH * 0.85)
     setProgress(Math.min((scrollY / (docH - windowH)) * 100, 100))
@@ -54,7 +54,7 @@ export function ProgressTracker() {
   }, [handleScroll])
 
   const ballLeft = progress          // % of track
-  const ballRotate = progress * 14.4 // 4 full turns across 100%
+  const ballRotate = progress * 38 // 4 full turns across 100%
 
   return (
     <motion.div
@@ -71,12 +71,11 @@ export function ProgressTracker() {
             <button
               key={s.id}
               onClick={() => scrollTo(s.id)}
-              className="text-left transition-all duration-300"
+              className="text-left transition-all duration-300 overflow-hidden"
               style={{ width: `${(s.end - s.start) * 100}%` }}
             >
-              <span className={`text-[9px] uppercase tracking-[0.2em] font-medium transition-colors duration-300 ${
-                activeSection === i ? "text-primary" : "text-muted-foreground/40"
-              }`}>
+              <span className={`block truncate text-[9px] uppercase tracking-[0.2em] font-medium transition-colors duration-300 ${activeSection === i ? "text-primary" : "text-muted-foreground/40"
+                }`}>
                 <span className="hidden sm:inline">{s.label}</span>
                 <span className="sm:hidden">{s.short}</span>
               </span>
@@ -112,8 +111,8 @@ export function ProgressTracker() {
                   key={`${si}-${di}`}
                   className="absolute rounded-full"
                   animate={{
-                    width:           lit ? 6 : 4,
-                    height:          lit ? 6 : 4,
+                    width: lit ? 6 : 4,
+                    height: lit ? 6 : 4,
                     backgroundColor: lit ? "oklch(0.65 0.18 222)" : "oklch(0.24 0.09 252)",
                   }}
                   transition={{ duration: 0.3 }}
@@ -131,10 +130,10 @@ export function ProgressTracker() {
           <motion.span
             className="absolute text-base select-none"
             animate={{ rotate: ballRotate }}
-            transition={{ duration: 0.05, ease: "linear" }}
+            transition={{ duration: 0.05, ease: "easeInOut" }}
             style={{
               left: `${ballLeft}%`,
-              top: "50%",
+              top: "20%",
               transform: "translate(-50%, -50%)",
               lineHeight: 1,
               display: "block",

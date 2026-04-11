@@ -1,13 +1,13 @@
 "use client"
 
 import { motion } from "framer-motion"
+import { formatCurrency } from "@/lib/utils"
 import { SectionWrapper } from "@/components/section-wrapper"
 import { useData } from "@/lib/data-context"
 
 /** Visualización tipo calendario: muestra N días laborables como celdas en grilla Mon–Fri */
 function WorkCalendar({ days, color, delay = 0 }: { days: number; color: string; delay?: number }) {
   const cols = 5   // L M M J V
-  const maxDays = Math.ceil(days / cols) * cols  // redondear a semana completa
   const weeks = Math.ceil(days / cols)
   const labels = ["L", "M", "M", "J", "V"]
 
@@ -63,9 +63,6 @@ export function CamisetaSection() {
   const usd2022 = (camiseta_2022 / dolar_2022).toFixed(0)
   const usd2026 = (camiseta_2026 / dolar_2026).toFixed(0)
 
-  const formatARS = (n: number) =>
-    n.toLocaleString("es-AR", { style: "currency", currency: "ARS", maximumFractionDigits: 0 })
-
   if (loading) {
     return (
       <SectionWrapper number="03" title="La camiseta" intro="Cargando datos...">
@@ -93,16 +90,16 @@ export function CamisetaSection() {
         >
           {/* Jersey */}
           <div className="w-40 h-40 mx-auto">
-            <img src="./mundial/camiseta2022.png" />
+            <img src="./mundial/camiseta2022.png" alt="Camiseta 2022" />
           </div>
 
           {/* Precios */}
           <div className="text-center space-y-1">
             <p className="text-2xl md:text-3xl font-light text-primary">
-              {formatARS(camiseta_2022)}
+              {formatCurrency(camiseta_2022, camiseta?.unidad)}
             </p>
             <p className="text-base text-muted-foreground">
-              ≈ <span className="text-foreground font-medium">USD {Number(usd2022).toLocaleString("es-AR")}</span>
+              ≈ <span className="text-foreground font-medium">{formatCurrency(Number(usd2022), "USD")}</span>
               <span className="text-xs ml-1 text-muted-foreground/60">al cambio 2022</span>
             </p>
           </div>
@@ -130,16 +127,16 @@ export function CamisetaSection() {
         >
           {/* Jersey */}
           <div className="w-40 h-40 mx-auto">
-            <img src="./mundial/camiseta2026.png" style={{ transform: "rotateY(180deg)" }} />
+            <img src="./mundial/camiseta2026.png" style={{ transform: "rotateY(180deg)" }} alt="Camiseta 2026" />
           </div>
 
           {/* Precios */}
           <div className="text-center space-y-1">
             <p className="text-2xl md:text-3xl font-light text-primary">
-              {formatARS(camiseta_2026)}
+              {formatCurrency(camiseta_2026, camiseta?.unidad)}
             </p>
             <p className="text-base text-muted-foreground">
-              ≈ <span className="text-foreground font-medium">USD {Number(usd2026).toLocaleString("es-AR")}</span>
+              ≈ <span className="text-foreground font-medium">{formatCurrency(Number(usd2026), "USD")}</span>
               <span className="text-xs ml-1 text-muted-foreground/60">al cambio 2026</span>
             </p>
           </div>

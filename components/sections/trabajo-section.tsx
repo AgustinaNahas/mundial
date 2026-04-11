@@ -1,6 +1,7 @@
 "use client"
 
 import { motion } from "framer-motion"
+import { formatCurrency } from "@/lib/utils"
 import { SectionWrapper } from "@/components/section-wrapper"
 import { StatCard } from "@/components/stat-card"
 import { useData } from "@/lib/data-context"
@@ -62,8 +63,6 @@ export function TrabajoSection() {
   const dia_2022 = Math.round(salario_2022 / 22)
   const dia_2026 = Math.round(salario_2026 / 22)
   
-  const formatARS = (n: number) => n.toLocaleString("es-AR", { style: "currency", currency: "ARS", maximumFractionDigits: 0 })
-  
   if (loading) {
     return (
       <SectionWrapper number="08" title="El que falto al laburo" intro="Cargando datos..." bgColor="muted">
@@ -78,6 +77,7 @@ export function TrabajoSection() {
       title="El que falto al laburo"
       intro="Faltar en 2022 costaba menos. En 2026, con nuevas reglas, el costo puede ser mayor."
       bgColor="muted"
+      sources={[salario]}
     >
       <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
         <div>
@@ -111,11 +111,11 @@ export function TrabajoSection() {
             <div className="space-y-3">
               <div className="flex justify-between items-center">
                 <span className="text-sm">Salario diario promedio 2022</span>
-                <span className="font-medium text-primary">{formatARS(dia_2022)}</span>
+                <span className="font-medium text-primary">{formatCurrency(dia_2022, salario?.unidad)}</span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-sm">Salario diario promedio 2026</span>
-                <span className="font-medium text-accent">{formatARS(dia_2026)}</span>
+                <span className="font-medium text-accent">{formatCurrency(dia_2026, salario?.unidad)}</span>
               </div>
             </div>
           </motion.div>
@@ -123,13 +123,13 @@ export function TrabajoSection() {
         
         <div className="space-y-4">
           <StatCard
-            value={formatARS(dia_2022)}
+            value={formatCurrency(dia_2022, salario?.unidad)}
             label="Costo de faltar un dia"
             subtext="En 2022"
             delay={0.4}
           />
           <StatCard
-            value={formatARS(dia_2026)}
+            value={formatCurrency(dia_2026, salario?.unidad)}
             label="Costo de faltar un dia"
             subtext="En 2026"
             delay={0.5}

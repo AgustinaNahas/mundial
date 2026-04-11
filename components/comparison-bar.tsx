@@ -1,6 +1,7 @@
 "use client"
 
 import { motion } from "framer-motion"
+import { formatCurrency } from "@/lib/utils"
 
 interface ComparisonBarProps {
   label: string
@@ -37,7 +38,10 @@ export function ComparisonBar({
   const compact2026 = rawWidth2026 < MIN_WIDTH
   const percentChange = value2022 > 0 ? ((value2026 - value2022) / value2022 * 100).toFixed(0) : "0"
   
-  const displayValue = (v: number) => formatValue ? formatValue(v) : `${unit}${v.toLocaleString('es-AR')}`
+  const displayValue = (v: number) => {
+    if (formatValue) return formatValue(v)
+    return formatCurrency(v, unit)
+  }
   
   return (
     <motion.div
@@ -69,13 +73,13 @@ export function ComparisonBar({
               className="h-full bg-primary flex items-center justify-end pr-3 shrink-0"
             >
               {!compact2022 && (
-                <span className="text-xs font-medium text-primary-foreground whitespace-nowrap">
+                <span className="text-xs font-medium text-primary-foreground truncate px-1">
                   {displayValue(value2022)}
                 </span>
               )}
             </motion.div>
             {compact2022 && (
-              <div className="pl-2 text-xs font-medium text-primary whitespace-nowrap shrink-0">
+              <div className="pl-2 pr-1 text-xs font-medium text-primary truncate shrink-0">
                 {displayValue(value2022)}
               </div>
             )}
@@ -94,13 +98,13 @@ export function ComparisonBar({
               className="h-full bg-accent flex items-center justify-end pr-3 shrink-0"
             >
               {!compact2026 && (
-                <span className="text-xs font-medium text-accent-foreground whitespace-nowrap">
+                <span className="text-xs font-medium text-accent-foreground truncate px-1">
                   {displayValue(value2026)}
                 </span>
               )}
             </motion.div>
             {compact2026 && (
-              <div className="pl-2 text-xs font-medium text-accent whitespace-nowrap shrink-0">
+              <div className="pl-2 pr-1 text-xs font-medium text-accent truncate shrink-0">
                 {displayValue(value2026)}
               </div>
             )}

@@ -1,6 +1,7 @@
 "use client"
 
 import { motion } from "framer-motion"
+import { formatCurrency } from "@/lib/utils"
 import { SectionWrapper } from "@/components/section-wrapper"
 import { useData } from "@/lib/data-context"
 
@@ -70,9 +71,6 @@ export function PelotaSection() {
   const diasTrabajo2022 = Math.ceil(pelota_2022  / (salario_2022 / 22))
   const diasTrabajo2026 = Math.ceil(pelota_2026  / (salario_2026 / 22))
 
-  const formatARS = (n: number) =>
-    n.toLocaleString("es-AR", { style: "currency", currency: "ARS", maximumFractionDigits: 0 })
-
   if (loading) {
     return (
       <SectionWrapper number="03" title="La pelota" intro="Cargando datos...">
@@ -98,26 +96,23 @@ export function PelotaSection() {
           transition={{ duration: 0.6 }}
           className="space-y-6"
         >
-          {/* Pelota animada */}
           <div className="w-40 h-40 mx-auto">
             <motion.div
               animate={{ rotate: 360 }}
               transition={{ repeat: Infinity, duration: 14, ease: "linear" }}
               className="w-full h-full"
             >
-              <img src="./mundial/pelota2022.webp"/>
+              <img src="./mundial/pelota2022.webp" alt="Pelota 2022" />
             </motion.div>
           </div>
 
-          {/* Precio */}
           <div className="text-center space-y-1">
             <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground/60">Qatar 2022</p>
             <p className="text-2xl md:text-3xl font-light text-primary">
-              {formatARS(pelota_2022)}
+              {formatCurrency(pelota_2022, pelota?.unidad)}
             </p>
           </div>
 
-          {/* Días laborables */}
           <div className="space-y-3">
             <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground/70 text-center">
               {diasTrabajo2022} días de sueldo mínimo
@@ -138,26 +133,23 @@ export function PelotaSection() {
           transition={{ duration: 0.6, delay: 0.15 }}
           className="space-y-6"
         >
-          {/* Pelota animada */}
           <div className="w-40 h-40 mx-auto">
             <motion.div
               animate={{ rotate: -360 }}
               transition={{ repeat: Infinity, duration: 14, ease: "linear" }}
               className="w-full h-full"
             >
-              <img src="./mundial/pelota2026.png"/>
+              <img src="./mundial/pelota2026.png" alt="Pelota 2026" />
             </motion.div>
           </div>
 
-          {/* Precio */}
           <div className="text-center space-y-1">
             <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground/60">EEUU 2026</p>
             <p className="text-2xl md:text-3xl font-light text-primary">
-              {formatARS(pelota_2026)}
+              {formatCurrency(pelota_2026, pelota?.unidad)}
             </p>
           </div>
 
-          {/* Días laborables */}
           <div className="space-y-3">
             <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground/70 text-center">
               {diasTrabajo2026} días de sueldo mínimo
