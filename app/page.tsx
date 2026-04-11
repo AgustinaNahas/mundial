@@ -24,7 +24,7 @@ import { ProgressTracker } from "@/components/progress-tracker"
 export default function Home() {
   return (
     <DataProvider>
-      <main className="bg-background min-h-screen pb-20 overflow-x-hidden">
+      <main className="bg-background min-h-screen pb-20 overflow-x-clip">
         <HeroSection />
         
         {/* BLOQUE 01: LA PREVIA */}
@@ -48,7 +48,6 @@ export default function Home() {
             subtitle="El momento de vivirlo."
           />
           <CanchaSection />
-          <ViajeSection />
           <MateSection />
           <AsadoSection />
           <TrabajoSection />

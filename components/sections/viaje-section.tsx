@@ -1,9 +1,15 @@
 "use client"
 
+import dynamic from "next/dynamic"
 import { motion } from "framer-motion"
 import { SectionWrapper } from "@/components/section-wrapper"
 import { ComparisonBar } from "@/components/comparison-bar"
 import { useData } from "@/lib/data-context"
+
+const WorldMap = dynamic(() => import("@/components/world-map").then((m) => m.WorldMap), {
+  ssr: false,
+  loading: () => <div className="h-[420px] rounded-2xl bg-muted/30 animate-pulse" />,
+})
 
 export function ViajeSection() {
   const { getIndicador, loading } = useData()
@@ -29,6 +35,21 @@ export function ViajeSection() {
       title="El Viaje al Mundial"
       intro={`Costear los vuelos ida y vuelta en 2022 requería ${salarios2022} salarios mínimos. Para 2026, la cifra asciende a ${salarios2026}.`}
     >
+      <div className="mt-12 mb-8">
+        <WorldMap />
+      </div>
+
+      <div className="flex gap-6 justify-center mb-12 text-sm text-muted-foreground">
+        <span className="flex items-center gap-2">
+          <span className="inline-block w-6 border-t-2 border-dashed border-[#4eaadc]" />
+          BS AS → Doha (Qatar 2022)
+        </span>
+        <span className="flex items-center gap-2">
+          <span className="inline-block w-6 border-t-2 border-dashed border-[#e8e8f0]" />
+          BS AS → Miami (EEUU 2026)
+        </span>
+      </div>
+
       <div className="mt-12 mb-16">
         <ComparisonBar
           label="Precio del vuelo (ARS)"
