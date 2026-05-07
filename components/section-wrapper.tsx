@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef } from "react"
 import { motion } from "framer-motion"
 import { SourcesPanel } from "@/components/sources-panel"
 import { DataItem } from "@/lib/data-context"
-import { pushDataLayerEvent } from "@/lib/gtm"
+import { sendGaEvent } from "@/lib/analytics"
 
 interface SectionWrapperProps {
   children: React.ReactNode
@@ -46,7 +46,7 @@ export function SectionWrapper({
         if (!entry?.isIntersecting || alreadyTracked) return
 
         alreadyTracked = true
-        pushDataLayerEvent("section_view", {
+        sendGaEvent("section_view", {
           section_name: sectionName,
           section_title: title,
           section_number: number,

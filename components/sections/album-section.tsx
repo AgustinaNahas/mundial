@@ -11,7 +11,7 @@ import { cn } from "@/lib/utils"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { useIsMobile } from "@/hooks/use-mobile"
 import { MonthStack } from "@/components/month-stack"
-import { pushDataLayerEvent } from "@/lib/gtm"
+import { sendGaEvent } from "@/lib/analytics"
 
 /* ─── Constantes ────────────────────────────────────────────── */
 const SLOTS = [
@@ -448,7 +448,7 @@ export function AlbumSection() {
     }
     if (orderIdx + 1 < TOTAL) setOrderIdx(orderIdx + 1)
 
-    pushDataLayerEvent("album_sticker_click", {
+    sendGaEvent("album_sticker_click", {
       section_name: "album",
       slot_index: clickedIdx,
       sticker_index: figuIdx,
