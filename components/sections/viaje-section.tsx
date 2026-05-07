@@ -1,10 +1,12 @@
 "use client"
 
 import dynamic from "next/dynamic"
+import { useEffect } from "react"
 import { motion } from "framer-motion"
 import { SectionWrapper } from "@/components/section-wrapper"
 import { ComparisonBar } from "@/components/comparison-bar"
 import { useData } from "@/lib/data-context"
+import { loadCountriesGeo } from "@/lib/countries-geo"
 
 const WorldMap = dynamic(() => import("@/components/world-map").then((m) => m.WorldMap), {
   ssr: false,
@@ -13,6 +15,10 @@ const WorldMap = dynamic(() => import("@/components/world-map").then((m) => m.Wo
 
 export function ViajeSection() {
   const { getIndicador, loading } = useData()
+
+  useEffect(() => {
+    void loadCountriesGeo({ detail: "lite" })
+  }, [])
 
   const vuelo2022Item = getIndicador("BSAS_DOHA")
   const vuelo2026Item = getIndicador("BSAS_MIAMI")

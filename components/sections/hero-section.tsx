@@ -185,6 +185,9 @@ export function HeroSection() {
             <h2 className="font-display font-bold text-3xl sm:text-4xl md:text-6xl lg:text-7xl text-primary tracking-[0.06em] leading-none uppercase pointer-events-auto">
               ser campeón del mundo?
             </h2>
+            <p className="mt-12 max-w-3xl mx-auto text-sm sm:text-base md:text-lg text-foreground/80 leading-relaxed pointer-events-auto">
+              En 2022 Argentina se coronó campeona del mundo. <br/>¿Cuál sería el precio de ser campeones hoy?
+            </p>
           </div>
 
           {/* Badge 2022 → 2026 */}

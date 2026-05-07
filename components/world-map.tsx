@@ -5,6 +5,7 @@ import { MapContainer, GeoJSON, Polyline, CircleMarker, Tooltip } from "react-le
 import "leaflet/dist/leaflet.css"
 import type { GeoJsonObject } from "geojson"
 import type { PathOptions } from "leaflet"
+import { loadCountriesGeo } from "@/lib/countries-geo"
 
 // Coordenadas
 const BSAS: [number, number] = [-34.6037, -58.3816]
@@ -87,16 +88,18 @@ export function WorldMap() {
   const [geoData, setGeoData] = useState<GeoJsonObject | null>(null)
 
   useEffect(() => {
-    fetch("/mundial/countries.geojson")
-      .then((r) => r.json())
-      .then(setGeoData)
-      .catch(() => {
-        // fallback dev path
-        fetch("/countries.geojson")
-          .then((r) => r.json())
-          .then(setGeoData)
-      })
+    void loadCountriesGeo({ detail: "lite" }).then(setGeoData)
   }, [])
+
+  if (!geoData) {
+    return (
+      <div
+        className="rounded-2xl bg-[#080e1c] animate-pulse"
+        style={{ height: "420px", width: "100%" }}
+        aria-hidden
+      />
+    )
+  }
 
   return (
     <>
@@ -122,34 +125,22 @@ export function WorldMap() {
         doubleClickZoom={false}
         attributionControl={false}
       >
-        {geoData && (
-          <>
-            <GeoJSON
-              data={geoData}
-              style={() => countryStyle}
-            />
-            {/* Ruta BS AS → Doha (Qatar 2022) */}
-            <Polyline
-              positions={routeDoha}
-              pathOptions={{ color: "#4eaadc", weight: 2, opacity: 0.9, dashArray: "6 4" }}
-            />
-
-            {/* Ruta BS AS → Miami (EEUU 2026) */}
-            <Polyline
-              positions={routeMiami}
-              pathOptions={{ color: "#e8e8f0", weight: 2, opacity: 0.9, dashArray: "6 4" }}
-            />
-
-            {/* Ciudades */}
-            <CityMarker position={BSAS} label="Buenos Aires" color="#4eaadc" />
-            <CityMarker position={DOHA} label="Doha" color="#4eaadc" />
-            <CityMarker position={MIAMI} label="Miami" color="#e8e8f0" />
-          </>
-
-
-        )}
-
-        
+        <GeoJSON data={geoData} style={() => ({ ...countryStyle, smoothFactor: 1.35 } as PathOptions)} />
+        <Polyline
+          positions={routeDoha}
+          pathOptions={
+            { color: "#e8e8f0", weight: 2, opacity: 0.9, dashArray: "6 4", noClip: true } as PathOptions
+          }
+        />
+        <Polyline
+          positions={routeMiami}
+          pathOptions={
+            { color: "#4eaadc", weight: 2, opacity: 0.9, dashArray: "6 4", noClip: true } as PathOptions
+          }
+        />
+        <CityMarker position={BSAS} label="Buenos Aires" color="#4eaadc" />
+        <CityMarker position={DOHA} label="Doha" color="#e8e8f0" />
+        <CityMarker position={MIAMI} label="Miami" color="#4eaadc" />
       </MapContainer>
     </>
   )

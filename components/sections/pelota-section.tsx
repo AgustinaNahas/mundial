@@ -1,9 +1,12 @@
 "use client"
 
 import { motion } from "framer-motion"
+import Image from "next/image"
 import { formatCurrency } from "@/lib/utils"
 import { SectionWrapper } from "@/components/section-wrapper"
 import { useData } from "@/lib/data-context"
+
+const BASE_PATH = "/mundial"
 
 function FootballSVG({ className }: { className?: string }) {
   return (
@@ -25,33 +28,62 @@ function FootballSVG({ className }: { className?: string }) {
   )
 }
 
-function WorkCalendar({ days, color, delay = 0 }: { days: number; color: string; delay?: number }) {
-  const cols  = 5
-  const weeks = Math.ceil(days / cols)
-  const labels = ["L", "M", "M", "J", "V"]
+function WorkCalendar({ days, color, delay = 0, completionMarker }: {
+  days: number
+  color: string
+  delay?: number
+  completionMarker?: React.ReactNode
+}) {
+  const WEEK = 7
+  const WORK = 5
+  const weeks = Math.ceil(days / WORK)
+  const totalSlots = weeks * WEEK
+  const labels = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"]
+
+  const slotWorkDay = (slot: number) => {
+    const day = slot % WEEK
+    if (day === 0 || day === 6) return -1
+    return Math.floor(slot / WEEK) * WORK + (day - 1)
+  }
+
+  const lastWeek = Math.floor((days - 1) / WORK)
+  const lastDay  = (days - 1) % WORK
+  const lastSlot = lastWeek * WEEK + (lastDay + 1)
 
   return (
     <div className="space-y-1.5">
-      <div className="grid grid-cols-5 gap-1">
+      <div className="grid grid-cols-7 gap-1">
         {labels.map((l, i) => (
-          <span key={i} className="text-center text-[9px] text-muted-foreground/50 uppercase">{l}</span>
+          <span key={i} className={`text-center text-[9px] uppercase ${i === 0 || i === 6 ? "text-muted-foreground/25" : "text-muted-foreground/50"}`}>{l}</span>
         ))}
       </div>
-      <div className="grid grid-cols-5 gap-1">
-        {Array.from({ length: weeks * cols }).map((_, i) => (
-          <motion.div
-            key={i}
-            initial={{ opacity: 0, scale: 0.6 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            viewport={{ once: true }}
-            transition={{ delay: delay + i * 0.025, duration: 0.2 }}
-            className="aspect-square rounded-sm"
-            style={{
-              backgroundColor: i < days ? color : "oklch(0.18 0.07 255)",
-              border:          i < days ? "none" : "1px solid oklch(0.24 0.09 252)",
-            }}
-          />
-        ))}
+      <div className="grid grid-cols-7 gap-1">
+        {Array.from({ length: totalSlots }).map((_, i) => {
+          const workDay   = slotWorkDay(i)
+          const isWeekend = workDay === -1
+          const isFilled  = !isWeekend && workDay < days
+          const isLast    = i === lastSlot
+
+          return (
+            <motion.div
+              key={i}
+              initial={{ opacity: 0, scale: 0.6 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true }}
+              transition={{ delay: delay + i * 0.018, duration: 0.2 }}
+              className="aspect-square rounded-sm flex items-center justify-center overflow-visible"
+              style={
+                isWeekend
+                  ? { backgroundColor: "oklch(0.14 0.07 255)", opacity: 0.35 }
+                  : isFilled
+                  ? { backgroundColor: color }
+                  : { backgroundColor: "oklch(0.18 0.07 255)", border: "1px solid oklch(0.24 0.09 252)" }
+              }
+            >
+              {isLast && completionMarker}
+            </motion.div>
+          )
+        })}
       </div>
     </div>
   )
@@ -100,15 +132,21 @@ export function PelotaSection() {
             <motion.div
               animate={{ rotate: 360 }}
               transition={{ repeat: Infinity, duration: 14, ease: "linear" }}
-              className="w-full h-full"
+              className="relative w-full h-full"
             >
-              <img src="./mundial/pelota2022.webp" alt="Pelota 2022" />
+              <Image
+                src={`${BASE_PATH}/pelota2022.webp`}
+                alt="Pelota 2022"
+                fill
+                sizes="160px"
+                className="object-contain"
+              />
             </motion.div>
           </div>
 
           <div className="text-center space-y-1">
             <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground/60">Qatar 2022</p>
-            <p className="text-2xl md:text-3xl font-light text-primary">
+            <p className="text-2xl md:text-3xl font-light text-accent">
               {formatCurrency(pelota_2022, pelota?.unidad)}
             </p>
           </div>
@@ -119,8 +157,9 @@ export function PelotaSection() {
             </p>
             <WorkCalendar
               days={diasTrabajo2022}
-              color="oklch(0.65 0.18 222)"
+              color="oklch(0.97 0.01 220)"
               delay={0.2}
+              completionMarker={<span style={{ fontSize: 13, lineHeight: 1 }}>⚽</span>}
             />
           </div>
         </motion.div>
@@ -137,9 +176,15 @@ export function PelotaSection() {
             <motion.div
               animate={{ rotate: -360 }}
               transition={{ repeat: Infinity, duration: 14, ease: "linear" }}
-              className="w-full h-full"
+              className="relative w-full h-full"
             >
-              <img src="./mundial/pelota2026.png" alt="Pelota 2026" />
+              <Image
+                src={`${BASE_PATH}/pelota2026.webp`}
+                alt="Pelota 2026"
+                fill
+                sizes="160px"
+                className="object-contain"
+              />
             </motion.div>
           </div>
 
@@ -156,8 +201,9 @@ export function PelotaSection() {
             </p>
             <WorkCalendar
               days={diasTrabajo2026}
-              color="oklch(0.45 0.12 240)"
+              color="oklch(0.65 0.18 222)"
               delay={0.35}
+              completionMarker={<span style={{ fontSize: 13, lineHeight: 1 }}>⚽</span>}
             />
           </div>
         </motion.div>

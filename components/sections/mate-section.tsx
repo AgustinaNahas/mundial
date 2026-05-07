@@ -72,12 +72,12 @@ export function MateSection() {
             </p>
             <div className="flex items-baseline gap-8">
               <div>
-                <p className="text-3xl font-light text-primary">{kilos2022}</p>
+                <p className="text-3xl font-light text-accent">{kilos2022}</p>
                 <p className="text-xs text-muted-foreground">kilos en 2022</p>
               </div>
               <span className="text-muted-foreground">→</span>
               <div>
-                <p className="text-3xl font-light text-accent">{kilos2026}</p>
+                <p className="text-3xl font-light text-primary">{kilos2026}</p>
                 <p className="text-xs text-muted-foreground">kilos en 2026</p>
               </div>
             </div>

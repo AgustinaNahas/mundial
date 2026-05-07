@@ -89,11 +89,11 @@ export function TrabajoSection() {
             className="flex justify-center gap-8 mb-8"
           >
             <div className="text-center">
-              <ClockIcon time="10:30" className="w-24 h-24 text-primary mx-auto" />
+              <ClockIcon time="10:30" className="w-24 h-24 text-accent mx-auto" />
               <p className="mt-2 text-sm text-muted-foreground">Hora del partido</p>
             </div>
             <div className="text-center">
-              <ClockIcon time="14:00" className="w-24 h-24 text-accent mx-auto" />
+              <ClockIcon time="14:00" className="w-24 h-24 text-primary mx-auto" />
               <p className="mt-2 text-sm text-muted-foreground">Hora laboral</p>
             </div>
           </motion.div>
@@ -111,11 +111,11 @@ export function TrabajoSection() {
             <div className="space-y-3">
               <div className="flex justify-between items-center">
                 <span className="text-sm">Salario diario promedio 2022</span>
-                <span className="font-medium text-primary">{formatCurrency(dia_2022, salario?.unidad)}</span>
+                <span className="font-medium text-accent">{formatCurrency(dia_2022, salario?.unidad)}</span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-sm">Salario diario promedio 2026</span>
-                <span className="font-medium text-accent">{formatCurrency(dia_2026, salario?.unidad)}</span>
+                <span className="font-medium text-primary">{formatCurrency(dia_2026, salario?.unidad)}</span>
               </div>
             </div>
           </motion.div>
@@ -154,14 +154,14 @@ export function TrabajoSection() {
         <h4 className="text-sm font-medium text-foreground mb-3">Cambios normativos</h4>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="flex items-start gap-3">
-            <div className="w-2 h-2 bg-primary rounded-full mt-2" />
+            <div className="w-2 h-2 bg-accent rounded-full mt-2" />
             <div>
               <p className="text-sm font-medium">2022</p>
               <p className="text-xs text-muted-foreground">Tolerancia tradicional a la "fiebre mundialista"</p>
             </div>
           </div>
           <div className="flex items-start gap-3">
-            <div className="w-2 h-2 bg-accent rounded-full mt-2" />
+            <div className="w-2 h-2 bg-primary rounded-full mt-2" />
             <div>
               <p className="text-sm font-medium">2026</p>
               <p className="text-xs text-muted-foreground">Mayor rigidez en controles de asistencia</p>

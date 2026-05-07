@@ -94,9 +94,9 @@ export function AlquilerSection() {
                       whileInView={{ width: `${(parseFloat(salarios2022) / 3) * 100}%` }}
                       viewport={{ once: true }}
                       transition={{ delay: 0.4, duration: 0.8 }}
-                      className="h-full bg-primary flex items-center justify-end pr-2"
+                      className="h-full bg-accent flex items-center justify-end pr-2"
                     >
-                      <span className="text-xs text-primary-foreground font-medium">{salarios2022}</span>
+                      <span className="text-xs text-accent-foreground font-medium">{salarios2022}</span>
                     </motion.div>
                   </div>
                 </div>
@@ -111,9 +111,9 @@ export function AlquilerSection() {
                       whileInView={{ width: `${(parseFloat(salarios2026) / 3) * 100}%` }}
                       viewport={{ once: true }}
                       transition={{ delay: 0.5, duration: 0.8 }}
-                      className="h-full bg-accent flex items-center justify-end pr-2"
+                      className="h-full bg-primary flex items-center justify-end pr-2"
                     >
-                      <span className="text-xs text-accent-foreground font-medium">{salarios2026}</span>
+                      <span className="text-xs text-primary-foreground font-medium">{salarios2026}</span>
                     </motion.div>
                   </div>
                 </div>

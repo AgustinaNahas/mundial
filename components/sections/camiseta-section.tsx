@@ -1,41 +1,67 @@
 "use client"
 
 import { motion } from "framer-motion"
+import Image from "next/image"
 import { formatCurrency } from "@/lib/utils"
 import { SectionWrapper } from "@/components/section-wrapper"
 import { useData } from "@/lib/data-context"
 
-/** Visualización tipo calendario: muestra N días laborables como celdas en grilla Mon–Fri */
-function WorkCalendar({ days, color, delay = 0 }: { days: number; color: string; delay?: number }) {
-  const cols = 5   // L M M J V
-  const weeks = Math.ceil(days / cols)
-  const labels = ["L", "M", "M", "J", "V"]
+const BASE_PATH = "/mundial"
+
+function WorkCalendar({ days, color, delay = 0, completionMarker }: {
+  days: number
+  color: string
+  delay?: number
+  completionMarker?: React.ReactNode
+}) {
+  const WEEK = 7
+  const WORK = 5
+  const weeks = Math.ceil(days / WORK)
+  const totalSlots = weeks * WEEK
+  const labels = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"]
+
+  const slotWorkDay = (slot: number) => {
+    const day = slot % WEEK
+    if (day === 0 || day === 6) return -1
+    return Math.floor(slot / WEEK) * WORK + (day - 1)
+  }
+
+  const lastWeek = Math.floor((days - 1) / WORK)
+  const lastDay  = (days - 1) % WORK
+  const lastSlot = lastWeek * WEEK + (lastDay + 1)
 
   return (
     <div className="space-y-1.5">
-      {/* header días */}
-      <div className="grid grid-cols-5 gap-1">
-        {labels.map(l => (
-          <span key={l} className="text-center text-[9px] text-muted-foreground/50 uppercase">{l}</span>
+      <div className="grid grid-cols-7 gap-1">
+        {labels.map((l, i) => (
+          <span key={i} className={`text-center text-[9px] uppercase ${i === 0 || i === 6 ? "text-muted-foreground/25" : "text-muted-foreground/50"}`}>{l}</span>
         ))}
       </div>
-      {/* grilla */}
-      <div className="grid grid-cols-5 gap-1">
-        {Array.from({ length: weeks * cols }).map((_, i) => {
-          const filled = i < days
+      <div className="grid grid-cols-7 gap-1">
+        {Array.from({ length: totalSlots }).map((_, i) => {
+          const workDay   = slotWorkDay(i)
+          const isWeekend = workDay === -1
+          const isFilled  = !isWeekend && workDay < days
+          const isLast    = i === lastSlot
+
           return (
             <motion.div
               key={i}
               initial={{ opacity: 0, scale: 0.6 }}
               whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: true }}
-              transition={{ delay: delay + i * 0.03, duration: 0.2 }}
-              className="aspect-square rounded-sm"
-              style={{
-                backgroundColor: filled ? color : "oklch(0.18 0.07 255)",
-                border: filled ? "none" : "1px solid oklch(0.24 0.09 252)",
-              }}
-            />
+              transition={{ delay: delay + i * 0.018, duration: 0.2 }}
+              className="aspect-square rounded-sm flex items-center justify-center overflow-visible"
+              style={
+                isWeekend
+                  ? { backgroundColor: "oklch(0.14 0.07 255)", opacity: 0.35 }
+                  : isFilled
+                  ? { backgroundColor: color }
+                  : { backgroundColor: "oklch(0.18 0.07 255)", border: "1px solid oklch(0.24 0.09 252)" }
+              }
+            >
+              {isLast && completionMarker}
+            </motion.div>
           )
         })}
       </div>
@@ -89,13 +115,19 @@ export function CamisetaSection() {
           className="space-y-6"
         >
           {/* Jersey */}
-          <div className="w-40 h-40 mx-auto">
-            <img src="./mundial/camiseta2022.png" alt="Camiseta 2022" />
+          <div className="relative w-40 h-40 mx-auto">
+            <Image
+              src={`${BASE_PATH}/camiseta2022.webp`}
+              alt="Camiseta 2022"
+              fill
+              sizes="160px"
+              className="object-contain"
+            />
           </div>
 
           {/* Precios */}
           <div className="text-center space-y-1">
-            <p className="text-2xl md:text-3xl font-light text-primary">
+            <p className="text-2xl md:text-3xl font-light text-accent">
               {formatCurrency(camiseta_2022, camiseta?.unidad)}
             </p>
             <p className="text-base text-muted-foreground">
@@ -111,8 +143,9 @@ export function CamisetaSection() {
             </p>
             <WorkCalendar
               days={diasTrabajo2022}
-              color="oklch(0.65 0.18 222)"
+              color="oklch(0.97 0.01 220)"
               delay={0.2}
+              completionMarker={<Image src={`${BASE_PATH}/camiseta2022.webp`} alt="" width={20} height={20} className="h-5 w-auto object-contain" />}
             />
           </div>
         </motion.div>
@@ -126,8 +159,14 @@ export function CamisetaSection() {
           className="space-y-6"
         >
           {/* Jersey */}
-          <div className="w-40 h-40 mx-auto">
-            <img src="./mundial/camiseta2026.png" style={{ transform: "rotateY(180deg)" }} alt="Camiseta 2026" />
+          <div className="relative w-40 h-40 mx-auto">
+            <Image
+              src={`${BASE_PATH}/camiseta2026.webp`}
+              alt="Camiseta 2026"
+              fill
+              sizes="160px"
+              className="object-contain [transform:rotateY(180deg)]"
+            />
           </div>
 
           {/* Precios */}
@@ -148,8 +187,9 @@ export function CamisetaSection() {
             </p>
             <WorkCalendar
               days={diasTrabajo2026}
-              color="oklch(0.45 0.12 240)"
+              color="oklch(0.65 0.18 222)"
               delay={0.35}
+              completionMarker={<Image src={`${BASE_PATH}/camiseta2026.webp`} alt="" width={20} height={20} className="h-5 w-auto object-contain [transform:rotateY(180deg)]" />}
             />
           </div>
         </motion.div>

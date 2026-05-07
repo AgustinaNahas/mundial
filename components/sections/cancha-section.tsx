@@ -155,8 +155,8 @@ export function CanchaSection() {
   const dolar_2022 = dolar?.valor_2022    ?? 266
   const dolar_2026 = dolar?.valor_2026    ?? 1430
 
-  const hora_2022 = sal_2022 / 240
-  const hora_2026 = sal_2026 / 240
+  const hora_2022 = sal_2022 / 176
+  const hora_2026 = sal_2026 / 176
 
   // Paso 0 — Primera división
   const primera_2022       = entradaPrimera?.valor_2022 ?? 1360
@@ -188,8 +188,8 @@ export function CanchaSection() {
   const horas_barata_miami = barata_miami_ars / hora_2026
   const horas_cara_miami   = cara_miami_ars   / hora_2026
 
-  const COLOR_QATAR = "oklch(0.65 0.18 222)"
-  const COLOR_MIAMI = "oklch(0.78 0.12 210)"
+  const COLOR_QATAR = "oklch(0.97 0.01 220)"
+  const COLOR_MIAMI = "oklch(0.65 0.18 222)"
 
   return (
     <section className="py-20 md:py-28 bg-background">

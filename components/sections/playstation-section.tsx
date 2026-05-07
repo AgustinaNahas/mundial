@@ -41,30 +41,9 @@ export function PlayStationSection() {
           value2026={ps5_2026}
           unit={ps5?.unidad}
           delay={0}
-        />
-        
-        <ComparisonBar
-          label="Salario Minimo"
-          value2022={salario_2022}
-          value2026={salario_2026}
-          unit={salario?.unidad}
-          delay={0.2}
-        />
-      </div>
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-12">
-        <StatCard
-          value={salarios_2022}
-          label="Salarios minimos para comprar la consola"
-          subtext="En 2022"
-          delay={0.4}
-        />
-        <StatCard
-          value={salarios_2026}
-          label="Salarios minimos para comprar la consola"
-          subtext="En 2026"
-          delay={0.6}
-          variant="highlight"
+          referenceValue2022={salario_2022}
+          referenceValue2026={salario_2026}
+          referenceLabel="salario mínimo"
         />
       </div>
     </SectionWrapper>

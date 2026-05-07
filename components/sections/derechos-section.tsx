@@ -22,8 +22,8 @@ const radarData: RadarDataPoint[] = [
 
 const countries = [
   { name: "Argentina", key: "argentina" as const, color: "var(--primary)" },
-  { name: "Qatar", key: "qatar" as const, color: "var(--muted-foreground)" },
-  { name: "EEUU", key: "eeuu" as const, color: "var(--accent)" },
+  { name: "Qatar", key: "qatar" as const, color: "var(--accent)" },
+  { name: "EEUU", key: "eeuu" as const, color: "var(--secondary)" },
   { name: "Canadá", key: "canada" as const, color: "var(--chart-3)" },
   { name: "México", key: "mexico" as const, color: "var(--chart-5)" },
 ]

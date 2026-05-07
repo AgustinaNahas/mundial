@@ -15,7 +15,7 @@ export function BlockHeader({ number, title, subtitle }: BlockHeaderProps) {
       whileInView={{ opacity: 1 }}
       viewport={{ once: true, margin: "-100px" }}
       transition={{ duration: 0.8 }}
-      className="py-24 md:py-32 bg-primary text-primary-foreground"
+      className="py-16 md:py-24 bg-primary text-primary-foreground"
     >
       <div className="container mx-auto px-6 md:px-12 max-w-5xl">
         <div className="flex items-baseline gap-4 md:gap-6">
