@@ -1,12 +1,67 @@
 "use client"
 
+import { useEffect, useRef } from "react"
 import { motion } from "framer-motion"
 import Image from "next/image"
-import { formatCurrency } from "@/lib/utils"
+import { cn, formatCurrency } from "@/lib/utils"
 import { SectionWrapper } from "@/components/section-wrapper"
 import { useData } from "@/lib/data-context"
 
 const BASE_PATH = "/mundial"
+
+const PELOTA_ROTATION_SLOW_S = 14
+const PELOTA_ROTATION_FAST_S = 4
+
+/** Rotación con rAF: siempre aplica `transform`, el hover solo cambia grados/segundo (sin CSS animation que a veces no corre con Tailwind). */
+function PelotaRotator({
+  clockwise,
+  children,
+  className,
+}: {
+  clockwise: boolean
+  children: React.ReactNode
+  className?: string
+}) {
+  const ref = useRef<HTMLDivElement>(null)
+  const angleRef = useRef(0)
+  const fastRef = useRef(false)
+
+  useEffect(() => {
+    let raf = 0
+    let lastMs: number | null = null
+
+    const tick = (t: number) => {
+      if (lastMs === null) lastMs = t
+      const dt = Math.min((t - lastMs) / 1000, 0.05)
+      lastMs = t
+      const period = fastRef.current ? PELOTA_ROTATION_FAST_S : PELOTA_ROTATION_SLOW_S
+      const degPerSec = 360 / period
+      angleRef.current += (clockwise ? 1 : -1) * degPerSec * dt
+      const el = ref.current
+      if (el) el.style.transform = `rotate(${angleRef.current}deg)`
+      raf = requestAnimationFrame(tick)
+    }
+
+    raf = requestAnimationFrame(tick)
+    return () => cancelAnimationFrame(raf)
+  }, [clockwise])
+
+  return (
+    <div
+      ref={ref}
+      className={cn(className)}
+      style={{ transformOrigin: "center center", willChange: "transform" }}
+      onPointerEnter={() => {
+        fastRef.current = true
+      }}
+      onPointerLeave={() => {
+        fastRef.current = false
+      }}
+    >
+      {children}
+    </div>
+  )
+}
 
 function FootballSVG({ className }: { className?: string }) {
   return (
@@ -129,19 +184,15 @@ export function PelotaSection() {
           className="space-y-6"
         >
           <div className="w-40 h-40 mx-auto">
-            <motion.div
-              animate={{ rotate: 360 }}
-              transition={{ repeat: Infinity, duration: 14, ease: "linear" }}
-              className="relative w-full h-full"
-            >
+            <PelotaRotator clockwise className="relative h-full w-full cursor-pointer touch-manipulation">
               <Image
                 src={`${BASE_PATH}/pelota2022.webp`}
                 alt="Pelota 2022"
                 fill
                 sizes="160px"
-                className="object-contain"
+                className="pointer-events-none object-contain"
               />
-            </motion.div>
+            </PelotaRotator>
           </div>
 
           <div className="text-center space-y-1">
@@ -173,19 +224,15 @@ export function PelotaSection() {
           className="space-y-6"
         >
           <div className="w-40 h-40 mx-auto">
-            <motion.div
-              animate={{ rotate: -360 }}
-              transition={{ repeat: Infinity, duration: 14, ease: "linear" }}
-              className="relative w-full h-full"
-            >
+            <PelotaRotator clockwise={false} className="relative h-full w-full cursor-pointer touch-manipulation">
               <Image
                 src={`${BASE_PATH}/pelota2026.webp`}
                 alt="Pelota 2026"
                 fill
                 sizes="160px"
-                className="object-contain"
+                className="pointer-events-none object-contain"
               />
-            </motion.div>
+            </PelotaRotator>
           </div>
 
           <div className="text-center space-y-1">

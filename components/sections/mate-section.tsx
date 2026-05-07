@@ -1,22 +1,11 @@
 "use client"
 
 import { motion } from "framer-motion"
-import { formatCurrency } from "@/lib/utils"
 import { SectionWrapper } from "@/components/section-wrapper"
 import { ComparisonBar } from "@/components/comparison-bar"
+import { PurchasingPowerPictogram } from "@/components/purchasing-power-pictogram"
+import { SourcesPanel } from "@/components/sources-panel"
 import { useData } from "@/lib/data-context"
-
-function MateIcon({ className }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 100 100" fill="currentColor">
-      {/* Mate body */}
-      <path d="M30 35 C25 35 20 45 20 60 C20 80 30 90 50 90 C70 90 80 80 80 60 C80 45 75 35 70 35 Z" />
-      {/* Bombilla */}
-      <rect x="48" y="10" width="4" height="50" />
-      <circle cx="50" cy="10" r="6" />
-    </svg>
-  )
-}
 
 export function MateSection() {
   const { getIndicador, loading } = useData()
@@ -32,9 +21,7 @@ export function MateSection() {
   // Cuantos kilos de yerba compra un salario
   const kilos2022 = Math.floor(salario_2022 / yerba_2022)
   const kilos2026 = Math.floor(salario_2026 / yerba_2026)
-  
-  const formatARS = (n: number) => formatCurrency(n, yerba?.unidad)
-  
+
   if (loading) {
     return (
       <SectionWrapper number="06" title="El mate mundialista" intro="Cargando datos..." bgColor="muted">
@@ -50,7 +37,7 @@ export function MateSection() {
       intro="El mate nunca falta. Veamos cuanto cuesta el ritual mas argentino."
       bgColor="muted"
     >
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-start">
         <div className="space-y-8">
           <ComparisonBar
             label="Kilo de yerba mate"
@@ -82,50 +69,26 @@ export function MateSection() {
               </div>
             </div>
           </motion.div>
+
         </div>
         
         <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          whileInView={{ opacity: 1, scale: 1 }}
+          initial={{ opacity: 0, y: 12 }}
+          whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ delay: 0.3, duration: 0.6 }}
-          className="flex justify-center"
+          className="flex justify-center md:justify-end"
         >
-          <div className="relative">
-            <MateIcon className="w-48 h-48 text-primary/20" />
-            <motion.div
-              animate={{ 
-                y: [0, -5, 0],
-              }}
-              transition={{ 
-                repeat: Infinity, 
-                duration: 2,
-                ease: "easeInOut"
-              }}
-              className="absolute top-8 left-1/2 -translate-x-1/2"
-            >
-              {/* Steam effect */}
-              <div className="flex gap-2">
-                {[0, 1, 2].map((i) => (
-                  <motion.div
-                    key={i}
-                    animate={{ 
-                      opacity: [0.3, 0.7, 0.3],
-                      y: [0, -10, 0]
-                    }}
-                    transition={{ 
-                      repeat: Infinity, 
-                      duration: 2,
-                      delay: i * 0.3
-                    }}
-                    className="w-1 h-6 bg-muted-foreground/30 rounded-full"
-                  />
-                ))}
-              </div>
-            </motion.div>
-          </div>
+          <PurchasingPowerPictogram
+            count2022={kilos2022}
+            count2026={kilos2026}
+            title="Kilos de yerba con un salario mínimo"
+            unitLabel="kilos"
+            emoji="🧉"
+          />
         </motion.div>
       </div>
+      <SourcesPanel items={[yerba, salario]} />
     </SectionWrapper>
   )
 }

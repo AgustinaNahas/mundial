@@ -25,6 +25,20 @@ function fmtSueldos(n: number) {
   return n < 10 ? n.toFixed(1) : Math.round(n).toString()
 }
 
+function fmtWorkUnit(totalArs: number, salarioMensual: number) {
+  const valorHora = salarioMensual / 176
+  const horas = totalArs / valorHora
+  if (horas > 176) {
+    const meses = horas / 176
+    return `${meses.toFixed(1)} meses de trabajo`
+  }
+  if (horas > 24) {
+    const dias = horas / 8
+    return `${dias.toFixed(1)} dias de trabajo`
+  }
+  return `${Math.round(horas)} hs de trabajo`
+}
+
 /* ─── Bloque vuelo (paso 1 y 3) ─── */
 function FlightBlock({
   priceArs, sueldos, year, color, unit,
@@ -94,6 +108,28 @@ function StepDots({ active, total }: { active: number; total: number }) {
   )
 }
 
+function AccumulatorColumn({
+  label,
+  total,
+  detail,
+  color,
+}: {
+  label: string
+  total: number
+  detail: string
+  color: string
+}) {
+  return (
+    <div className="rounded-lg border border-border/25 bg-card/70 backdrop-blur px-3 py-2">
+      <p className="text-[10px] uppercase tracking-wider text-muted-foreground">{label}</p>
+      <p className="text-lg md:text-xl font-bold font-mono mt-0.5 leading-tight" style={{ color }}>
+        {formatCurrency(total, "ARS")}
+      </p>
+      <p className="text-[10px] text-muted-foreground mt-0.5">{detail}</p>
+    </div>
+  )
+}
+
 /* ─── Wrapper de paso con fade-in al entrar en viewport ─── */
 function StepPanel({ children, stepRef }: { children: React.ReactNode; stepRef: React.RefObject<HTMLDivElement | null> }) {
   return (
@@ -124,6 +160,7 @@ export function CanchaSection() {
   const vueloMiamiItem = getIndicador("BSAS_MIAMI")
 
   const [activeStep, setActiveStep] = useState(0)
+  const [showAccumulatorInfo, setShowAccumulatorInfo] = useState(false)
   const ref0 = useRef<HTMLDivElement>(null)
   const ref1 = useRef<HTMLDivElement>(null)
   const ref2 = useRef<HTMLDivElement>(null)
@@ -191,6 +228,19 @@ export function CanchaSection() {
   const COLOR_QATAR = "oklch(0.97 0.01 220)"
   const COLOR_MIAMI = "oklch(0.65 0.18 222)"
 
+  const qatarTotal =
+    primera_2022 +
+    (activeStep >= 1 ? vuelo_doha : 0) +
+    (activeStep >= 2 ? barata_qatar_ars : 0)
+
+  const usaTotal =
+    primera_2026 +
+    (activeStep >= 3 ? vuelo_miami : 0) +
+    (activeStep >= 4 ? barata_miami_ars : 0)
+
+  const qatarDetail = fmtWorkUnit(qatarTotal, sal_2022)
+  const usaDetail = fmtWorkUnit(usaTotal, sal_2026)
+
   return (
     <section className="py-20 md:py-28 bg-background">
       {/* ── Header ── */}
@@ -213,6 +263,33 @@ export function CanchaSection() {
 
       {/* ── Scrolly ── */}
       <div className="container mx-auto px-6 md:px-12 max-w-6xl">
+        <div className="lg:sticky lg:top-3 z-[700] mb-5">
+          <div className="relative rounded-xl border border-border/30 bg-background/65 backdrop-blur px-3 py-2">
+            <div className="flex items-center justify-between mb-1">
+              <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Acumulado</p>
+              <button
+                type="button"
+                aria-label="Informacion del acumulado"
+                onClick={() => setShowAccumulatorInfo((prev) => !prev)}
+                className="h-5 w-5 rounded-full border border-border/30 text-[11px] text-muted-foreground hover:text-foreground hover:border-border/60 transition-colors"
+              >
+                i
+              </button>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <AccumulatorColumn label="Qatar" total={qatarTotal} detail={qatarDetail} color={COLOR_QATAR} />
+              <AccumulatorColumn label="EEUU" total={usaTotal} detail={usaDetail} color={COLOR_MIAMI} />
+            </div>
+            {showAccumulatorInfo && (
+              <div className="absolute top-full right-0 mt-2 w-72 rounded-lg border border-border/35 bg-popover text-popover-foreground p-3 shadow-lg">
+                <p className="text-xs leading-relaxed text-muted-foreground">
+                  Acumulado del paso actual (entrada mundial calculada con la categoria mas barata).
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
+
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
 
           {/* Mapa sticky */}

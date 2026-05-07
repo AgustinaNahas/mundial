@@ -4,6 +4,21 @@ import { useEffect, useRef, useState } from "react"
 import { useInView } from "framer-motion"
 import { cn } from "@/lib/utils"
 
+const LABOR_WORK_DAYS_PER_MONTH = 22
+
+/** Equivalente meses SMVM → "X meses de trabajo", o "X días de trabajo" si equivalen a menos de 22 días hábiles. */
+export function formatLaborDurationFromSalaryMonths(months: number): string {
+  if (months <= 0) return "—"
+  const workDays = months * LABOR_WORK_DAYS_PER_MONTH
+  if (workDays < LABOR_WORK_DAYS_PER_MONTH) {
+    const d = Math.max(1, Math.round(workDays))
+    return d === 1 ? "1 día de trabajo" : `${d} días de trabajo`
+  }
+  const rounded = Math.round(months * 10) / 10
+  const label = rounded % 1 === 0 ? String(Math.round(rounded)) : rounded.toFixed(1).replace(".", ",")
+  return rounded === 1 ? "1 mes de trabajo" : `${label} meses de trabajo`
+}
+
 function MiniMonthCalendar({
   progress,
   color,
@@ -114,18 +129,26 @@ export function MonthStack({
   ]
 
   return (
-    <div className={cn("flex flex-col", className)}>
+    <div className={cn("flex flex-col w-full md:max-w-[min(100%,13rem)]", className)}>
       <div
         className={cn(
-          "w-full grid grid-cols-2 gap-2",
-          align === "right" ? "justify-items-end" : "justify-items-start",
+          "w-full flex flex-wrap gap-x-3 gap-y-2",
+          align === "right" ? "justify-end" : "justify-start",
         )}
       >
         {blocks.map((p, i) => (
           <MiniMonthCalendar key={i} progress={p} color={color} label={`Mes ${i + 1}`} />
         ))}
       </div>
-      <p className={cn("text-xs font-medium mt-2", toneClass, align === "right" ? "text-right" : "text-left")}>{months.toFixed(1)} meses</p>
+      <p
+        className={cn(
+          "text-xs font-medium mt-2 leading-snug tabular-nums",
+          toneClass,
+          align === "right" ? "text-right" : "text-left",
+        )}
+      >
+        {formatLaborDurationFromSalaryMonths(months)}
+      </p>
     </div>
   )
 }

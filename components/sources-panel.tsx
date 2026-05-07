@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { DataItem, FuenteInfo } from "@/lib/data-context"
+import { DataItem, useData } from "@/lib/data-context"
 
 interface SourcesPanelProps {
   items: (DataItem | undefined)[]
@@ -10,20 +10,27 @@ interface SourcesPanelProps {
 
 export function SourcesPanel({ items }: SourcesPanelProps) {
   const [open, setOpen] = useState(false)
+  const { rawData } = useData()
 
-  const sourcesMap = new Map<string, FuenteInfo>()
-  items.forEach(item => {
-    if (item?.fuente_2022?.url) {
-      sourcesMap.set(item.fuente_2022.url, item.fuente_2022)
-    }
-    if (item?.fuente_2026?.url) {
-      sourcesMap.set(item.fuente_2026.url, item.fuente_2026)
-    }
+  const indicadores = new Set(items.filter(Boolean).map((item) => item!.indicador.toLowerCase()))
+  const sourceRows = rawData
+    .filter((row) => indicadores.has(row.indicador.toLowerCase()) && row.fuente)
+    .map((row, index) => ({
+      key: `${row.indicador}-${row.periodo}-${index}`,
+      descripcion: row.descripcion || row.indicador,
+      fuente: row.fuente,
+      fuenteCorta: row.fuente_corta || "Fuente",
+      fechaFuente: row.fecha_fuente || "",
+      periodo: row.periodo,
+    }))
+
+  if (sourceRows.length === 0) return null
+
+  const sortedRows = [...sourceRows].sort((a, b) => {
+    const desc = a.descripcion.localeCompare(b.descripcion, "es")
+    if (desc !== 0) return desc
+    return a.periodo - b.periodo
   })
-  
-  const sources = Array.from(sourcesMap.values())
-
-  if (sources.length === 0) return null
 
   return (
     <div className="mt-10 pt-6 border-t border-border/40">
@@ -47,19 +54,23 @@ export function SourcesPanel({ items }: SourcesPanelProps) {
             transition={{ duration: 0.25 }}
             className="mt-3 space-y-1.5 overflow-hidden"
           >
-            {sources.map((src, i) => (
-              <li key={i} className="text-[12px] text-muted-foreground/75 leading-relaxed">
-                {src.url.startsWith("http") ? (
+            {sortedRows.map((row) => (
+              <li key={row.key} className="text-[12px] text-muted-foreground/75 leading-relaxed">
+                {row.fuente.startsWith("http") ? (
                   <a
-                    href={src.url}
+                    href={row.fuente}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="cursor-pointer hover:text-primary transition-colors underline underline-offset-2"
                   >
-                    {src.corta} {src.fecha && `(${src.fecha})`}
+                    {row.descripcion} - Fuente: {row.fuenteCorta + " "}
+                    {row.fechaFuente ? `(${row.fechaFuente})` : ""}
                   </a>
                 ) : (
-                  <span>{src.corta} {src.fecha && `(${src.fecha})`}</span>
+                  <span>
+                    {row.descripcion} - Fuente: {row.fuenteCorta + " "}
+                    {row.fechaFuente ? `(${row.fechaFuente})` : ""}
+                  </span>
                 )}
               </li>
             ))}

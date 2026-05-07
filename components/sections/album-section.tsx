@@ -1,8 +1,8 @@
 "use client"
 
-import { useState, useCallback, useEffect, useRef } from "react"
+import { useState, useCallback, useEffect, useRef, useMemo } from "react"
 import { createPortal } from "react-dom"
-import { motion, AnimatePresence, useMotionValue, useSpring } from "framer-motion"
+import { motion, AnimatePresence, useMotionValue, useSpring, useReducedMotion } from "framer-motion"
 import Image from "next/image"
 import { formatCurrency } from "@/lib/utils"
 import { SectionWrapper } from "@/components/section-wrapper"
@@ -11,6 +11,7 @@ import { cn } from "@/lib/utils"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { useIsMobile } from "@/hooks/use-mobile"
 import { MonthStack } from "@/components/month-stack"
+import { pushDataLayerEvent } from "@/lib/gtm"
 
 /* ─── Constantes ────────────────────────────────────────────── */
 const SLOTS = [
@@ -30,6 +31,8 @@ const SLOTS = [
 const COLS = 4
 const ROWS = 3
 const TOTAL = COLS * ROWS
+/** Índice en SLOTS / celda del álbum de Messi (siempre el cierre). */
+const MESSI_INDEX = 0
 
 /* ─── Types ──────────────────────────────────────────────────── */
 interface PlacedFigu { src: string; price2022: number; price2026: number }
@@ -271,6 +274,73 @@ function shuffled<T>(arr: T[]): T[] {
   return a
 }
 
+/** Orden de celdas a completar: primero el resto al azar, Messi siempre al final. */
+function buildSlotOrder(): number[] {
+  const rest = Array.from({ length: TOTAL }, (_, i) => i).filter(i => i !== MESSI_INDEX)
+  return [...shuffled(rest), MESSI_INDEX]
+}
+
+const CELESTE_CONFETTI = "#5BA3E8"
+
+function AlbumConfettiBurst({ onDone }: { onDone: () => void }) {
+  const particles = useMemo(
+    () =>
+      Array.from({ length: 72 }, (_, i) => ({
+        id: i,
+        left: Math.random() * 100,
+        drift: (Math.random() - 0.5) * 140,
+        delay: Math.random() * 0.18,
+        duration: 2.1 + Math.random() * 1.35,
+        w: (4 + Math.random() * 5) * (Math.random() > 0.45 ? 1 : 2.4),
+        h: 4 + Math.random() * 6,
+        spin: (Math.random() - 0.5) * 1080,
+        celeste: Math.random() < 0.5,
+        round: Math.random() > 0.55,
+      })),
+    [],
+  )
+
+  useEffect(() => {
+    const t = window.setTimeout(onDone, 3200)
+    return () => window.clearTimeout(t)
+  }, [onDone])
+
+  const node = (
+    <div className="pointer-events-none fixed inset-0 z-[9996] overflow-hidden" aria-hidden>
+      {particles.map(p => (
+        <motion.div
+          key={p.id}
+          className={cn(
+            "absolute -top-6",
+            p.round ? "rounded-full" : "rounded-[1px]",
+            p.celeste ? "opacity-95" : "bg-white opacity-[0.92] shadow-[0_0_1px_rgba(0,0,0,0.12)]",
+          )}
+          style={{
+            left: `${p.left}%`,
+            width: p.w,
+            height: p.h,
+            ...(p.celeste ? { backgroundColor: CELESTE_CONFETTI } : {}),
+          }}
+          initial={{ y: 0, x: 0, opacity: 1, rotate: 0 }}
+          animate={{
+            y: "115vh",
+            x: p.drift,
+            rotate: p.spin,
+            opacity: [1, 1, 0],
+          }}
+          transition={{
+            duration: p.duration,
+            delay: p.delay,
+            ease: [0.18, 0.72, 0.24, 0.98],
+            opacity: { times: [0, 0.82, 1], duration: p.duration },
+          }}
+        />
+      ))}
+    </div>
+  )
+  return createPortal(node, document.body)
+}
+
 /* ─── Sección principal ──────────────────────────────────────── */
 export function AlbumSection() {
   const { getIndicador, loading } = useData()
@@ -293,8 +363,8 @@ export function AlbumSection() {
   const pricePerFigu2022 = sobre_2022 / Math.max(figusSobre2022, 1)
   const pricePerFigu2026 = sobre_2026 / Math.max(figusSobre2026, 1)
 
-  // orden random generado una sola vez al montar
-  const [slotOrder] = useState(() => shuffled(Array.from({ length: TOTAL }, (_, i) => i)))
+  // orden random al montar; Messi (índice 0) siempre es la última figurita
+  const [slotOrder] = useState(() => buildSlotOrder())
   // posición dentro del orden shuffled
   const [orderIdx, setOrderIdx] = useState(0)
 
@@ -309,6 +379,10 @@ export function AlbumSection() {
   const [displayCount2026, setDisplayCount2026] = useState(0)
   const [mobileSnacks, setMobileSnacks] = useState<MobileSnack[]>([])
   const isMobile = useIsMobile()
+  const prefersReducedMotion = useReducedMotion()
+
+  const [confettiBurst, setConfettiBurst] = useState(false)
+  const albumCompleteConfettiRef = useRef(false)
 
   const [inAlbum, setInAlbum] = useState(false)
   const rawX = useMotionValue(-200)
@@ -373,10 +447,34 @@ export function AlbumSection() {
       pushMobileSnack("right", pricePerFigu2026)
     }
     if (orderIdx + 1 < TOTAL) setOrderIdx(orderIdx + 1)
+
+    pushDataLayerEvent("album_sticker_click", {
+      section_name: "album",
+      slot_index: clickedIdx,
+      sticker_index: figuIdx,
+      sticker_player: SLOTS[figuIdx].player,
+      stickers_completed: newPlaced.filter(Boolean).length,
+      is_mobile: isMobile,
+    })
   }, [slotOrder, orderIdx, placed, pricePerFigu2022, pricePerFigu2026, isMobile, pushMobileSnack])
 
   const placedCount = placed.filter(Boolean).length
   const allFilled = placedCount === TOTAL
+
+  useEffect(() => {
+    if (!allFilled) {
+      albumCompleteConfettiRef.current = false
+      setConfettiBurst(false)
+      return
+    }
+    if (prefersReducedMotion === true || albumCompleteConfettiRef.current) return
+    albumCompleteConfettiRef.current = true
+    setConfettiBurst(true)
+  }, [allFilled, prefersReducedMotion])
+
+  const endAlbumConfetti = useCallback(() => {
+    setConfettiBurst(false)
+  }, [])
 
   useEffect(() => {
     if (allFilled) return
@@ -483,6 +581,7 @@ export function AlbumSection() {
 
   return (
     <>
+      {confettiBurst && <AlbumConfettiBurst onDone={endAlbumConfetti} />}
       <FiguraCursor visible={!isMobile && inAlbum && !allFilled} cursorX={cursorX} cursorY={cursorY} src={cursorSrc} />
 
       <SectionWrapper
@@ -492,6 +591,15 @@ export function AlbumSection() {
         bgColor="muted"
         sources={[sobreItem, figusSobreItem, albumItem, cantFiguritas, salario]}
       >
+        <p className="text-sm text-muted-foreground text-center max-w-xl mx-auto mb-5 md:mb-6 leading-relaxed px-1">
+          <span className="hidden md:inline">
+            💡 Pasá el mouse por encima del álbum para revelar las figuritas, y hacé clic en donde te parece que van en función de las pistas dadas.
+          </span>
+          <span className="md:hidden">
+            💡 Tocá el casillero donde creas que va cada figurita según las pistas (la figurita actual se ve arriba).
+          </span>
+        </p>
+
         {/* ── Tres columnas: [2022] [álbum] [2026] ── */}
         <div className="grid grid-cols-1 md:grid-cols-[1fr_220px_1fr] lg:grid-cols-[1fr_450px_1fr] gap-6 items-start">
 
@@ -623,9 +731,13 @@ export function AlbumSection() {
 
         {/* ── Resumen final en dos escenarios ── */}
         <div className="mt-12 pt-8 border-t border-border/10 space-y-8">
+          <h3 className="text-center font-semibold tracking-tight text-foreground text-base md:text-lg px-2">
+            Entonces, ¿cuánto sale completar el álbum?
+          </h3>
+
           <div className="rounded-xl bg-card border border-border/20 p-5 md:p-6 space-y-5">
             <div className="flex items-center gap-2 justify-center">
-              <p className="text-sm font-medium text-foreground">Si sos un bendecido por Messi</p>
+              <p className="text-sm font-medium text-foreground">Si sos más del "Elijo creer"...</p>
               <Tooltip>
                 <TooltipTrigger asChild>
                   <button
@@ -643,16 +755,16 @@ export function AlbumSection() {
             </div>
             <div className="grid grid-cols-2 gap-4 md:gap-6">
               <div className="flex flex-col gap-3 md:flex-row md:items-stretch md:justify-between">
-                <div className="space-y-1.5 text-center md:text-right order-1 md:order-2">
+              <MonthStack months={blessedMonths2022} color="oklch(0.97 0.01 220)" toneClass="text-accent" align="right" />
+              <div className="space-y-1.5 text-center md:text-right min-w-0 shrink">
                   <p className="text-xs uppercase tracking-widest text-muted-foreground">Qatar 2022</p>
                   <p className="text-sm text-muted-foreground">{totalFigus2022} figuritas totales</p>
                   <p className="text-2xl font-light text-accent font-mono">{formatCurrency(blessedTotal2022, unit)}</p>
                   <p className="text-sm text-muted-foreground">{blessedHoras2022.toFixed(1)} horas de trabajo</p>
                 </div>
-                <MonthStack months={blessedMonths2022} color="oklch(0.97 0.01 220)" toneClass="text-accent" align="right" className="order-2 md:order-1" />
               </div>
-              <div className="flex flex-col gap-3 md:flex-row md:items-stretch md:justify-between md:border-l md:border-border/10 md:pl-6">
-                <div className="space-y-1.5 text-center md:text-left">
+              <div className="flex flex-col-reverse gap-3 md:flex-row md:items-stretch md:justify-between md:border-l md:border-border/10 md:pl-6">
+                <div className="space-y-1.5 text-center md:text-right min-w-0 shrink">
                   <p className="text-xs uppercase tracking-widest text-muted-foreground">EEUU 2026</p>
                   <p className="text-sm text-muted-foreground">{totalFigus2026} figuritas totales</p>
                   <p className="text-2xl font-light text-primary font-mono">{formatCurrency(blessedTotal2026, unit)}</p>
@@ -665,7 +777,7 @@ export function AlbumSection() {
 
           <div className="rounded-xl bg-card border border-border/20 p-5 md:p-6 space-y-5">
             <div className="flex items-center gap-2 justify-center">
-              <p className="text-sm font-medium text-foreground">Si sos laburante</p>
+              <p className="text-sm font-medium text-foreground">Si lo tuyo es más huevo que suerte...</p>
             <Tooltip>
                 <TooltipTrigger asChild>
                   <button
@@ -683,16 +795,16 @@ export function AlbumSection() {
             </div>
             <div className="grid grid-cols-2 gap-4 md:gap-6">
               <div className="flex flex-col gap-3 md:flex-row md:items-stretch md:justify-between">
-                <div className="space-y-1.5 text-center md:text-right order-1 md:order-2">
+              <MonthStack months={laborMonths2022} color="oklch(0.97 0.01 220)" toneClass="text-accent" align="right" />
+              <div className="space-y-1.5 text-center md:text-right min-w-0 shrink">
                   <p className="text-xs uppercase tracking-widest text-muted-foreground">Qatar 2022</p>
                   <p className="text-sm text-muted-foreground">{laborCount2022} figuritas estimadas</p>
                   <p className="text-2xl font-light text-accent font-mono">{formatCurrency(laborTotal2022, unit)}</p>
                   <p className="text-sm text-muted-foreground">{laborHoras2022.toFixed(1)} horas de trabajo</p>
                 </div>
-                <MonthStack months={laborMonths2022} color="oklch(0.97 0.01 220)" toneClass="text-accent" align="right" className="order-2 md:order-1" />
               </div>
-              <div className="flex flex-col gap-3 md:flex-row md:items-stretch md:justify-between md:border-l md:border-border/10 md:pl-6">
-                <div className="space-y-1.5 text-center md:text-left">
+              <div className="flex flex-col-reverse gap-3 md:flex-row md:items-stretch md:justify-between md:border-l md:border-border/10 md:pl-6">
+                <div className="space-y-1.5 text-center md:text-right min-w-0 shrink">
                   <p className="text-xs uppercase tracking-widest text-muted-foreground">EEUU 2026</p>
                   <p className="text-sm text-muted-foreground">{laborCount2026} figuritas estimadas</p>
                   <p className="text-2xl font-light text-primary font-mono">{formatCurrency(laborTotal2026, unit)}</p>
