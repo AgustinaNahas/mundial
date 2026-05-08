@@ -18,15 +18,15 @@ const SLOTS = [
   { player: "Lionel Messi",       emoji: "🐐", src: "/mundial/album/figu1.webp"  },
   { player: "Rodrigo De Paul",    emoji: "🍬", src: "/mundial/album/figu3.webp"  },
   { player: "Ángel Di María",     emoji: "🍝", src: "/mundial/album/figu10.webp" },
-  { player: "Nicolás Otamendi",   emoji: "🧱", src: "/mundial/album/figu7.webp"  },
+  { player: "Nicolás Otamendi",   emoji: "🪖", src: "/mundial/album/figu7.webp"  },
   { player: "Marcos Acuña",       emoji: "🥚", src: "/mundial/album/figu8.webp"  },
   { player: "Julián Álvarez",     emoji: "🕷️", src: "/mundial/album/figu4.webp"  },
   { player: "Lautaro Martínez",   emoji: "🐂", src: "/mundial/album/figu12.webp" },
-  { player: "Alejandro Gómez",    emoji: "🤪", src: "/mundial/album/figu5.webp"  },
+  { player: "Alejandro Gómez",    emoji: "🕺", src: "/mundial/album/figu5.webp"  },
   { player: "Emiliano Martínez",  emoji: "🧤", src: "/mundial/album/figu2.webp"  },
   { player: "Nahuel Molina",      emoji: "🚀", src: "/mundial/album/figu6.webp"  },
   { player: "Cristian Romero",    emoji: "🪓", src: "/mundial/album/figu9.webp"  },
-  { player: "Leandro Paredes",    emoji: "🧠", src: "/mundial/album/figu11.webp" },
+  { player: "Leandro Paredes",    emoji: "🧱", src: "/mundial/album/figu11.webp" },
 ] as const
 const COLS = 4
 const ROWS = 3
@@ -755,22 +755,34 @@ export function AlbumSection() {
             </div>
             <div className="grid grid-cols-2 gap-4 md:gap-6">
               <div className="flex flex-col gap-3 md:flex-row md:items-stretch md:justify-between">
-              <MonthStack months={blessedMonths2022} color="oklch(0.97 0.01 220)" toneClass="text-accent" align="right" />
-              <div className="space-y-1.5 text-center md:text-right min-w-0 shrink">
+                <MonthStack
+                  className="order-2 md:order-none"
+                  months={blessedMonths2022}
+                  color="oklch(0.97 0.01 220)"
+                  toneClass="text-accent"
+                  align="right"
+                />
+                <div className="order-1 md:order-none space-y-1.5 text-center md:text-right min-w-0 shrink">
                   <p className="text-xs uppercase tracking-widest text-muted-foreground">Qatar 2022</p>
                   <p className="text-sm text-muted-foreground">{totalFigus2022} figuritas totales</p>
                   <p className="text-2xl font-light text-accent font-mono">{formatCurrency(blessedTotal2022, unit)}</p>
                   <p className="text-sm text-muted-foreground">{blessedHoras2022.toFixed(1)} horas de trabajo</p>
                 </div>
               </div>
-              <div className="flex flex-col-reverse gap-3 md:flex-row md:items-stretch md:justify-between md:border-l md:border-border/10 md:pl-6">
-                <div className="space-y-1.5 text-center md:text-right min-w-0 shrink">
+              <div className="flex flex-col gap-3 md:flex-row md:items-stretch md:justify-between md:border-l md:border-border/10 md:pl-6">
+                <div className="order-1 md:order-none space-y-1.5 text-center md:text-right min-w-0 shrink">
                   <p className="text-xs uppercase tracking-widest text-muted-foreground">EEUU 2026</p>
                   <p className="text-sm text-muted-foreground">{totalFigus2026} figuritas totales</p>
                   <p className="text-2xl font-light text-primary font-mono">{formatCurrency(blessedTotal2026, unit)}</p>
                   <p className="text-sm text-muted-foreground">{blessedHoras2026.toFixed(1)} horas de trabajo</p>
                 </div>
-                <MonthStack months={blessedMonths2026} color="oklch(0.65 0.18 222)" toneClass="text-primary" align="left" />
+                <MonthStack
+                  className="order-2 md:order-none"
+                  months={blessedMonths2026}
+                  color="oklch(0.65 0.18 222)"
+                  toneClass="text-primary"
+                  align="left"
+                />
               </div>
             </div>
           </div>
@@ -795,22 +807,34 @@ export function AlbumSection() {
             </div>
             <div className="grid grid-cols-2 gap-4 md:gap-6">
               <div className="flex flex-col gap-3 md:flex-row md:items-stretch md:justify-between">
-              <MonthStack months={laborMonths2022} color="oklch(0.97 0.01 220)" toneClass="text-accent" align="right" />
-              <div className="space-y-1.5 text-center md:text-right min-w-0 shrink">
+                <MonthStack
+                  className="order-2 md:order-none"
+                  months={laborMonths2022}
+                  color="oklch(0.97 0.01 220)"
+                  toneClass="text-accent"
+                  align="right"
+                />
+                <div className="order-1 md:order-none space-y-1.5 text-center md:text-right min-w-0 shrink">
                   <p className="text-xs uppercase tracking-widest text-muted-foreground">Qatar 2022</p>
                   <p className="text-sm text-muted-foreground">{laborCount2022} figuritas estimadas</p>
                   <p className="text-2xl font-light text-accent font-mono">{formatCurrency(laborTotal2022, unit)}</p>
                   <p className="text-sm text-muted-foreground">{laborHoras2022.toFixed(1)} horas de trabajo</p>
                 </div>
               </div>
-              <div className="flex flex-col-reverse gap-3 md:flex-row md:items-stretch md:justify-between md:border-l md:border-border/10 md:pl-6">
-                <div className="space-y-1.5 text-center md:text-right min-w-0 shrink">
+              <div className="flex flex-col gap-3 md:flex-row md:items-stretch md:justify-between md:border-l md:border-border/10 md:pl-6">
+                <div className="order-1 md:order-none space-y-1.5 text-center md:text-right min-w-0 shrink">
                   <p className="text-xs uppercase tracking-widest text-muted-foreground">EEUU 2026</p>
                   <p className="text-sm text-muted-foreground">{laborCount2026} figuritas estimadas</p>
                   <p className="text-2xl font-light text-primary font-mono">{formatCurrency(laborTotal2026, unit)}</p>
                   <p className="text-sm text-muted-foreground">{laborHoras2026.toFixed(1)} horas de trabajo</p>
                 </div>
-                <MonthStack months={laborMonths2026} color="oklch(0.65 0.18 222)" toneClass="text-primary" align="left" />
+                <MonthStack
+                  className="order-2 md:order-none"
+                  months={laborMonths2026}
+                  color="oklch(0.65 0.18 222)"
+                  toneClass="text-primary"
+                  align="left"
+                />
               </div>
             </div>
           </div>

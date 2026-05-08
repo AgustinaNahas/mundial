@@ -106,13 +106,13 @@ function WorkCalendar({ days, color, delay = 0, completionMarker }: {
   const lastSlot = lastWeek * WEEK + (lastDay + 1)
 
   return (
-    <div className="space-y-1.5">
-      <div className="grid grid-cols-7 gap-1">
+    <div className="space-y-1 md:space-y-1.5">
+      <div className="grid grid-cols-7 gap-0.5 md:gap-1">
         {labels.map((l, i) => (
-          <span key={i} className={`text-center text-[9px] uppercase ${i === 0 || i === 6 ? "text-muted-foreground/25" : "text-muted-foreground/50"}`}>{l}</span>
+          <span key={i} className={`text-center text-[6.5px] md:text-[9px] uppercase leading-none ${i === 0 || i === 6 ? "text-muted-foreground/25" : "text-muted-foreground/50"}`}>{l}</span>
         ))}
       </div>
-      <div className="grid grid-cols-7 gap-1">
+      <div className="grid grid-cols-7 gap-0.5 md:gap-1">
         {Array.from({ length: totalSlots }).map((_, i) => {
           const workDay   = slotWorkDay(i)
           const isWeekend = workDay === -1
@@ -173,7 +173,7 @@ export function PelotaSection() {
       intro="Jugar al fútbol tiene un precio. La pelota oficial del Mundial pasó de ser un capricho caro a un lujo difícil de justificar."
       sources={[pelota, salario]}
     >
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12">
+      <div className="grid grid-cols-2 gap-3 md:gap-12">
 
         {/* ── Columna 2022 ── */}
         <motion.div
@@ -181,36 +181,36 @@ export function PelotaSection() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
-          className="space-y-6"
+          className="space-y-3 md:space-y-6 min-w-0"
         >
-          <div className="w-40 h-40 mx-auto">
+          <div className="w-[5.25rem] h-[5.25rem] md:w-40 md:h-40 mx-auto">
             <PelotaRotator clockwise className="relative h-full w-full cursor-pointer touch-manipulation">
               <Image
                 src={`${BASE_PATH}/pelota2022.webp`}
                 alt="Pelota 2022"
                 fill
-                sizes="160px"
+                sizes="(max-width: 767px) 84px, 160px"
                 className="pointer-events-none object-contain"
               />
             </PelotaRotator>
           </div>
 
-          <div className="text-center space-y-1">
-            <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground/60">Qatar 2022</p>
-            <p className="text-2xl md:text-3xl font-light text-accent">
+          <div className="text-center space-y-0.5 md:space-y-1">
+            <p className="text-[9px] md:text-xs uppercase tracking-[0.12em] md:tracking-[0.18em] text-muted-foreground/60 leading-tight">Qatar 2022</p>
+            <p className="text-base md:text-3xl font-light text-accent leading-tight tabular-nums">
               {formatCurrency(pelota_2022, pelota?.unidad)}
             </p>
           </div>
 
-          <div className="space-y-3">
-            <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground/70 text-center">
+          <div className="space-y-1.5 md:space-y-3">
+            <p className="text-[9px] md:text-xs uppercase tracking-[0.12em] md:tracking-[0.18em] text-muted-foreground/70 text-center leading-tight px-0.5">
               {diasTrabajo2022} días de sueldo mínimo
             </p>
             <WorkCalendar
               days={diasTrabajo2022}
               color="oklch(0.97 0.01 220)"
               delay={0.2}
-              completionMarker={<span style={{ fontSize: 13, lineHeight: 1 }}>⚽</span>}
+              completionMarker={<span className="text-[10px] md:text-[13px] leading-none">⚽</span>}
             />
           </div>
         </motion.div>
@@ -221,36 +221,36 @@ export function PelotaSection() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6, delay: 0.15 }}
-          className="space-y-6"
+          className="space-y-3 md:space-y-6 min-w-0"
         >
-          <div className="w-40 h-40 mx-auto">
+          <div className="w-[5.25rem] h-[5.25rem] md:w-40 md:h-40 mx-auto">
             <PelotaRotator clockwise={false} className="relative h-full w-full cursor-pointer touch-manipulation">
               <Image
                 src={`${BASE_PATH}/pelota2026.webp`}
                 alt="Pelota 2026"
                 fill
-                sizes="160px"
+                sizes="(max-width: 767px) 84px, 160px"
                 className="pointer-events-none object-contain"
               />
             </PelotaRotator>
           </div>
 
-          <div className="text-center space-y-1">
-            <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground/60">EEUU 2026</p>
-            <p className="text-2xl md:text-3xl font-light text-primary">
+          <div className="text-center space-y-0.5 md:space-y-1">
+            <p className="text-[9px] md:text-xs uppercase tracking-[0.12em] md:tracking-[0.18em] text-muted-foreground/60 leading-tight">EEUU 2026</p>
+            <p className="text-base md:text-3xl font-light text-primary leading-tight tabular-nums">
               {formatCurrency(pelota_2026, pelota?.unidad)}
             </p>
           </div>
 
-          <div className="space-y-3">
-            <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground/70 text-center">
+          <div className="space-y-1.5 md:space-y-3">
+            <p className="text-[9px] md:text-xs uppercase tracking-[0.12em] md:tracking-[0.18em] text-muted-foreground/70 text-center leading-tight px-0.5">
               {diasTrabajo2026} días de sueldo mínimo
             </p>
             <WorkCalendar
               days={diasTrabajo2026}
               color="oklch(0.65 0.18 222)"
               delay={0.35}
-              completionMarker={<span style={{ fontSize: 13, lineHeight: 1 }}>⚽</span>}
+              completionMarker={<span className="text-[10px] md:text-[13px] leading-none">⚽</span>}
             />
           </div>
         </motion.div>

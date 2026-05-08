@@ -1,5 +1,3 @@
-"use client"
-
 import { DataProvider } from "@/lib/data-context"
 import {
   DeferredAlbumSection,
