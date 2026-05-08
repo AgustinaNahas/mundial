@@ -2,7 +2,10 @@
 
 import { useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
+import { ChevronDown } from "lucide-react"
 import { DataItem, useData } from "@/lib/data-context"
+import { InfoIconSurface } from "@/components/ui/info-icon-button"
+import { cn } from "@/lib/utils"
 
 interface SourcesPanelProps {
   items: (DataItem | undefined)[]
@@ -35,14 +38,21 @@ export function SourcesPanel({ items }: SourcesPanelProps) {
   return (
     <div className="mt-10 pt-6 border-t border-border/40">
       <button
+        type="button"
         onClick={() => setOpen(v => !v)}
-        className="cursor-pointer flex items-center gap-2 text-muted-foreground/80 hover:text-foreground transition-colors text-xs group"
+        aria-expanded={open}
+        className="cursor-pointer flex w-full max-w-full items-center gap-3 text-left text-sm font-medium text-muted-foreground hover:text-foreground transition-colors group"
       >
-        <span className="flex items-center justify-center w-5 h-5 rounded-full border border-current text-[10px] font-bold leading-none shrink-0 group-hover:bg-primary/10 transition-colors">
-          i
-        </span>
-        <span className="uppercase tracking-[0.18em]">Fuentes</span>
-        <span className="ml-1 opacity-70 text-[10px]">{open ? "▲" : "▼"}</span>
+        <InfoIconSurface size="sm" />
+        <span className="uppercase tracking-[0.16em]">Fuentes</span>
+        <ChevronDown
+          strokeWidth={2.6}
+          className={cn(
+            "ml-auto size-5 shrink-0 text-primary transition-transform duration-200",
+            open && "rotate-180",
+          )}
+          aria-hidden
+        />
       </button>
 
       <AnimatePresence>
@@ -55,7 +65,7 @@ export function SourcesPanel({ items }: SourcesPanelProps) {
             className="mt-3 space-y-1.5 overflow-hidden"
           >
             {sortedRows.map((row) => (
-              <li key={row.key} className="text-[12px] text-muted-foreground/75 leading-relaxed">
+              <li key={row.key} className="text-sm text-muted-foreground/85 leading-relaxed">
                 {row.fuente.startsWith("http") ? (
                   <a
                     href={row.fuente}

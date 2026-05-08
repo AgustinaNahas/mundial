@@ -71,9 +71,9 @@ export default function Home() {
         </section>
 
         <DeferredCierreSection />
-
-        <ProgressTracker />
       </main>
+      {/* Fuera de <main>: overflow-x-clip en iOS/Safari rompe position:fixed de hijos */}
+      <ProgressTracker />
     </DataProvider>
   )
 }

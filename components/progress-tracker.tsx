@@ -48,9 +48,17 @@ export function ProgressTracker() {
   }, [])
 
   useEffect(() => {
-    window.addEventListener("scroll", handleScroll, { passive: true })
-    handleScroll()
-    return () => window.removeEventListener("scroll", handleScroll)
+    const vv = window.visualViewport
+    const run = () => handleScroll()
+    window.addEventListener("scroll", run, { passive: true })
+    vv?.addEventListener("scroll", run, { passive: true })
+    vv?.addEventListener("resize", run, { passive: true })
+    run()
+    return () => {
+      window.removeEventListener("scroll", run)
+      vv?.removeEventListener("scroll", run)
+      vv?.removeEventListener("resize", run)
+    }
   }, [handleScroll])
 
   const ballLeft = progress          // % of track
@@ -61,7 +69,7 @@ export function ProgressTracker() {
       initial={{ y: 80, opacity: 0 }}
       animate={{ y: isVisible ? 0 : 80, opacity: isVisible ? 1 : 0 }}
       transition={{ duration: 0.3, ease: "easeOut" }}
-      className="fixed bottom-0 left-0 right-0 z-50 bg-card/90 backdrop-blur-md border-t border-border/50"
+      className="fixed bottom-0 left-0 right-0 z-50 bg-card/90 backdrop-blur-md border-t border-border/50 pb-[env(safe-area-inset-bottom,0px)]"
     >
       <div className="max-w-3xl mx-auto px-5 pt-3 pb-4">
 

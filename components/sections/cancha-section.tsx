@@ -7,6 +7,8 @@ import { ChevronDown } from "lucide-react"
 import { cn, formatCurrency } from "@/lib/utils"
 import { useData } from "@/lib/data-context"
 import { SourcesPanel } from "@/components/sources-panel"
+import { InfoIconButton } from "@/components/ui/info-icon-button"
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 
 const ScrollyMap = dynamic(
   () => import("@/components/scrolly-map").then(m => m.ScrollyMapInner),
@@ -284,7 +286,6 @@ export function CanchaSection() {
   const vueloMiamiItem = getIndicador("BSAS_MIAMI")
 
   const [activeStep, setActiveStep] = useState(0)
-  const [showAccumulatorInfo, setShowAccumulatorInfo] = useState(false)
   const ref0 = useRef<HTMLDivElement>(null)
   const ref1 = useRef<HTMLDivElement>(null)
   const ref2 = useRef<HTMLDivElement>(null)
@@ -401,26 +402,19 @@ export function CanchaSection() {
           <div className="relative rounded-xl border border-border/30 bg-background/65 backdrop-blur px-3 py-2">
             <div className="flex items-center justify-between mb-1">
               <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Acumulado</p>
-              <button
-                type="button"
-                aria-label="Informacion del acumulado"
-                onClick={() => setShowAccumulatorInfo((prev) => !prev)}
-                className="h-5 w-5 rounded-full border border-border/30 text-[11px] text-muted-foreground hover:text-foreground hover:border-border/60 transition-colors"
-              >
-                i
-              </button>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <InfoIconButton size="sm" label="Información del acumulado" />
+                </TooltipTrigger>
+                <TooltipContent side="bottom" sideOffset={8} className="max-w-xs leading-relaxed text-balance">
+                  Acumulado del paso actual (entrada mundial calculada con la categoría más barata).
+                </TooltipContent>
+              </Tooltip>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <AccumulatorColumn label="Qatar" total={qatarTotal} detail={qatarDetail} color={COLOR_QATAR} items={qatarItems} />
               <AccumulatorColumn label="EEUU" total={usaTotal} detail={usaDetail} color={COLOR_MIAMI} items={usaItems} />
             </div>
-            {showAccumulatorInfo && (
-              <div className="absolute top-full right-0 mt-2 w-72 rounded-lg border border-border/35 bg-popover text-popover-foreground p-3 shadow-lg">
-                <p className="text-xs leading-relaxed text-muted-foreground">
-                  Acumulado del paso actual (entrada mundial calculada con la categoria mas barata).
-                </p>
-              </div>
-            )}
           </div>
         </div>
 

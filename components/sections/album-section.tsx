@@ -9,6 +9,7 @@ import { SectionWrapper } from "@/components/section-wrapper"
 import { useData } from "@/lib/data-context"
 import { cn } from "@/lib/utils"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
+import { InfoIconButton } from "@/components/ui/info-icon-button"
 import { useIsMobile } from "@/hooks/use-mobile"
 import { MonthStack } from "@/components/month-stack"
 import { sendGaEvent } from "@/lib/analytics"
@@ -740,13 +741,10 @@ export function AlbumSection() {
               <p className="text-sm font-medium text-foreground">Si sos más del "Elijo creer"...</p>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <button
-                    type="button"
-                    className="inline-flex h-5 w-5 items-center justify-center rounded-full border border-border/40 text-[11px] text-muted-foreground hover:text-foreground"
-                    aria-label="Más información"
-                  >
-                    i
-                  </button>
+                  <InfoIconButton
+                    size="sm"
+                    label="Más información sobre completar el álbum sin repetidas"
+                  />
                 </TooltipTrigger>
                 <TooltipContent sideOffset={6} className="max-w-xs leading-relaxed">
                   Solo vas a necesitar 980 figuritas si no te toca ninguna repetida; es como ganar el loto 60 veces, es decir, imposible.
@@ -792,13 +790,10 @@ export function AlbumSection() {
               <p className="text-sm font-medium text-foreground">Si lo tuyo es más huevo que suerte...</p>
             <Tooltip>
                 <TooltipTrigger asChild>
-                  <button
-                    type="button"
-                    className="inline-flex h-5 w-5 items-center justify-center rounded-full border border-border/40 text-[11px] text-muted-foreground hover:text-foreground"
-                    aria-label="Más información"
-                  >
-                    i
-                  </button>
+                  <InfoIconButton
+                    size="sm"
+                    label="Más información sobre el promedio de figuritas (coupon collector)"
+                  />
                 </TooltipTrigger>
                 <TooltipContent sideOffset={6} className="max-w-xs leading-relaxed">
                   Promedio sin intercambiar figuritas (coupon collector): n · (ln n + γ)
