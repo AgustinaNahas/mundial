@@ -85,9 +85,9 @@ export function AsadoSection() {
             count2022={asados2022}
             count2026={asados2026}
             title="Asados promedio con un salario mínimo"
-            footnote="Supuesto: precio por kg (ASADO_FINAL) y 5 kg por asado. Referencia 2022: lo que ya no alcanza en 2026 va con menor opacidad."
             unitLabel="asados"
             emoji="🥩"
+            methodologyNote="Calculado como 5 kg de carne por asado, sin distinción entre cortes. El precio utilizado es un promedio general de carne vacuna para parrilla."
           />
         </motion.div>
       </div>

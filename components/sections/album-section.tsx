@@ -136,7 +136,7 @@ function Slot({ figu, emoji, onPlace }: { figu: SlotData; emoji: string; onPlace
           />
         ) : (
           <motion.div className="absolute inset-0 flex flex-col items-center justify-center gap-1 group-hover:bg-primary/5 transition-colors rounded-md">
-            <span className="text-3xl leading-none select-none">{emoji}</span>
+            <span className="text-[2.625rem] md:text-3xl leading-none select-none">{emoji}</span>
           </motion.div>
         )}
       </AnimatePresence>
@@ -415,10 +415,10 @@ export function AlbumSection() {
   const placeSticker = useCallback((clickedIdx: number) => {
     const targetSlot = slotOrder[orderIdx]
     if (placed[clickedIdx]) return
-    if (!isMobile && clickedIdx !== targetSlot) return
+    if (clickedIdx !== targetSlot) return
 
     const newPlaced = [...placed]
-    const figuIdx = isMobile ? targetSlot : clickedIdx
+    const figuIdx = clickedIdx
     newPlaced[clickedIdx] = {
       src: SLOTS[figuIdx].src,
       price2022: pricePerFigu2022,
@@ -586,7 +586,7 @@ export function AlbumSection() {
       <FiguraCursor visible={!isMobile && inAlbum && !allFilled} cursorX={cursorX} cursorY={cursorY} src={cursorSrc} />
 
       <SectionWrapper
-        number="02"
+        number="01"
         title="El álbum del Mundial"
         intro="Completar el álbum pasó de ser un hobby familiar a un lujo."
         bgColor="muted"
@@ -597,7 +597,7 @@ export function AlbumSection() {
             💡 Pasá el mouse por encima del álbum para revelar las figuritas, y hacé clic en donde te parece que van en función de las pistas dadas.
           </span>
           <span className="md:hidden">
-            💡 Tocá el casillero donde creas que va cada figurita según las pistas (la figurita actual se ve arriba).
+            💡 Tocá el casillero correcto según las pistas de la figurita actual (se ve arriba).
           </span>
         </p>
 

@@ -2,7 +2,7 @@
 
 import { SectionWrapper } from "@/components/section-wrapper"
 import { ComparisonBar } from "@/components/comparison-bar"
-import { StatCard } from "@/components/stat-card"
+import { FifaPitchAnimation } from "@/components/fifa-pitch-animation"
 import { useData } from "@/lib/data-context"
 
 export function PlayStationSection() {
@@ -21,7 +21,7 @@ export function PlayStationSection() {
   
   if (loading) {
     return (
-      <SectionWrapper number="01" title="La Play en la previa" intro="Cargando datos...">
+      <SectionWrapper number="02" title="La Play en la previa" intro="Cargando datos...">
         <div className="h-48 animate-pulse bg-muted rounded-lg" />
       </SectionWrapper>
     )
@@ -29,7 +29,7 @@ export function PlayStationSection() {
   
   return (
     <SectionWrapper
-      number="01"
+      number="02"
       title="La Play en la previa"
       intro="Jugar al FIFA antes del mundial ya no es lo mismo. Aunque la consola cuesta mas en pesos, el poder adquisitivo cambio."
       sources={[ps5, salario]}
@@ -45,6 +45,7 @@ export function PlayStationSection() {
           referenceValue2026={salario_2026}
           referenceLabel="salario mínimo"
         />
+        <FifaPitchAnimation />
       </div>
     </SectionWrapper>
   )

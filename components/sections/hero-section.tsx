@@ -17,6 +17,8 @@ function HeroParticles() {
     canvas.width = width
     canvas.height = height
 
+    const isMobile = window.innerWidth < 768 || "ontouchstart" in window
+
     const handleResize = () => {
       width = canvas.parentElement?.clientWidth || window.innerWidth
       height = canvas.parentElement?.clientHeight || window.innerHeight
@@ -25,9 +27,10 @@ function HeroParticles() {
     }
     window.addEventListener("resize", handleResize)
 
-    const TOTAL = 500
+    const TOTAL = isMobile ? Math.round(500 * 0.4) : 500
     const COLORS = ["#80c4db", "#ffffff", "#00a4dc"]
     const particles: any[] = []
+    const burstParticles: any[] = []
 
     for (let i = 0; i < TOTAL; i++) {
       particles.push({
@@ -47,6 +50,31 @@ function HeroParticles() {
       })
     }
 
+    const spawnBurst = (tapX: number, tapY: number) => {
+      const BURST_COUNT = 35
+      for (let i = 0; i < BURST_COUNT; i++) {
+        const angle = (Math.PI * 2 * i) / BURST_COUNT + (Math.random() - 0.5) * 0.4
+        const speed = 3 + Math.random() * 7
+        const maxLife = 55 + Math.random() * 35
+        burstParticles.push({
+          x: tapX,
+          y: tapY,
+          w: 4 + Math.random() * 6,
+          h: (4 + Math.random() * 6) * 2,
+          color: COLORS[Math.floor(Math.random() * COLORS.length)],
+          vx: Math.cos(angle) * speed,
+          vy: Math.sin(angle) * speed,
+          rot: Math.random() * Math.PI * 2,
+          rotSpeed: (Math.random() - 0.5) * 0.2,
+          flipRot: Math.random() * Math.PI * 2,
+          flipSpeed: (Math.random() - 0.5) * 0.15,
+          life: maxLife,
+          maxLife,
+          borderRadius: 10
+        })
+      }
+    }
+
     let mouseX = -1000
     let mouseY = -1000
     let isMouseActive = false
@@ -61,9 +89,18 @@ function HeroParticles() {
       isMouseActive = false
     }
 
+    const handleTouchStart = (e: TouchEvent) => {
+      const touch = e.changedTouches[0]
+      const rect = canvas.getBoundingClientRect()
+      spawnBurst(touch.clientX - rect.left, touch.clientY - rect.top)
+    }
+
     const parent = canvas.parentElement
     parent?.addEventListener("mousemove", handleMouseMove)
     parent?.addEventListener("mouseleave", handleMouseLeave)
+    if (isMobile) {
+      parent?.addEventListener("touchstart", handleTouchStart, { passive: true })
+    }
 
     const RADIUS = 80 // Distancia desde el vértice del mouse (radio generoso)
     const PUSH_FORCE = 3.5
@@ -86,7 +123,7 @@ function HeroParticles() {
         // Retornar a la velocidad vertical base gentilmente
         p.vy = p.vy * 0.98 + p.baseVy * 0.02
 
-        if (isMouseActive) {
+        if (!isMobile && isMouseActive) {
           const dx = p.x - mouseX
           const dy = p.y - mouseY
           // Añadimos un offset en Y para que el centro del "círculo colisionador" esté un poco más arriba (apuntando al puntero del mouse real)
@@ -134,6 +171,37 @@ function HeroParticles() {
         ctx.restore()
       }
 
+      // Renderizar partículas de explosión (tap)
+      for (let i = burstParticles.length - 1; i >= 0; i--) {
+        const p = burstParticles[i]
+        p.vy += 0.18
+        p.vx *= 0.95
+        p.vy *= 0.97
+        p.x += p.vx
+        p.y += p.vy
+        p.rot += p.rotSpeed
+        p.flipRot += p.flipSpeed
+        p.life--
+
+        if (p.life <= 0) {
+          burstParticles.splice(i, 1)
+          continue
+        }
+
+        const alpha = p.life / p.maxLife
+        ctx.save()
+        ctx.globalAlpha = alpha
+        ctx.translate(p.x, p.y)
+        ctx.rotate(p.rot)
+        const bScaleY = Math.abs(Math.cos(p.flipRot))
+        ctx.scale(1, bScaleY)
+        ctx.fillStyle = p.color
+        ctx.beginPath()
+        ctx.roundRect(-p.w / 2, -p.h / 2, p.w, p.h, p.borderRadius)
+        ctx.fill()
+        ctx.restore()
+      }
+
       animationId = requestAnimationFrame(render)
     }
     render()
@@ -142,6 +210,9 @@ function HeroParticles() {
       window.removeEventListener("resize", handleResize)
       parent?.removeEventListener("mousemove", handleMouseMove)
       parent?.removeEventListener("mouseleave", handleMouseLeave)
+      if (isMobile) {
+        parent?.removeEventListener("touchstart", handleTouchStart)
+      }
       cancelAnimationFrame(animationId)
     }
   }, [])

@@ -78,10 +78,11 @@ export function FernetSection() {
           <PurchasingPowerPictogram
             count2022={fernetsSalario2022}
             count2026={fernetsSalario2026}
-            title="Fernets (combo) con un salario mínimo"
+            title="Fernets con un salario mínimo"
             unitLabel="fernets"
             imageFile="viajero.webp"
             imageAlt=""
+            methodologyNote="Precio relevado para Fernet Branca 750 ml, la marca de referencia del mercado argentino."
           />
         </motion.div>
       </div>

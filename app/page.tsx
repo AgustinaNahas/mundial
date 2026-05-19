@@ -30,8 +30,8 @@ export default function Home() {
             title="La Previa del Mundial"
             subtitle="Arranca la fiebre mundialista. Nos preparamos para palpitar lo que van a ser los próximos días."
           />
-          <DeferredPlayStationSection />
           <DeferredAlbumSection />
+          <DeferredPlayStationSection />
           <DeferredPelotaSection />
           <DeferredCamisetaSection />
         </section>

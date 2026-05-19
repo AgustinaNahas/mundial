@@ -85,6 +85,7 @@ export function MateSection() {
             title="Kilos de yerba con un salario mínimo"
             unitLabel="kilos"
             emoji="🧉"
+            methodologyNote="El precio corresponde a la mediana de todas las marcas de yerba mate disponibles en el mercado, incluyendo primeras y segundas marcas."
           />
         </motion.div>
       </div>
