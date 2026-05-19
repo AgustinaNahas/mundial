@@ -36,6 +36,11 @@ export const debugSectionRegistry = {
     label: "Asado",
     load: () => import("@/components/sections/asado-section").then((m) => m.AsadoSection),
   },
+  carta: {
+    label: "Carta",
+    load: () =>
+      import("@/components/sections/carta-reveal-section").then((m) => m.CartaRevealDebugSection),
+  },
   fernet: {
     label: "Fernet",
     load: () => import("@/components/sections/fernet-section").then((m) => m.FernetSection),
@@ -47,6 +52,10 @@ export const debugSectionRegistry = {
   jubilacion: {
     label: "Jubilacion",
     load: () => import("@/components/sections/jubilacion-section").then((m) => m.JubilacionSection),
+  },
+  ninos: {
+    label: "Los niños",
+    load: () => import("@/components/sections/ninos-section").then((m) => m.NinosSection),
   },
   derechos: {
     label: "Derechos",

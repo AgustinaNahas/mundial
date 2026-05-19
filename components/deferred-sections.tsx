@@ -114,6 +114,12 @@ const JubilacionSectionDyn = deferred("jubilacion", () =>
   })),
 )
 
+const NinosSectionDyn = deferred("ninos", () =>
+  import("@/components/sections/ninos-section").then((m) => ({
+    default: m.NinosSection,
+  })),
+)
+
 const DerechosSectionDyn = deferred("derechos", () =>
   import("@/components/sections/derechos-section").then((m) => ({
     default: m.DerechosSection,
@@ -202,6 +208,14 @@ export function DeferredJubilacionSection() {
   return (
     <LazyMount sectionId="jubilacion">
       <JubilacionSectionDyn />
+    </LazyMount>
+  )
+}
+
+export function DeferredNinosSection() {
+  return (
+    <LazyMount sectionId="ninos">
+      <NinosSectionDyn />
     </LazyMount>
   )
 }

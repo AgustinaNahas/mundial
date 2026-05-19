@@ -6,11 +6,12 @@ import { useEffect, useState, useCallback } from "react"
 const sections = [
   { id: "previa", label: "La Previa", short: "Previa", subsections: 3 },
   { id: "mundial", label: "El Mundial", short: "Mundial", subsections: 5 },
+  { id: "carta", label: "La Carta", short: "Carta", subsections: 1 },
   { id: "festejo", label: "El Festejo", short: "Festejo", subsections: 3 },
-  { id: "gente", label: "La Gente", short: "Gente", subsections: 2 },
+  { id: "gente", label: "La Gente", short: "Gente", subsections: 3 },
 ]
 
-const totalSubs = sections.reduce((a, s) => a + s.subsections, 0) // 13
+const totalSubs = sections.reduce((a, s) => a + s.subsections, 0) // 15
 
 // Pre-compute each section's start/end as fraction of the track
 let acc = 0
