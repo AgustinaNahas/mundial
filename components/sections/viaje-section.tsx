@@ -7,6 +7,7 @@ import { SectionWrapper } from "@/components/section-wrapper"
 import { ComparisonBar } from "@/components/comparison-bar"
 import { useData } from "@/lib/data-context"
 import { loadCountriesGeo } from "@/lib/countries-geo"
+import { LazySectionSkeleton } from "@/components/lazy-mount"
 
 const WorldMap = dynamic(() => import("@/components/world-map").then((m) => m.WorldMap), {
   ssr: false,
@@ -33,7 +34,13 @@ export function ViajeSection() {
   const salarios2022 = Math.round((vuelo_2022 / salario_2022) * 10) / 10
   const salarios2026 = Math.round((vuelo_2026 / salario_2026) * 10) / 10
 
-  if (loading) return null
+  if (loading) {
+    return (
+      <SectionWrapper number="05" title="El Viaje al Mundial" intro="Cargando datos...">
+        <LazySectionSkeleton className="min-h-[min(48vh,28rem)]" />
+      </SectionWrapper>
+    )
+  }
 
   return (
     <SectionWrapper

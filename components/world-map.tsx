@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { MapContainer, GeoJSON, Polyline, CircleMarker, Tooltip } from "react-leaflet"
+import { RoutePlaneMarker } from "@/components/route-plane-marker"
 import "leaflet/dist/leaflet.css"
 import type { GeoJsonObject } from "geojson"
 import type { PathOptions } from "leaflet"
@@ -112,6 +113,7 @@ export function WorldMap() {
           padding: 0 !important;
         }
         .leaflet-world-tooltip::before { display: none !important; }
+        .route-plane-icon { background: transparent !important; border: none !important; }
       `}</style>
       <MapContainer
         center={[15, -10]}
@@ -138,6 +140,8 @@ export function WorldMap() {
             { color: "#4eaadc", weight: 2, opacity: 0.9, dashArray: "6 4", noClip: true } as PathOptions
           }
         />
+        <RoutePlaneMarker positions={routeDoha} color="#e8e8f0" startOffset={0} durationMs={12_000} />
+        <RoutePlaneMarker positions={routeMiami} color="#4eaadc" startOffset={0.45} durationMs={9_000} />
         <CityMarker position={BSAS} label="Buenos Aires" color="#4eaadc" />
         <CityMarker position={DOHA} label="Doha" color="#e8e8f0" />
         <CityMarker position={MIAMI} label="Miami" color="#4eaadc" />

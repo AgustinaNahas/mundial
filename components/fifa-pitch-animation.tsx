@@ -1,18 +1,19 @@
 "use client"
 
-import { useEffect, useRef, useState, type ReactNode } from "react"
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react"
 import { AnimatePresence, motion, useMotionValueEvent, useReducedMotion, useScroll } from "framer-motion"
 import { formatCurrency } from "@/lib/utils"
 import Lottie from "lottie-react"
 import runAnimationRaw from "@/public/run.json"
 
-// Recolorea el negro puro (#000) por el celeste argentino (#80c4db) una única vez
-const runAnimation = JSON.parse(
-  JSON.stringify(runAnimationRaw).replaceAll(
-    '"k":[0,0,0,1]',
-    '"k":[0.502,0.769,0.859,1]'
+function tintRunAnimation() {
+  return JSON.parse(
+    JSON.stringify(runAnimationRaw).replaceAll(
+      '"k":[0,0,0,1]',
+      '"k":[0.502,0.769,0.859,1]',
+    ),
   )
-)
+}
 
 type PlayerId = "p1" | "p2" | "p3" | "p4"
 
@@ -42,6 +43,8 @@ const SCROLL_STEPS = [
 ]
 
 function PlayerSilhouette({ facing }: { facing: "left" | "right" }) {
+  const runAnimation = useMemo(() => tintRunAnimation(), [])
+
   return (
     <div
       className="h-28 w-24 drop-shadow-[0_2px_6px_rgba(0,0,0,0.5)]"

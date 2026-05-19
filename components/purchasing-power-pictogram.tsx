@@ -7,6 +7,13 @@ import { InfoIconButton } from "@/components/ui/info-icon-button"
 
 const BASE_PATH = "/mundial"
 
+/** Contorno blanco para separar íconos densos (mobile y desktop). */
+const PICTO_HALO =
+  "drop-shadow-[0_0_1px_#fff] drop-shadow-[0_0_2px_#fff] md:drop-shadow-[0_0_1.5px_#fff] md:drop-shadow-[0_0_3px_#fff]"
+
+const PICTO_EMOJI_HALO =
+  "[text-shadow:0_0_2px_#fff,0_0_1px_#fff,1px_0_0_#fff,-1px_0_0_#fff,0_1px_0_#fff,0_-1px_0_#fff] md:[text-shadow:0_0_3px_#fff,0_0_1.5px_#fff,1px_0_0_#fff,-1px_0_0_#fff,0_1px_0_#fff,0_-1px_0_#fff]"
+
 export interface PurchasingPowerPictogramProps {
   count2022: number
   count2026: number
@@ -56,7 +63,7 @@ export function PurchasingPowerPictogram({
     "max-w-xs leading-relaxed bg-card border border-border text-card-foreground"
 
   return (
-    <div className="w-full max-w-md p-6 bg-card rounded-lg border border-border">
+    <div className="w-full max-w-md md:max-w-xl p-6 bg-card rounded-lg border border-border">
       {/* Título con botón ⓘ opcional */}
       <div className="flex items-center gap-2 mb-2">
         <h4 className="text-sm font-medium text-foreground">{title}</h4>
@@ -77,7 +84,7 @@ export function PurchasingPowerPictogram({
                 }}
               />
             </TooltipTrigger>
-            <TooltipContent sideOffset={6} className={tooltipContentClass}>
+            <TooltipContent sideOffset={6} showArrow={false} className={tooltipContentClass}>
               {methodologyNote}
             </TooltipContent>
           </Tooltip>
@@ -97,7 +104,7 @@ export function PurchasingPowerPictogram({
       <Tooltip>
         <TooltipTrigger asChild>
           <div
-            className="grid grid-cols-10 gap-0.5 cursor-default"
+            className="grid grid-cols-8 md:grid-cols-10 gap-0 cursor-default"
             role="img"
             aria-label={`${count2022} ${unitLabel} en 2022, ${count2026} en 2026`}
           >
@@ -106,7 +113,7 @@ export function PurchasingPowerPictogram({
               return (
                 <span
                   key={i}
-                  className={`inline-flex size-8 shrink-0 items-center justify-center transition-opacity ${faded ? "opacity-25" : "opacity-100"}`}
+                  className="flex aspect-square w-full items-center justify-center"
                 >
                   {src ? (
                     <Image
@@ -114,17 +121,21 @@ export function PurchasingPowerPictogram({
                       alt=""
                       width={28}
                       height={28}
-                      className="size-full object-contain"
+                      className={`size-[92%] object-contain transition-opacity ${PICTO_HALO} ${faded ? "opacity-25" : "opacity-100"}`}
                     />
                   ) : (
-                    <span className="text-lg leading-none select-none">{emoji}</span>
+                    <span
+                      className={`text-base leading-none select-none transition-opacity md:text-lg ${PICTO_EMOJI_HALO} ${faded ? "opacity-25" : "opacity-100"}`}
+                    >
+                      {emoji}
+                    </span>
                   )}
                 </span>
               )
             })}
           </div>
         </TooltipTrigger>
-        <TooltipContent sideOffset={8} className={`${tooltipContentClass} space-y-1`}>
+        <TooltipContent sideOffset={8} showArrow={false} className={`${tooltipContentClass} space-y-1`}>
           <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground mb-1.5">
             Con un salario mínimo…
           </p>

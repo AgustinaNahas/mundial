@@ -7,6 +7,8 @@ import "leaflet/dist/leaflet.css"
 import type { GeoJsonObject } from "geojson"
 import type { PathOptions } from "leaflet"
 import { loadCountriesGeo } from "@/lib/countries-geo"
+import { debugLog } from "@/lib/debug-log"
+import { RoutePlaneMarker } from "@/components/route-plane-marker"
 
 /* ─── Great circle ─── */
 function greatCirclePoints(from: [number, number], to: [number, number], n = 80): [number, number][] {
@@ -52,10 +54,10 @@ const countryStyleForMap = (): PathOptions =>
 
 /* ─── Vistas para cada uno de los 5 pasos ─── */
 const VIEWS: Array<{ center: [number, number]; zoom: number }> = [
-  { center: [-22, -52], zoom: 3.2 }, // 0 · Buenos Aires
-  { center: [-2, -3], zoom: 2 }, // 1 · Ruta BS AS → Doha
+  { center: [-22, -52], zoom: 3.2 },  // 0 · Buenos Aires
+  { center: [-5, -5], zoom: 1.5 },    // 1 · Ruta BS AS → Doha (zoom reducido: muestra ambos extremos en mobile portrait)
   { center: [25.3, 51.5], zoom: 5.5 }, // 2 · Zoom in Qatar
-  { center: [4, -68], zoom: 2.8 }, // 3 · Ruta BS AS → Miami
+  { center: [-4, -68], zoom: 2.3 },   // 3 · Ruta BS AS → Miami (zoom reducido: muestra ambos extremos en mobile)
   { center: [25.8, -80.2], zoom: 6 }, // 4 · Zoom in Miami
 ]
 
@@ -141,7 +143,29 @@ export function ScrollyMapInner({ step }: ScrollyMapProps) {
   const svgRenderer = useMemo(() => L.svg({ padding: 6 }), [])
 
   useEffect(() => {
-    void loadCountriesGeo({ detail: "lite" }).then(setGeoData)
+    const t0 = Date.now()
+    void loadCountriesGeo({ detail: "lite" })
+      .then((data) => {
+        setGeoData(data)
+        // #region agent log
+        debugLog(
+          "scrolly-map.tsx",
+          "geo loaded in map",
+          { ms: Date.now() - t0 },
+          "H7",
+        )
+        // #endregion
+      })
+      .catch((err) => {
+        // #region agent log
+        debugLog(
+          "scrolly-map.tsx",
+          "geo load failed in map",
+          { err: String(err), ms: Date.now() - t0 },
+          "H7",
+        )
+        // #endregion
+      })
   }, [])
 
   const dohaOpacity = routeOpacity(step, "doha")
@@ -163,6 +187,7 @@ export function ScrollyMapInner({ step }: ScrollyMapProps) {
         }
         .leaflet-scrolly-tt::before { display: none !important; }
         .leaflet-overlay-pane svg { overflow: visible !important; }
+        .route-plane-icon { background: transparent !important; border: none !important; }
       `}</style>
 
       <MapContainer
@@ -211,6 +236,20 @@ export function ScrollyMapInner({ step }: ScrollyMapProps) {
               renderer: svgRenderer,
             } as PathOptions
           }
+        />
+        <RoutePlaneMarker
+          positions={routeDoha}
+          color="#e8e8f0"
+          opacity={dohaOpacity}
+          startOffset={0}
+          durationMs={12_000}
+        />
+        <RoutePlaneMarker
+          positions={routeMiami}
+          color="#4eaadc"
+          opacity={miamiOpacity}
+          startOffset={0.45}
+          durationMs={9_000}
         />
 
         <CityDot position={BSAS} label="Buenos Aires" color="#4eaadc" active={step === 0} />

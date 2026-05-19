@@ -3,78 +3,124 @@
 import type { ComponentType } from "react"
 import dynamic from "next/dynamic"
 import { LazyMount, LazySectionSkeleton } from "@/components/lazy-mount"
+import { debugLog } from "@/lib/debug-log"
+import { withConcurrentImport } from "@/lib/concurrent-import"
 
-function deferred(importFn: () => Promise<{ default: ComponentType<object> }>) {
-  return dynamic(importFn, { loading: () => <LazySectionSkeleton /> })
+function deferred(
+  sectionId: string,
+  importFn: () => Promise<{ default: ComponentType<object> }>,
+) {
+  return dynamic(
+    () => {
+      const t0 = Date.now()
+      // #region agent log
+      debugLog(
+        "deferred-sections.tsx",
+        "dynamic import start",
+        { sectionId, t0 },
+        "H1",
+      )
+      // #endregion
+      return withConcurrentImport(sectionId, importFn)
+        .then((m) => {
+          // #region agent log
+          debugLog(
+            "deferred-sections.tsx",
+            "dynamic import done",
+            { sectionId, ms: Date.now() - t0 },
+            "H1",
+            "post-fix-v3",
+          )
+          // #endregion
+          return m
+        })
+        .catch((err) => {
+          // #region agent log
+          debugLog(
+            "deferred-sections.tsx",
+            "dynamic import failed",
+            { sectionId, err: String(err), ms: Date.now() - t0 },
+            "H1",
+            "post-fix-v3",
+          )
+          // #endregion
+          throw err
+        })
+    },
+    {
+      ssr: false,
+      loading: () => <LazySectionSkeleton />,
+    },
+  )
 }
 
-const PlayStationSectionDyn = deferred(() =>
+const PlayStationSectionDyn = deferred("playstation", () =>
   import("@/components/sections/playstation-section").then((m) => ({
     default: m.PlayStationSection,
   })),
 )
 
-const AlbumSectionDyn = deferred(() =>
+const AlbumSectionDyn = deferred("album", () =>
   import("@/components/sections/album-section").then((m) => ({
     default: m.AlbumSection,
   })),
 )
 
-const PelotaSectionDyn = deferred(() =>
+const PelotaSectionDyn = deferred("pelota", () =>
   import("@/components/sections/pelota-section").then((m) => ({
     default: m.PelotaSection,
   })),
 )
 
-const CamisetaSectionDyn = deferred(() =>
+const CamisetaSectionDyn = deferred("camiseta", () =>
   import("@/components/sections/camiseta-section").then((m) => ({
     default: m.CamisetaSection,
   })),
 )
 
-const CanchaSectionDyn = deferred(() =>
+const CanchaSectionDyn = deferred("cancha", () =>
   import("@/components/sections/cancha-section").then((m) => ({
     default: m.CanchaSection,
   })),
 )
 
-const MateSectionDyn = deferred(() =>
+const MateSectionDyn = deferred("mate", () =>
   import("@/components/sections/mate-section").then((m) => ({
     default: m.MateSection,
   })),
 )
 
-const AsadoSectionDyn = deferred(() =>
+const AsadoSectionDyn = deferred("asado", () =>
   import("@/components/sections/asado-section").then((m) => ({
     default: m.AsadoSection,
   })),
 )
 
-const FernetSectionDyn = deferred(() =>
+const FernetSectionDyn = deferred("fernet", () =>
   import("@/components/sections/fernet-section").then((m) => ({
     default: m.FernetSection,
   })),
 )
 
-const MicroSectionDyn = deferred(() =>
+const MicroSectionDyn = deferred("micro", () =>
   import("@/components/sections/micro-section").then((m) => ({
     default: m.MicroSection,
   })),
 )
 
-const JubilacionSectionDyn = deferred(() =>
+const JubilacionSectionDyn = deferred("jubilacion", () =>
   import("@/components/sections/jubilacion-section").then((m) => ({
     default: m.JubilacionSection,
   })),
 )
 
-const DerechosSectionDyn = deferred(() =>
+const DerechosSectionDyn = deferred("derechos", () =>
   import("@/components/sections/derechos-section").then((m) => ({
     default: m.DerechosSection,
   })),
 )
 
-const CierreSectionDyn = deferred(() =>
+const CierreSectionDyn = deferred("cierre", () =>
   import("@/components/sections/cierre-section").then((m) => ({
     default: m.CierreSection,
   })),
@@ -82,7 +128,7 @@ const CierreSectionDyn = deferred(() =>
 
 export function DeferredPlayStationSection() {
   return (
-    <LazyMount>
+    <LazyMount sectionId="playstation">
       <PlayStationSectionDyn />
     </LazyMount>
   )
@@ -90,7 +136,7 @@ export function DeferredPlayStationSection() {
 
 export function DeferredAlbumSection() {
   return (
-    <LazyMount>
+    <LazyMount sectionId="album">
       <AlbumSectionDyn />
     </LazyMount>
   )
@@ -98,7 +144,7 @@ export function DeferredAlbumSection() {
 
 export function DeferredPelotaSection() {
   return (
-    <LazyMount>
+    <LazyMount sectionId="pelota">
       <PelotaSectionDyn />
     </LazyMount>
   )
@@ -106,7 +152,7 @@ export function DeferredPelotaSection() {
 
 export function DeferredCamisetaSection() {
   return (
-    <LazyMount>
+    <LazyMount sectionId="camiseta">
       <CamisetaSectionDyn />
     </LazyMount>
   )
@@ -114,7 +160,7 @@ export function DeferredCamisetaSection() {
 
 export function DeferredCanchaSection() {
   return (
-    <LazyMount>
+    <LazyMount sectionId="cancha" rootMargin="0px 0px 120px 0px">
       <CanchaSectionDyn />
     </LazyMount>
   )
@@ -122,7 +168,7 @@ export function DeferredCanchaSection() {
 
 export function DeferredMateSection() {
   return (
-    <LazyMount>
+    <LazyMount sectionId="mate">
       <MateSectionDyn />
     </LazyMount>
   )
@@ -130,7 +176,7 @@ export function DeferredMateSection() {
 
 export function DeferredAsadoSection() {
   return (
-    <LazyMount>
+    <LazyMount sectionId="asado">
       <AsadoSectionDyn />
     </LazyMount>
   )
@@ -138,7 +184,7 @@ export function DeferredAsadoSection() {
 
 export function DeferredFernetSection() {
   return (
-    <LazyMount>
+    <LazyMount sectionId="fernet">
       <FernetSectionDyn />
     </LazyMount>
   )
@@ -146,7 +192,7 @@ export function DeferredFernetSection() {
 
 export function DeferredMicroSection() {
   return (
-    <LazyMount>
+    <LazyMount sectionId="micro">
       <MicroSectionDyn />
     </LazyMount>
   )
@@ -154,7 +200,7 @@ export function DeferredMicroSection() {
 
 export function DeferredJubilacionSection() {
   return (
-    <LazyMount>
+    <LazyMount sectionId="jubilacion">
       <JubilacionSectionDyn />
     </LazyMount>
   )
@@ -162,7 +208,7 @@ export function DeferredJubilacionSection() {
 
 export function DeferredDerechosSection() {
   return (
-    <LazyMount>
+    <LazyMount sectionId="derechos">
       <DerechosSectionDyn />
     </LazyMount>
   )
@@ -170,7 +216,7 @@ export function DeferredDerechosSection() {
 
 export function DeferredCierreSection() {
   return (
-    <LazyMount>
+    <LazyMount sectionId="cierre">
       <CierreSectionDyn />
     </LazyMount>
   )

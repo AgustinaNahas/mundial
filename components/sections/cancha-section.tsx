@@ -9,13 +9,16 @@ import { useData } from "@/lib/data-context"
 import { SourcesPanel } from "@/components/sources-panel"
 import { InfoIconButton } from "@/components/ui/info-icon-button"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
+import { LazySectionSkeleton } from "@/components/lazy-mount"
+import { loadCountriesGeo } from "@/lib/countries-geo"
+import { debugLog } from "@/lib/debug-log"
 
 const ScrollyMap = dynamic(
-  () => import("@/components/scrolly-map").then(m => m.ScrollyMapInner),
+  () => import("@/components/scrolly-map").then((m) => m.ScrollyMapInner),
   {
     ssr: false,
     loading: () => <div className="w-full h-full rounded-2xl bg-[#080e1c] animate-pulse" />,
-  }
+  },
 )
 
 /** Ajustes de animación solo en mobile (max-width: 1023px). Estado inicial false para SSR. */
@@ -293,6 +296,59 @@ export function CanchaSection() {
   const ref4 = useRef<HTMLDivElement>(null)
   const refs = [ref0, ref1, ref2, ref3, ref4]
 
+  // Precargar chunk del mapa en cuanto monta la sección (no esperar al render de ScrollyMap)
+  useEffect(() => {
+    const t0 = Date.now()
+    void import("@/components/scrolly-map")
+      .then(() => {
+        // #region agent log
+        debugLog(
+          "cancha-section.tsx",
+          "scrolly-map chunk preloaded",
+          { ms: Date.now() - t0 },
+          "H7",
+          "post-fix-v3",
+        )
+        // #endregion
+      })
+      .catch((err) => {
+        // #region agent log
+        debugLog(
+          "cancha-section.tsx",
+          "scrolly-map chunk preload failed",
+          { err: String(err) },
+          "H7",
+          "post-fix-v3",
+        )
+        // #endregion
+      })
+  }, [])
+
+  useEffect(() => {
+    const t0 = Date.now()
+    void loadCountriesGeo({ detail: "lite" })
+      .then(() => {
+        // #region agent log
+        debugLog(
+          "cancha-section.tsx",
+          "geo preload ok",
+          { ms: Date.now() - t0 },
+          "H7",
+        )
+        // #endregion
+      })
+      .catch((err) => {
+        // #region agent log
+        debugLog(
+          "cancha-section.tsx",
+          "geo preload failed",
+          { err: String(err), ms: Date.now() - t0 },
+          "H7",
+        )
+        // #endregion
+      })
+  }, [])
+
   // loading como dep: el efecto corre de nuevo cuando el DOM ya está montado (loading → false)
   useEffect(() => {
     if (loading) return
@@ -309,7 +365,33 @@ export function CanchaSection() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loading])
 
-  if (loading) return null
+  useEffect(() => {
+    if (loading) return
+    // #region agent log
+    debugLog(
+      "cancha-section.tsx",
+      "cancha section rendered",
+      { activeStep },
+      "H7",
+      "post-fix-v2",
+    )
+    // #endregion
+  }, [loading, activeStep])
+
+  if (loading) {
+    return (
+      <section className="py-20 md:py-28 bg-background">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          className="container mx-auto px-6 md:px-12 max-w-6xl"
+        >
+          <LazySectionSkeleton className="min-h-[min(70vh,40rem)]" />
+        </motion.div>
+      </section>
+    )
+  }
 
   /* ── Cálculos ── */
   const sal_2022   = salario?.valor_2022  ?? 61953
@@ -418,10 +500,24 @@ export function CanchaSection() {
           </div>
         </div>
 
+        {/* Barra acumulado mobile: sticky fuera del grid para que el mapa arranque debajo de ella */}
+        <div className="sticky top-0 z-[30] pt-2 pb-1 bg-background lg:hidden">
+          <MobileAccumulatorBar
+            qatarTotal={qatarTotal}
+            usaTotal={usaTotal}
+            qatarDetail={qatarDetail}
+            usaDetail={usaDetail}
+            colorQatar={COLOR_QATAR}
+            colorUsa={COLOR_MIAMI}
+            qatarItems={qatarItems}
+            usaItems={usaItems}
+          />
+        </div>
+
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-0 lg:gap-8 items-start">
 
-          {/* Mapa: mobile ~75% viewport sticky; desktop igual que antes (h-60 → lg:h-screen) */}
-          <div className="sticky top-0 z-[8] max-lg:h-[75svh] max-lg:-mb-[75svh] max-lg:shrink-0 h-60 lg:z-auto lg:mb-0 lg:h-screen lg:py-6">
+          {/* Mapa: mobile 100svh arrancando debajo de la barra (~60px); desktop h-screen */}
+          <div className="sticky max-lg:top-[60px] top-0 z-[8] max-lg:h-[calc(100svh-60px)] max-lg:-mb-[calc(100svh-60px)] max-lg:shrink-0 h-60 lg:z-auto lg:mb-0 lg:h-screen lg:py-6">
             <div className="relative h-full rounded-2xl overflow-hidden">
               <ScrollyMap step={activeStep} />
               <div className="absolute bottom-4 left-4 z-500">
@@ -430,20 +526,8 @@ export function CanchaSection() {
             </div>
           </div>
 
-          {/* Pasos (+ barra acumulado solo mobile) */}
-          <div className="relative z-[12] max-lg:px-0">
-            <div className="sticky top-0 z-[30] mb-3 pt-2 lg:hidden">
-              <MobileAccumulatorBar
-                qatarTotal={qatarTotal}
-                usaTotal={usaTotal}
-                qatarDetail={qatarDetail}
-                usaDetail={usaDetail}
-                colorQatar={COLOR_QATAR}
-                colorUsa={COLOR_MIAMI}
-                qatarItems={qatarItems}
-                usaItems={usaItems}
-              />
-            </div>
+          {/* Pasos */}
+          <div className="relative z-[12] max-lg:px-0 max-lg:pb-[50svh]">
 
             {/* ── Paso 0: Buenos Aires ── */}
             <StepPanel stepRef={refs[0]}>

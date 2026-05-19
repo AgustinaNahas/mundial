@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "eslint .",
     "optimize-images": "node scripts/optimize-public-images.mjs",
+    "sync-data": "node scripts/sync-data.mjs",
     "dev:webpack": "next dev --webpack"
   },
   "dependencies": {

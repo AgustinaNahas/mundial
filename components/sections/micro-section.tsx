@@ -10,190 +10,234 @@ import {
 } from "framer-motion"
 import { SectionWrapper } from "@/components/section-wrapper"
 import { useData } from "@/lib/data-context"
+import { formatCurrency } from "@/lib/utils"
 
-// ─── Player & Snack data ──────────────────────────────────────
+const BASE_PATH = "/mundial"
+
+// ─── Player data ──────────────────────────────────────────────
 
 interface PlayerData {
   label: string
   nombre: string
-  snack: string
-  emoji: string
-  qatarUSD: number
-  usaUSD: number
 }
 
 const PLAYERS: PlayerData[] = [
-  { label: "Dibu",         nombre: "Emiliano Martínez",  snack: "Hot dog",       emoji: "🌭", qatarUSD: 12, usaUSD: 8  },
-  { label: "Armani",       nombre: "Franco Armani",       snack: "Pizza",         emoji: "🍕", qatarUSD: 15, usaUSD: 10 },
-  { label: "Rulli",        nombre: "Gerónimo Rulli",      snack: "Shawarma",      emoji: "🥙", qatarUSD: 16, usaUSD: 11 },
-  { label: "Molina",       nombre: "Nahuel Molina",       snack: "Hamburguesa",   emoji: "🍔", qatarUSD: 18, usaUSD: 13 },
-  { label: "Montiel",      nombre: "Gonzalo Montiel",     snack: "Tacos",         emoji: "🌮", qatarUSD: 14, usaUSD: 9  },
-  { label: "Cuti",         nombre: "Cristian Romero",     snack: "Papas fritas",  emoji: "🍟", qatarUSD: 10, usaUSD: 7  },
-  { label: "Pezzella",     nombre: "Germán Pezzella",     snack: "Wrap",          emoji: "🌯", qatarUSD: 13, usaUSD: 9  },
-  { label: "Otamendi",     nombre: "Nicolás Otamendi",    snack: "Pollo",         emoji: "🍗", qatarUSD: 16, usaUSD: 14 },
-  { label: "Acuña",        nombre: "Marcos Acuña",        snack: "Sándwich",      emoji: "🥪", qatarUSD: 14, usaUSD: 8  },
-  { label: "Tagliafico",   nombre: "Nicolás Tagliafico",  snack: "Falafel",       emoji: "🧆", qatarUSD: 10, usaUSD: 7  },
-  { label: "Foyth",        nombre: "Juan Foyth",          snack: "Ensalada",      emoji: "🥗", qatarUSD: 11, usaUSD: 9  },
-  { label: "De Paul",      nombre: "Rodrigo De Paul",     snack: "Helado",        emoji: "🍦", qatarUSD: 9,  usaUSD: 7  },
-  { label: "Paredes",      nombre: "Leandro Paredes",     snack: "Gaseosa",       emoji: "🥤", qatarUSD: 6,  usaUSD: 5  },
-  { label: "Mac Allister", nombre: "Alexis Mac Allister", snack: "Pochoclo",      emoji: "🍿", qatarUSD: 8,  usaUSD: 9  },
-  { label: "Enzo",         nombre: "Enzo Fernández",      snack: "Donut",         emoji: "🍩", qatarUSD: 7,  usaUSD: 5  },
-  { label: "Guido",        nombre: "Guido Rodríguez",     snack: "Burrito",       emoji: "🌯", qatarUSD: 15, usaUSD: 10 },
-  { label: "Palacios",     nombre: "Exequiel Palacios",   snack: "Pretzel",       emoji: "🥨", qatarUSD: 8,  usaUSD: 6  },
-  { label: "Almada",       nombre: "Thiago Almada",       snack: "Choclo",        emoji: "🌽", qatarUSD: 7,  usaUSD: 5  },
-  { label: "Messi",        nombre: "Lionel Messi",        snack: "Empanada",      emoji: "🥟", qatarUSD: 20, usaUSD: 14 },
-  { label: "Di María",     nombre: "Ángel Di María",      snack: "Pizza rellena", emoji: "🍕", qatarUSD: 17, usaUSD: 11 },
-  { label: "Lautaro",      nombre: "Lautaro Martínez",    snack: "Choripán",      emoji: "🌭", qatarUSD: 18, usaUSD: 15 },
-  { label: "J. Álvarez",   nombre: "Julián Álvarez",      snack: "Doble burger",  emoji: "🍔", qatarUSD: 22, usaUSD: 16 },
-  { label: "Dybala",       nombre: "Paulo Dybala",        snack: "Pasta",         emoji: "🍝", qatarUSD: 19, usaUSD: 13 },
-  { label: "Correa",       nombre: "Joaquín Correa",      snack: "Hot dog doble", emoji: "🌭", qatarUSD: 14, usaUSD: 9  },
-  { label: "N. González",  nombre: "Nicolás González",    snack: "Maní tostado",  emoji: "🥜", qatarUSD: 5,  usaUSD: 4  },
-  { label: "Papu",         nombre: "Alejandro Gómez",     snack: "Hummus + pita", emoji: "🫓", qatarUSD: 12, usaUSD: 8  },
+  { label: "Dibu",         nombre: "Emiliano Martínez" },
+  { label: "Armani",       nombre: "Franco Armani" },
+  { label: "Rulli",        nombre: "Gerónimo Rulli" },
+  { label: "Molina",       nombre: "Nahuel Molina" },
+  { label: "Montiel",      nombre: "Gonzalo Montiel" },
+  { label: "Cuti",         nombre: "Cristian Romero" },
+  { label: "Pezzella",     nombre: "Germán Pezzella" },
+  { label: "Otamendi",     nombre: "Nicolás Otamendi" },
+  { label: "Acuña",        nombre: "Marcos Acuña" },
+  { label: "Tagliafico",   nombre: "Nicolás Tagliafico" },
+  { label: "Foyth",        nombre: "Juan Foyth" },
+  { label: "De Paul",      nombre: "Rodrigo De Paul" },
+  { label: "Paredes",      nombre: "Leandro Paredes" },
+  { label: "Mac Allister", nombre: "Alexis Mac Allister" },
+  { label: "Enzo",         nombre: "Enzo Fernández" },
+  { label: "Guido",        nombre: "Guido Rodríguez" },
+  { label: "Palacios",     nombre: "Exequiel Palacios" },
+  { label: "Almada",       nombre: "Thiago Almada" },
+  { label: "Messi",        nombre: "Lionel Messi" },
+  { label: "Di María",     nombre: "Ángel Di María" },
+  { label: "Lautaro",      nombre: "Lautaro Martínez" },
+  { label: "J. Álvarez",   nombre: "Julián Álvarez" },
+  { label: "Dybala",       nombre: "Paulo Dybala" },
+  { label: "Correa",       nombre: "Joaquín Correa" },
+  { label: "N. González",  nombre: "Nicolás González" },
+  { label: "Papu",         nombre: "Alejandro Gómez" },
 ]
 
-// ─── Bus layout constants ─────────────────────────────────────
-
-const SVG_W = 190
-const SVG_H = 440
-const NUM_ROWS = 9
-const ROW_START_Y = 32   // y-center of topmost row (back of bus)
-const ROW_H = 36
-// x-centers of 3 seat columns: left-window, left-aisle, right-window
-const SEAT_X = [22, 52, 138]
-const CIRCLE_D = 18
-
-// Where players appear before being "seated" (inside SVG at door position)
-const DOOR_CX = 161
-const DOOR_CY = 381
-
-function getSeatPos(index: number): { x: number; y: number } {
-  const row = Math.floor(index / 3)
-  const col = index % 3
-  return { x: SEAT_X[col], y: ROW_START_Y + row * ROW_H }
+function splitNombreEnDosLineas(nombre: string): [string, string] {
+  const parts = nombre.trim().split(/\s+/)
+  if (parts.length <= 1) return [parts[0] ?? "", ""]
+  return [parts.slice(0, -1).join(" "), parts[parts.length - 1]]
 }
 
-// ─── Bus SVG ──────────────────────────────────────────────────
-// Top-down view: top = back of bus, bottom = front (door, driver)
-// Layout 2+1: two seats left, one seat right
+// ─── Bus layout constants ─────────────────────────────────────
+// Horizontal top-view: front = left, back = right
 
-function BusTopView() {
-  // Cancha-inspired two-tone green palette
-  const GA = "#2d6f35"      // lighter green stripe
-  const GB = "#1e5228"      // darker green stripe
-  const SEAT_F = "#132c17"  // seat fill
-  const SEAT_S = "#2d6030"  // seat stroke
-  const DARK = "#0c1f0e"    // body dark fill
-  const SHELL = "#1a4920"   // outer stroke
+const MARGIN = 20
+const SVG_W = 820
+const SVG_H = 250
+const NUM_ROWS = 9
+const ROW_W = 76
+const SEAT_SIZE = 30
+const SEAT_GAP = 6
+const CIRCLE_D = 22
+
+const TOP_Y1 = MARGIN + SEAT_SIZE / 2
+const TOP_Y2 = MARGIN + SEAT_SIZE + SEAT_GAP + SEAT_SIZE / 2
+const BOTTOM_Y = SVG_H - MARGIN - SEAT_SIZE / 2
+const TOP_SEAT2_Y = MARGIN + SEAT_SIZE + SEAT_GAP
+const BOTTOM_SEAT_Y = SVG_H - MARGIN - SEAT_SIZE
+
+const WHEEL_CX = MARGIN + 22
+const WHEEL_CY = SVG_H - MARGIN - 20
+const WHEEL_R = 16
+const DRIVER_SEAT_W = 30
+const DRIVER_SEAT_H = 32
+const DRIVER_SEAT_X = WHEEL_CX + WHEEL_R + 10
+const DRIVER_SEAT_Y = SVG_H - MARGIN - DRIVER_SEAT_H
+
+// Zona conductor + una fila de aire antes de pasajeros
+const PARTITION_X = DRIVER_SEAT_X + DRIVER_SEAT_W + ROW_W
+const ROW_START_X = PARTITION_X + 12
+
+const ENTRANCE_CX = PARTITION_X - ROW_W / 2
+const ENTRANCE_CY = (TOP_Y2 + BOTTOM_Y) / 2
+
+function getSeatPos(index: number): { x: number; y: number; col: number } {
+  const row = Math.floor(index / 3)
+  const col = index % 3
+  const x = ROW_START_X + row * ROW_W
+  const y = col === 0 ? TOP_Y1 : col === 1 ? TOP_Y2 : BOTTOM_Y
+  return { x, y, col }
+}
+
+/** Fracción de scroll hasta completar los 26; el resto es margen con el Obelisco. */
+const BOARDING_SCROLL_END = 0.8
+const SCROLL_MIN_HEIGHT = "500vh"
+
+// ─── Bus SVG ──────────────────────────────────────────────────
+// Top-down, horizontal: left = front, right = back — layout 2+1
+
+function BusTopView({ showObelisco }: { showObelisco?: boolean }) {
+  const GA = "#2d6f35"
+  const GB = "#1e5228"
+  const SEAT_F = "#132c17"
+  const SEAT_S = "#2d6030"
+  const DARK = "#0c1f0e"
+  const SHELL = "#1a4920"
+  const WHEEL = "#0a0a0a"
+  const floorOpacity = showObelisco ? 0.32 : 1
+  const aisleOpacity = showObelisco ? 0.22 : 0.55
+  const shellOpacity = showObelisco ? 0.72 : 1
+  const stripeCount = Math.ceil((SVG_W - MARGIN * 2) / 32)
+  const aisleY = TOP_SEAT2_Y + SEAT_SIZE + 4
+  const aisleH = BOTTOM_SEAT_Y - aisleY - 4
 
   return (
     <svg
       viewBox={`0 0 ${SVG_W} ${SVG_H}`}
       width={SVG_W}
       height={SVG_H}
-      className="drop-shadow-2xl"
+      className="drop-shadow-2xl max-w-full h-auto"
       aria-hidden
     >
       <defs>
         <clipPath id="bus-int-clip">
-          <rect x="5" y="5" width={SVG_W - 10} height={SVG_H - 10} rx="14" />
+          <rect x={MARGIN} y={MARGIN} width={SVG_W - MARGIN * 2} height={SVG_H - MARGIN * 2} rx="14" />
         </clipPath>
       </defs>
 
       {/* Outer shell */}
       <rect
         x="1" y="1" width={SVG_W - 2} height={SVG_H - 2} rx="18"
-        fill={DARK} stroke={SHELL} strokeWidth="2.5"
+        fill={DARK} fillOpacity={shellOpacity} stroke={SHELL} strokeWidth="2.5"
       />
 
       {/* Cancha-stripe interior floor */}
       <g clipPath="url(#bus-int-clip)">
-        {Array.from({ length: 14 }).map((_, i) => (
+        {Array.from({ length: stripeCount }).map((_, i) => (
           <rect
-            key={i} x="5" y={5 + i * 32} width={SVG_W - 10} height={32}
+            key={i}
+            x={MARGIN + i * 32}
+            y={MARGIN}
+            width={32}
+            height={SVG_H - MARGIN * 2}
             fill={i % 2 === 0 ? GA : GB}
+            fillOpacity={floorOpacity}
           />
         ))}
       </g>
 
-      {/* Aisle strip (slightly darker) */}
+      {/* Pasillo central */}
       <rect
-        x="70" y="5" width="50" height="353"
-        fill="#152e18" opacity="0.55"
+        x={MARGIN}
+        y={aisleY}
+        width={SVG_W - MARGIN * 2}
+        height={aisleH}
+        fill="#152e18"
+        opacity={aisleOpacity}
         clipPath="url(#bus-int-clip)"
       />
 
-      {/* 9 seat rows — 2-bench left (x 7..67) + 1-seat right (x 123..153) */}
+      {/* 9 filas × layout 2+1 — asientos cuadrados */}
       {Array.from({ length: NUM_ROWS }).map((_, row) => {
-        const cy = ROW_START_Y + row * ROW_H
-        const sh = 20
-        const sy = cy - sh / 2
+        const cx = ROW_START_X + row * ROW_W
+        const sx = cx - SEAT_SIZE / 2
         return (
           <g key={row}>
-            <rect x="7"   y={sy} width="60" height={sh} rx="4" fill={SEAT_F} stroke={SEAT_S} strokeWidth="0.8" />
-            <line x1="37" y1={sy + 2} x2="37" y2={sy + sh - 2} stroke={SEAT_S} strokeWidth="0.8" />
-            <rect x="123" y={sy} width="30" height={sh} rx="4" fill={SEAT_F} stroke={SEAT_S} strokeWidth="0.8" />
+            <rect x={sx} y={MARGIN} width={SEAT_SIZE} height={SEAT_SIZE} rx="3"
+              fill={SEAT_F} stroke={SEAT_S} strokeWidth="0.8" />
+            <rect x={sx} y={TOP_SEAT2_Y} width={SEAT_SIZE} height={SEAT_SIZE} rx="3"
+              fill={SEAT_F} stroke={SEAT_S} strokeWidth="0.8" />
+            <rect x={sx} y={BOTTOM_SEAT_Y} width={SEAT_SIZE} height={SEAT_SIZE} rx="3"
+              fill={SEAT_F} stroke={SEAT_S} strokeWidth="0.8" />
           </g>
         )
       })}
 
-      {/* Partition: passenger / driver */}
-      <rect x="5" y="358" width={SVG_W - 10} height="2.5" fill="#0f2612" />
+      {/* Partition: conductor / pasajeros */}
+      <rect x={PARTITION_X} y={MARGIN} width="2.5" height={SVG_H - MARGIN * 2} fill="#0f2612" />
 
-      {/* Door: bottom-right of passenger area */}
-      <rect x="137" y="360" width="47" height="46" rx="4"
-        fill={DARK} stroke="#60a5fa" strokeWidth="1.5" strokeDasharray="4,3" />
-      <rect x="141" y="364" width="39" height="37" rx="2"
-        fill="#0a1a0c" stroke="#60a5fa" strokeWidth="0.8" />
-      <circle cx="157" cy="384" r="2.5" fill="#60a5fa" />
-      <text
-        x="161" y="398" textAnchor="middle" fontSize="7"
-        fill="#93c5fd" fontFamily="system-ui,sans-serif" fontWeight="700"
-      >PUERTA</text>
+      {/* Volante (negro) — a la izquierda */}
+      <circle cx={WHEEL_CX} cy={WHEEL_CY} r={WHEEL_R} fill="none" stroke={WHEEL} strokeWidth="2.5" />
+      <circle cx={WHEEL_CX} cy={WHEEL_CY} r="4" fill={WHEEL} />
+      <line x1={WHEEL_CX} y1={WHEEL_CY - WHEEL_R} x2={WHEEL_CX} y2={WHEEL_CY - 6} stroke={WHEEL} strokeWidth="2" />
+      <line x1={WHEEL_CX - WHEEL_R} y1={WHEEL_CY} x2={WHEEL_CX - 6} y2={WHEEL_CY} stroke={WHEEL} strokeWidth="2" />
+      <line x1={WHEEL_CX + 6} y1={WHEEL_CY} x2={WHEEL_CX + WHEEL_R} y2={WHEEL_CY} stroke={WHEEL} strokeWidth="2" />
 
-      {/* Steering wheel */}
-      <circle cx="75" cy="415" r="16" fill="none" stroke="#2a5030" strokeWidth="2.5" />
-      <circle cx="75" cy="415" r="4"  fill="#2a5030" />
-      <line x1="75" y1="399" x2="75" y2="411" stroke="#2a5030" strokeWidth="2" />
-      <line x1="59" y1="415" x2="71" y2="415" stroke="#2a5030" strokeWidth="2" />
-      <line x1="79" y1="415" x2="91" y2="415" stroke="#2a5030" strokeWidth="2" />
+      {/* Asiento conductor — a la derecha del volante */}
+      <rect
+        x={DRIVER_SEAT_X} y={DRIVER_SEAT_Y}
+        width={DRIVER_SEAT_W} height={DRIVER_SEAT_H} rx="3"
+        fill={SEAT_F} stroke={SEAT_S} strokeWidth="0.8"
+      />
 
-      {/* Driver seat */}
-      <rect x="20" y="399" width="28" height="22" rx="4" fill={SEAT_F} stroke={SEAT_S} strokeWidth="0.8" />
-
-      {/* Rear window (top = back of bus) */}
-      <rect x="14" y="8"  width={SVG_W - 28} height="9"  rx="3" fill="#0d2a55" opacity="0.6" clipPath="url(#bus-int-clip)" />
-      {/* Front windshield (bottom = front) */}
-      <rect x="14" y={SVG_H - 20} width={SVG_W - 28} height="11" rx="4" fill="#0d2a55" opacity="0.65" clipPath="url(#bus-int-clip)" />
+      {/* Front windshield (left) */}
+      <rect x={MARGIN + 4} y={MARGIN + 8} width="9" height={SVG_H - MARGIN * 2 - 16} rx="3"
+        fill="#0d2a55" opacity="0.6" clipPath="url(#bus-int-clip)" />
+      {/* Rear window */}
+      <rect x={SVG_W - MARGIN - 12} y={MARGIN + 8} width="11" height={SVG_H - MARGIN * 2 - 16} rx="4"
+        fill="#0d2a55" opacity="0.65" clipPath="url(#bus-int-clip)" />
     </svg>
   )
 }
 
-// ─── Snack Bubble ─────────────────────────────────────────────
+// ─── Price pop (snackbar) ─────────────────────────────────────
 
-function SnackBubble({ player }: { player: PlayerData }) {
+function PricePop({
+  x,
+  y,
+  boleto2022,
+  boleto2026,
+  unit,
+}: {
+  x: number
+  y: number
+  boleto2022: number
+  boleto2026: number
+  unit?: string
+}) {
   return (
     <motion.div
-      initial={{ opacity: 0, y: 10, scale: 0.92 }}
-      animate={{ opacity: 1, y: 0, scale: 1 }}
-      exit={{ opacity: 0, y: -8, scale: 0.92 }}
-      transition={{ duration: 0.25 }}
-      className="bg-card border border-border rounded-xl p-4 shadow-xl w-52"
+      initial={{ opacity: 0, scale: 0.88 }}
+      animate={{ opacity: 1, scale: 1 }}
+      exit={{ opacity: 0, scale: 0.9 }}
+      transition={{ duration: 0.45, ease: "easeOut" }}
+      className="absolute z-20 pointer-events-none"
+      style={{ left: x, top: y }}
     >
-      <p className="text-[10px] text-muted-foreground mb-1">{player.nombre} pidió…</p>
-      <div className="flex items-center gap-2 mb-3">
-        <span className="text-2xl leading-none">{player.emoji}</span>
-        <p className="text-sm font-semibold text-foreground leading-tight">{player.snack}</p>
-      </div>
-      <div className="grid grid-cols-2 gap-2">
-        <div className="bg-muted rounded-lg px-2 py-1.5 text-center">
-          <p className="text-[9px] text-muted-foreground mb-0.5">🇶🇦 Qatar 2022</p>
-          <p className="text-sm font-bold tabular-nums">USD&nbsp;${player.qatarUSD}</p>
-        </div>
-        <div className="bg-muted rounded-lg px-2 py-1.5 text-center">
-          <p className="text-[9px] text-muted-foreground mb-0.5">🇺🇸 EEUU 2026</p>
-          <p className="text-sm font-bold tabular-nums">USD&nbsp;${player.usaUSD}</p>
-        </div>
-      </div>
+      <span className="absolute right-full top-1/2 -translate-y-1/2 mr-1.5 inline-block rounded-md border border-primary/50 bg-primary/25 px-1.5 py-0.5 text-[10px] font-semibold text-primary shadow-md tabular-nums whitespace-nowrap">
+        {formatCurrency(boleto2022, unit)}
+      </span>
+      <span className="absolute left-full top-1/2 -translate-y-1/2 ml-1.5 inline-block rounded-md border border-accent/50 bg-accent/25 px-1.5 py-0.5 text-[10px] font-semibold text-accent shadow-md tabular-nums whitespace-nowrap">
+        {formatCurrency(boleto2026, unit)}
+      </span>
     </motion.div>
   )
 }
@@ -266,7 +310,6 @@ export function MicroSection() {
   const sueldo2022 = salario?.valor_2022 ?? 61953
   const sueldo2026 = salario?.valor_2026 ?? 346800
 
-  // Daily min-wage ÷ bus fare = trips/day
   const viajes2022 = Math.floor(sueldo2022 / 30 / boleto2022)
   const viajes2026 = Math.floor(sueldo2026 / 30 / boleto2026)
 
@@ -277,9 +320,8 @@ export function MicroSection() {
 
   useMotionValueEvent(scrollYProgress, "change", (v) => {
     if (prefersReducedMotion) return
-    // Map 0-1 scroll progress to 0-26 players boarded
-    // Players fill seats from 3% scroll to ~95%, leaving room at end for obelisco
-    const next = Math.min(26, Math.floor(v * 27.5))
+    const boardingV = Math.min(1, v / BOARDING_SCROLL_END)
+    const next = Math.min(26, Math.floor(boardingV * 27.5))
     if (next > prevBoarded.current) {
       setSnackIndex(next - 1)
     } else if (next < prevBoarded.current) {
@@ -289,10 +331,9 @@ export function MicroSection() {
     setBoarded(next)
   })
 
-  // Auto-clear snack bubble after 2.5 s
   useEffect(() => {
     if (snackIndex === null) return
-    const t = setTimeout(() => setSnackIndex(null), 2500)
+    const t = setTimeout(() => setSnackIndex(null), 2200)
     return () => clearTimeout(t)
   }, [snackIndex])
 
@@ -315,26 +356,49 @@ export function MicroSection() {
         sources={[micro, salario]}
       >
         <p className="text-sm text-muted-foreground text-center py-8 border border-border/40 rounded-xl bg-muted/30">
-          26 jugadores, 26 snacks, un solo colectivo.
+          26 jugadores, un solo colectivo.
         </p>
       </SectionWrapper>
     )
   }
 
+  const snackPos =
+    snackIndex !== null ? getSeatPos(snackIndex) : null
+
   return (
     <SectionWrapper
       number="11"
       title="El micro del festejo"
-      intro="Si los campeones del mundo hubieran viajado en colectivo… ¿qué snack hubieran pedido?"
+      intro="Si los campeones del mundo hubieran viajado en colectivo… ¿cuánto les hubiera costado ir a festejar?"
       sources={[micro, salario]}
     >
-      {/* Tall scroll container — drives the boarding animation */}
-      <div ref={scrollRef} className="relative" style={{ minHeight: "380vh" }}>
-        <div className="sticky top-0 h-screen flex flex-col items-center justify-center gap-5 py-4">
+      <motion.div ref={scrollRef} className="relative" style={{ minHeight: SCROLL_MIN_HEIGHT }}>
+        <motion.div className="sticky top-0 h-screen flex flex-col items-center justify-center gap-5 py-4 px-2 relative overflow-visible">
 
-          {/* Progress counter */}
+          <AnimatePresence>
+            {allBoarded && (
+              <motion.div
+                key="obelisco-bg"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.8 }}
+                className="absolute top-0 bottom-0 left-1/2 z-0 w-screen -translate-x-1/2 pointer-events-none"
+                aria-hidden
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={`${BASE_PATH}/obelisco.webp`}
+                  alt=""
+                  className="absolute inset-0 h-full w-full object-cover"
+                />
+                <div className="absolute inset-0 bg-background/35 pointer-events-none" />
+              </motion.div>
+            )}
+          </AnimatePresence>
+
           <motion.p
-            className="text-xs text-muted-foreground font-medium tracking-wide text-center"
+            className="relative z-10 text-xs text-muted-foreground font-medium tracking-wide text-center"
             animate={{ opacity: boarded === 0 ? 0.5 : 1 }}
             transition={{ duration: 0.3 }}
           >
@@ -345,92 +409,85 @@ export function MicroSection() {
               : "¡Los 26 campeones están en el micro! 🏆"}
           </motion.p>
 
-          {/* Bus + snack bubble */}
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
+          <motion.div
+            className="relative z-10 flex-shrink-0 w-full max-w-[820px] overflow-visible rounded-xl pt-10"
+            style={{ width: SVG_W, height: SVG_H + 40 }}
+          >
+            <div className="relative" style={{ height: SVG_H }}>
+            <BusTopView showObelisco={allBoarded} />
 
-            {/* Bus top-view with player circles on top */}
-            <div
-              className="relative flex-shrink-0"
-              style={{ width: SVG_W, height: SVG_H }}
-            >
-              <BusTopView />
+            {PLAYERS.map((player, i) => {
+              const isBoarded = i < boarded
+              const { x: sx, y: sy, col } = getSeatPos(i)
+              const [nombreLinea1, nombreLinea2] = splitNombreEnDosLineas(player.nombre)
+              const linea1 = nombreLinea2 ? nombreLinea1 : player.label
+              const linea2 = nombreLinea2 || player.nombre
+              const nameBelow = col === 1
 
-              {PLAYERS.map((player, i) => {
-                const isBoarded = i < boarded
-                const { x: sx, y: sy } = getSeatPos(i)
-
-                return (
-                  <motion.div
-                    key={i}
-                    style={{
-                      position: "absolute",
-                      left: 0,
-                      top: 0,
-                      width: CIRCLE_D,
-                      height: CIRCLE_D,
-                    }}
-                    initial={{
-                      x: DOOR_CX - CIRCLE_D / 2,
-                      y: DOOR_CY - CIRCLE_D / 2,
-                      opacity: 0,
-                      scale: 0.4,
-                    }}
-                    animate={
-                      isBoarded
-                        ? { x: sx - CIRCLE_D / 2, y: sy - CIRCLE_D / 2, opacity: 1, scale: 1 }
-                        : { x: DOOR_CX - CIRCLE_D / 2, y: DOOR_CY - CIRCLE_D / 2, opacity: 0, scale: 0.4 }
-                    }
-                    transition={{ duration: 0.7, ease: "easeInOut" }}
+              return (
+                <motion.div
+                  key={i}
+                  style={{
+                    position: "absolute",
+                    left: 0,
+                    top: 0,
+                    width: CIRCLE_D,
+                    height: CIRCLE_D,
+                  }}
+                  initial={{
+                    x: ENTRANCE_CX - CIRCLE_D / 2,
+                    y: ENTRANCE_CY - CIRCLE_D / 2,
+                    opacity: 0,
+                    scale: 0.4,
+                  }}
+                  animate={
+                    isBoarded
+                      ? { x: sx - CIRCLE_D / 2, y: sy - CIRCLE_D / 2, opacity: 1, scale: 1 }
+                      : { x: ENTRANCE_CX - CIRCLE_D / 2, y: ENTRANCE_CY - CIRCLE_D / 2, opacity: 0, scale: 0.4 }
+                  }
+                  transition={{ duration: 0.7, ease: "easeInOut" }}
+                >
+                  <div
+                    className={`absolute left-1/2 z-30 -translate-x-1/2 flex flex-col items-center text-center pointer-events-none leading-tight max-w-[4.25rem] ${
+                      nameBelow ? "top-full mt-0.5" : "bottom-full mb-0.5"
+                    }`}
+                    style={{ textShadow: "0 1px 4px rgba(0,0,0,0.95)" }}
                   >
-                    {/* Name label */}
-                    <div
-                      style={{
-                        position: "absolute",
-                        bottom: "100%",
-                        left: "50%",
-                        transform: "translateX(-50%)",
-                        fontSize: "5.5px",
-                        color: "white",
-                        whiteSpace: "nowrap",
-                        textShadow: "0 1px 3px rgba(0,0,0,0.95)",
-                        fontWeight: 700,
-                        marginBottom: "1px",
-                        lineHeight: 1,
-                        pointerEvents: "none",
-                      }}
-                    >
-                      {player.label}
-                    </div>
+                    <span className="text-[10px] font-bold text-white">{linea1}</span>
+                    <span className="text-[9px] font-semibold text-white/90">{linea2}</span>
+                  </div>
 
-                    {/* Celeste circle */}
-                    <div
-                      style={{
-                        width: "100%",
-                        height: "100%",
-                        borderRadius: "50%",
-                        backgroundColor: "#75AADB",
-                        border: "2px solid white",
-                        boxShadow: "0 2px 6px rgba(0,0,0,0.55)",
-                      }}
-                    />
-                  </motion.div>
-                )
-              })}
+                  <div
+                    className="bg-primary border-2 border-white"
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      borderRadius: "50%",
+                      boxShadow: "0 2px 6px rgba(0,0,0,0.55)",
+                    }}
+                  />
+                </motion.div>
+              )
+            })}
+
+            <AnimatePresence>
+              {snackIndex !== null && !allBoarded && snackPos && (
+                <PricePop
+                  key={snackIndex}
+                  x={snackPos.x}
+                  y={snackPos.y}
+                  boleto2022={boleto2022}
+                  boleto2026={boleto2026}
+                  unit={micro?.unidad}
+                />
+              )}
+            </AnimatePresence>
             </div>
+          </motion.div>
 
-            {/* Snack bubble slot */}
-            <div className="w-52 flex items-center justify-center" style={{ minHeight: 128 }}>
-              <AnimatePresence mode="wait">
-                {snackIndex !== null && !allBoarded && (
-                  <SnackBubble key={snackIndex} player={PLAYERS[snackIndex]} />
-                )}
-              </AnimatePresence>
-            </div>
-          </div>
-
-          {/* Obelisco stat — appears when all 26 are seated */}
           <AnimatePresence>
             {allBoarded && (
+              <motion.div className="relative z-10">
               <ObeliscoCard
                 key="obelisco"
                 viajes2022={viajes2022}
@@ -438,10 +495,11 @@ export function MicroSection() {
                 boleto2022={boleto2022}
                 boleto2026={boleto2026}
               />
+              </motion.div>
             )}
           </AnimatePresence>
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
     </SectionWrapper>
   )
 }

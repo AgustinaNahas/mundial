@@ -12,6 +12,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import { InfoIconButton } from "@/components/ui/info-icon-button"
 import { useIsMobile } from "@/hooks/use-mobile"
 import { MonthStack } from "@/components/month-stack"
+import { LazySectionSkeleton } from "@/components/lazy-mount"
 import { sendGaEvent } from "@/lib/analytics"
 
 /* ─── Constantes ────────────────────────────────────────────── */
@@ -578,7 +579,13 @@ export function AlbumSection() {
   const mobileLeftSnacks = mobileSnacks.filter(s => s.side === "left")
   const mobileRightSnacks = mobileSnacks.filter(s => s.side === "right")
 
-  if (loading) return null
+  if (loading) {
+    return (
+      <SectionWrapper number="01" title="El álbum del Mundial" intro="Cargando datos..." bgColor="muted">
+        <LazySectionSkeleton className="min-h-[min(48vh,28rem)]" />
+      </SectionWrapper>
+    )
+  }
 
   return (
     <>
