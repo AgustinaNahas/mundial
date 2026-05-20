@@ -19,6 +19,7 @@ import {
 } from "@/components/deferred-sections"
 import { BlockHeader } from "@/components/block-header"
 import { CartaRevealSection } from "@/components/sections/carta-reveal-section"
+import { BLOCKS } from "@/lib/site-copy"
 
 export default function HomeSections() {
   const [festejoUnlocked, setFestejoUnlocked] = useState(false)
@@ -34,11 +35,7 @@ export default function HomeSections() {
   return (
     <>
       <section id="previa">
-        <BlockHeader
-          number="01"
-          title="La Previa del Mundial"
-          subtitle="Arranca la fiebre mundialista. Nos preparamos para palpitar lo que van a ser los próximos días."
-        />
+        <BlockHeader {...BLOCKS.previa} />
         <DeferredAlbumSection />
         <DeferredPlayStationSection />
         <DeferredPelotaSection />
@@ -46,11 +43,7 @@ export default function HomeSections() {
       </section>
 
       <section id="mundial">
-        <BlockHeader
-          number="02"
-          title="El Mundial"
-          subtitle="El momento de vivirlo."
-        />
+        <BlockHeader {...BLOCKS.mundial} />
         <DeferredCanchaSection />
         <DeferredMateSection />
         <DeferredAsadoSection />
@@ -70,21 +63,13 @@ export default function HomeSections() {
             transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
           >
             <section id="festejo">
-              <BlockHeader
-                number="03"
-                title="El Festejo"
-                subtitle="Argentina campeona."
-              />
+              <BlockHeader {...BLOCKS.festejo} />
               <DeferredFernetSection />
               <DeferredMicroSection />
             </section>
 
             <section id="gente">
-              <BlockHeader
-                number="04"
-                title="La Gente"
-                subtitle="El tono cambia. Más íntimo."
-              />
+              <BlockHeader {...BLOCKS.gente} />
               <DeferredJubilacionSection />
               <DeferredNinosSection />
               <DeferredDerechosSection />

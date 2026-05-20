@@ -11,7 +11,7 @@ import { cn } from "@/lib/utils"
 
 const BASE_PATH = "/mundial"
 const CARTA_DORSO_SRC = `${BASE_PATH}/carta.png`
-const CUATRO_COPAS_SRC = `${BASE_PATH}/4copas.jpg`
+const CUATRO_COPAS_SRC = `${BASE_PATH}/4copas.png`
 
 /** Proporción real de carta.png y 4copas.jpg (~247×375) */
 const CARD_WIDTH = 247
@@ -108,6 +108,7 @@ export function CartaRevealSection({ unlocked, onUnlock }: CartaRevealSectionPro
   return (
     <section
       id="carta"
+      data-progress-anchor=""
       className={cn(
         "relative flex flex-col items-center justify-center overflow-hidden bg-background",
         unlocked ? "min-h-[min(72vh,40rem)] py-16 md:py-20" : "min-h-[100dvh]",

@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react"
 import { motion } from "framer-motion"
+import { HERO_COPY } from "@/lib/site-copy"
 
 function HeroParticles() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -251,13 +252,13 @@ export function HeroSection() {
         >
           <div className="space-y-3">
             <h1 className="font-display font-black text-5xl sm:text-6xl md:text-8xl lg:text-9xl text-foreground tracking-[0.04em] leading-none uppercase pointer-events-auto">
-              ¿Cuánto cuesta
+              {HERO_COPY.titleLine1}
             </h1>
             <h2 className="font-display font-bold text-3xl sm:text-4xl md:text-6xl lg:text-7xl text-primary tracking-[0.06em] leading-none uppercase pointer-events-auto">
-              ser campeón del mundo?
+              {HERO_COPY.titleLine2}
             </h2>
             <p className="mt-12 max-w-3xl mx-auto text-sm sm:text-base md:text-lg text-foreground/80 leading-relaxed pointer-events-auto">
-              En 2022 Argentina se coronó campeona del mundo. <br/>¿Cuál sería el precio de ser campeones hoy?
+              {HERO_COPY.subtitle}
             </p>
           </div>
 
@@ -270,13 +271,21 @@ export function HeroSection() {
           >
             <div className="flex flex-col items-center gap-1.5 px-4 sm:px-7 py-4 bg-primary/10">
               <span className="text-xl">⭐</span>
-              <span className="font-display font-black text-2xl md:text-3xl text-foreground tracking-[0.04em] leading-none">2022</span>
-              <span className="text-[9px] uppercase tracking-[0.18em] text-primary">Qatar · Campeones</span>
+              <span className="font-display font-black text-2xl md:text-3xl text-foreground tracking-[0.04em] leading-none">
+                {HERO_COPY.badge2022.label}
+              </span>
+              <span className="text-[9px] uppercase tracking-[0.18em] text-primary">
+                {HERO_COPY.badge2022.place}
+              </span>
             </div>
             <div className="flex flex-col items-center gap-1.5 px-4 sm:px-7 py-4">
               <span className="text-xl">⚽</span>
-              <span className="font-display font-black text-2xl md:text-3xl text-foreground tracking-[0.04em] leading-none">2026</span>
-              <span className="text-[9px] uppercase tracking-[0.18em] text-muted-foreground">EEUU · Can · Méx</span>
+              <span className="font-display font-black text-2xl md:text-3xl text-foreground tracking-[0.04em] leading-none">
+                {HERO_COPY.badge2026.label}
+              </span>
+              <span className="text-[9px] uppercase tracking-[0.18em] text-muted-foreground">
+                {HERO_COPY.badge2026.place}
+              </span>
             </div>
           </motion.div>
         </motion.div>

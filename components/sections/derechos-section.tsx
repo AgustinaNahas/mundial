@@ -2,6 +2,10 @@
 
 import { motion } from "framer-motion"
 import { SectionWrapper } from "@/components/section-wrapper"
+import { DERECHOS_SOURCE_ROWS } from "@/lib/derechos-sources"
+import { SECTIONS } from "@/lib/site-copy"
+
+const copy = SECTIONS.derechos
 
 interface RadarDataPoint {
   category: string
@@ -127,9 +131,11 @@ function RadarChart() {
 export function DerechosSection() {
   return (
     <SectionWrapper
-      number="13"
-      title="Derechos: Qatar vs EEUU vs Canadá vs México"
-      intro="No todos los Mundiales se juegan en la cancha."
+      number={copy.number}
+      title={copy.title}
+      intro={copy.intro}
+      closing={copy.closing}
+      extraSources={DERECHOS_SOURCE_ROWS}
     >
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
         <RadarChart />

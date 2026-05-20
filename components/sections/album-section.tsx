@@ -6,6 +6,9 @@ import { motion, AnimatePresence, useMotionValue, useSpring, useReducedMotion } 
 import Image from "next/image"
 import { formatCurrency } from "@/lib/utils"
 import { SectionWrapper } from "@/components/section-wrapper"
+import { LOADING_INTRO, SECTIONS } from "@/lib/site-copy"
+
+const copy = SECTIONS.album
 import { useData } from "@/lib/data-context"
 import { cn } from "@/lib/utils"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
@@ -581,7 +584,12 @@ export function AlbumSection() {
 
   if (loading) {
     return (
-      <SectionWrapper number="01" title="El álbum del Mundial" intro="Cargando datos..." bgColor="muted">
+      <SectionWrapper
+        number={copy.number}
+        title={copy.title}
+        intro={LOADING_INTRO}
+        bgColor="muted"
+      >
         <LazySectionSkeleton className="min-h-[min(48vh,28rem)]" />
       </SectionWrapper>
     )
@@ -593,9 +601,10 @@ export function AlbumSection() {
       <FiguraCursor visible={!isMobile && inAlbum && !allFilled} cursorX={cursorX} cursorY={cursorY} src={cursorSrc} />
 
       <SectionWrapper
-        number="01"
-        title="El álbum del Mundial"
-        intro="Completar el álbum pasó de ser un hobby familiar a un lujo."
+        number={copy.number}
+        title={copy.title}
+        intro={copy.intro}
+        closing={copy.closing}
         bgColor="muted"
         sources={[sobreItem, figusSobreItem, albumItem, cantFiguritas, salario]}
       >

@@ -6,6 +6,9 @@ import { SectionWrapper } from "@/components/section-wrapper"
 import { ComparisonBar } from "@/components/comparison-bar"
 import { StatCard } from "@/components/stat-card"
 import { useData } from "@/lib/data-context"
+import { LOADING_INTRO, SECTIONS } from "@/lib/site-copy"
+
+const copy = SECTIONS.alquiler
 
 function BuildingIcon({ className }: { className?: string }) {
   return (
@@ -49,7 +52,12 @@ export function AlquilerSection() {
   
   if (loading) {
     return (
-      <SectionWrapper number="10" title="El depto 2 ambientes" intro="Cargando datos..." bgColor="muted">
+      <SectionWrapper
+        number={copy.number}
+        title={copy.title}
+        intro={LOADING_INTRO}
+        bgColor="muted"
+      >
         <div className="h-48 animate-pulse bg-muted rounded-lg" />
       </SectionWrapper>
     )
@@ -57,9 +65,10 @@ export function AlquilerSection() {
   
   return (
     <SectionWrapper
-      number="10"
-      title="El depto 2 ambientes"
-      intro="El balcon del festejo ahora cuesta mas meses de trabajo."
+      number={copy.number}
+      title={copy.title}
+      intro={copy.intro}
+      closing={copy.closing}
       bgColor="muted"
       sources={[alquiler, salario]}
     >

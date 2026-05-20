@@ -5,6 +5,9 @@ import Image from "next/image"
 import { formatCurrency } from "@/lib/utils"
 import { SectionWrapper } from "@/components/section-wrapper"
 import { useData } from "@/lib/data-context"
+import { LOADING_INTRO, SECTIONS } from "@/lib/site-copy"
+
+const copy = SECTIONS.camiseta
 
 const BASE_PATH = "/mundial"
 
@@ -91,7 +94,7 @@ export function CamisetaSection() {
 
   if (loading) {
     return (
-      <SectionWrapper number="03" title="La camiseta" intro="Cargando datos...">
+      <SectionWrapper number={copy.number} title={copy.title} intro={LOADING_INTRO}>
         <div className="h-48 animate-pulse bg-muted rounded-lg" />
       </SectionWrapper>
     )
@@ -99,9 +102,10 @@ export function CamisetaSection() {
 
   return (
     <SectionWrapper
-      number="03"
-      title="La camiseta"
-      intro="Vestir los colores de la Selección requiere más días de trabajo que hace 4 años."
+      number={copy.number}
+      title={copy.title}
+      intro={copy.intro}
+      closing={copy.closing}
       sources={[camiseta, salario, dolar]}
     >
       <div className="grid grid-cols-2 gap-3 md:gap-12">

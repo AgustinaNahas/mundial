@@ -5,27 +5,72 @@ import { motion, AnimatePresence } from "framer-motion"
 import { ChevronDown } from "lucide-react"
 import { DataItem, useData } from "@/lib/data-context"
 import { InfoIconSurface } from "@/components/ui/info-icon-button"
-import { cn } from "@/lib/utils"
+import { cn, formatCurrency } from "@/lib/utils"
 
-interface SourcesPanelProps {
-  items: (DataItem | undefined)[]
+export interface SourceRow {
+  key: string
+  descripcion: string
+  fuente: string
+  fuenteCorta: string
+  fechaFuente: string
+  periodo: number
+  valor?: number
+  unidad?: string
 }
 
-export function SourcesPanel({ items }: SourcesPanelProps) {
+interface SourcesPanelProps {
+  items?: (DataItem | undefined)[]
+  extraRows?: SourceRow[]
+}
+
+function formatSourceValue(valor: number, unidad?: string) {
+  const u = unidad?.trim().toUpperCase()
+  if (u === "ARS" || u === "USD") return formatCurrency(valor, unidad)
+  return valor.toLocaleString("es-AR")
+}
+
+function SourceAttributionLink({
+  url,
+  corta,
+  fecha,
+}: {
+  url: string
+  corta: string
+  fecha: string
+}) {
+  const label = fecha ? `${corta} (${fecha})` : corta
+  if (!url.startsWith("http")) return <span>{label}</span>
+  return (
+    <a
+      href={url}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="cursor-pointer hover:text-primary transition-colors underline underline-offset-2"
+    >
+      {label}
+    </a>
+  )
+}
+
+export function SourcesPanel({ items = [], extraRows = [] }: SourcesPanelProps) {
   const [open, setOpen] = useState(false)
   const { rawData } = useData()
 
   const indicadores = new Set(items.filter(Boolean).map((item) => item!.indicador.toLowerCase()))
-  const sourceRows = rawData
+  const csvRows: SourceRow[] = rawData
     .filter((row) => indicadores.has(row.indicador.toLowerCase()) && row.fuente)
     .map((row, index) => ({
       key: `${row.indicador}-${row.periodo}-${index}`,
       descripcion: row.descripcion || row.indicador,
+      valor: row.valor,
+      unidad: row.unidad,
       fuente: row.fuente,
       fuenteCorta: row.fuente_corta || "Fuente",
       fechaFuente: row.fecha_fuente || "",
       periodo: row.periodo,
     }))
+
+  const sourceRows = [...csvRows, ...extraRows]
 
   if (sourceRows.length === 0) return null
 
@@ -39,7 +84,7 @@ export function SourcesPanel({ items }: SourcesPanelProps) {
     <div className="mt-10 pt-6 border-t border-border/40">
       <button
         type="button"
-        onClick={() => setOpen(v => !v)}
+        onClick={() => setOpen((v) => !v)}
         aria-expanded={open}
         className="cursor-pointer flex w-full max-w-full items-center gap-3 text-left text-sm font-medium text-muted-foreground hover:text-foreground transition-colors group"
       >
@@ -66,22 +111,18 @@ export function SourcesPanel({ items }: SourcesPanelProps) {
           >
             {sortedRows.map((row) => (
               <li key={row.key} className="text-sm text-muted-foreground/85 leading-relaxed">
-                {row.fuente.startsWith("http") ? (
-                  <a
-                    href={row.fuente}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="cursor-pointer hover:text-primary transition-colors underline underline-offset-2"
-                  >
-                    {row.descripcion} - Fuente: {row.fuenteCorta + " "}
-                    {row.fechaFuente ? `(${row.fechaFuente})` : ""}
-                  </a>
+                {row.valor != null ? (
+                  <>
+                    {row.descripcion}: {formatSourceValue(row.valor, row.unidad)} — Fuente:{" "}
+                  </>
                 ) : (
-                  <span>
-                    {row.descripcion} - Fuente: {row.fuenteCorta + " "}
-                    {row.fechaFuente ? `(${row.fechaFuente})` : ""}
-                  </span>
+                  <>{row.descripcion} — Fuente: </>
                 )}
+                <SourceAttributionLink
+                  url={row.fuente}
+                  corta={row.fuenteCorta}
+                  fecha={row.fechaFuente}
+                />
               </li>
             ))}
           </motion.ul>

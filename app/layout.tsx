@@ -1,4 +1,4 @@
-import type { Metadata } from "next"
+import type { Metadata, Viewport } from "next"
 import { Analytics } from "@vercel/analytics/next"
 import { DM_Sans, Barlow_Condensed } from "next/font/google"
 import Script from "next/script"
@@ -6,6 +6,14 @@ import "./globals.css"
 
 const dmSans = DM_Sans({ subsets: ["latin"], variable: "--font-dm-sans" })
 const barlowCondensed = Barlow_Condensed({ subsets: ["latin"], weight: ["600", "700", "800", "900"], variable: "--font-barlow" })
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+  /** Safari iOS: la UI del navegador superpone el contenido sin reservar hueco al ocultarse. */
+  interactiveWidget: "overlays-content",
+}
 
 export const metadata: Metadata = {
   title: '¿Cuánto cuesta ser campeón del mundo? | Argentina Qatar 2022 vs EEUU 2026',

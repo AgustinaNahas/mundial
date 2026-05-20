@@ -2,7 +2,8 @@
 
 import { useEffect, useMemo, useRef } from "react"
 import { motion } from "framer-motion"
-import { SourcesPanel } from "@/components/sources-panel"
+import { SectionClosing } from "@/components/section-closing"
+import { SourcesPanel, type SourceRow } from "@/components/sources-panel"
 import { DataItem } from "@/lib/data-context"
 import { sendGaEvent } from "@/lib/analytics"
 
@@ -11,8 +12,10 @@ interface SectionWrapperProps {
   number: string
   title: string
   intro?: string
+  closing?: string
   bgColor?: "background" | "muted"
   sources?: (DataItem | undefined)[]
+  extraSources?: SourceRow[]
 }
 
 function slugify(value: string) {
@@ -29,11 +32,14 @@ export function SectionWrapper({
   number,
   title,
   intro,
+  closing,
   bgColor = "background",
   sources,
+  extraSources,
 }: SectionWrapperProps) {
   const sectionRef = useRef<HTMLElement | null>(null)
   const sectionName = useMemo(() => slugify(title), [title])
+  const showSources = (sources && sources.length > 0) || (extraSources && extraSources.length > 0)
 
   useEffect(() => {
     const node = sectionRef.current
@@ -61,7 +67,11 @@ export function SectionWrapper({
   }, [number, sectionName, title])
 
   return (
-    <section ref={sectionRef} className={`py-20 md:py-28 ${bgColor === "muted" ? "bg-muted" : "bg-background"}`}>
+    <section
+      ref={sectionRef}
+      data-progress-anchor=""
+      className={`py-20 md:py-28 ${bgColor === "muted" ? "bg-muted" : "bg-background"}`}
+    >
       <div className="container mx-auto px-6 md:px-12 max-w-5xl">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -83,7 +93,11 @@ export function SectionWrapper({
 
         {children}
 
-        {sources && <SourcesPanel items={sources} />}
+        {closing && <SectionClosing>{closing}</SectionClosing>}
+
+        {showSources && (
+          <SourcesPanel items={sources} extraRows={extraSources} />
+        )}
       </div>
     </section>
   )

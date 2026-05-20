@@ -6,6 +6,9 @@ import { motion } from "framer-motion"
 import { SectionWrapper } from "@/components/section-wrapper"
 import { ComparisonBar } from "@/components/comparison-bar"
 import { useData } from "@/lib/data-context"
+import { formatViajeIntro, LOADING_INTRO, SECTIONS } from "@/lib/site-copy"
+
+const copy = SECTIONS.viaje
 import { loadCountriesGeo } from "@/lib/countries-geo"
 import { LazySectionSkeleton } from "@/components/lazy-mount"
 
@@ -36,7 +39,7 @@ export function ViajeSection() {
 
   if (loading) {
     return (
-      <SectionWrapper number="05" title="El Viaje al Mundial" intro="Cargando datos...">
+      <SectionWrapper number={copy.number} title={copy.title} intro={LOADING_INTRO}>
         <LazySectionSkeleton className="min-h-[min(48vh,28rem)]" />
       </SectionWrapper>
     )
@@ -44,9 +47,11 @@ export function ViajeSection() {
 
   return (
     <SectionWrapper
-      number="05"
-      title="El Viaje al Mundial"
-      intro={`Costear los vuelos ida y vuelta en 2022 requería ${salarios2022} salarios mínimos. Para 2026, la cifra asciende a ${salarios2026}.`}
+      number={copy.number}
+      title={copy.title}
+      intro={formatViajeIntro(String(salarios2022), String(salarios2026))}
+      closing={copy.closing}
+      sources={[vuelo2022Item, vuelo2026Item, salarioItem]}
     >
       <div className="mt-12 mb-8">
         <WorldMap />

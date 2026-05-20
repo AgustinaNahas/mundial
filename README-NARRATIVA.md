@@ -160,12 +160,19 @@ Los montos vienen en gran parte del **CSV** publicado en Google Sheets (`lib/dat
 
 ---
 
+## Edición de textos
+
+Los títulos, intros, cierres de sección y textos de los cuatro bloques narrativos se editan en **`lib/site-copy.ts`**. Este README sigue siendo el mapa narrativo y las notas de diseño.
+
+Patrón en pantalla: contenido → **cierre** (itálica, grande) → panel **Fuentes**.
+
 ## Archivos clave
 
 | Archivo | Rol |
 |---------|-----|
+| `lib/site-copy.ts` | Copy centralizado (bloques, secciones, hero, cierre) |
 | `app/page.tsx` | Orden de bloques y secciones |
-| `components/section-wrapper.tsx` | Título, intro, fuentes por sección |
+| `components/section-wrapper.tsx` | Título, intro, cierre, fuentes por sección |
 | `lib/data-context.tsx` | CSV, indicadores, `getIndicador` |
 | `components/scrolly-map.tsx` | Mapa Leaflet del scrolly de cancha |
 | `components/comparison-bar.tsx` | Barras 2022 vs 2026 |

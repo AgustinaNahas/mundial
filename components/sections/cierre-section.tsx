@@ -1,7 +1,9 @@
 "use client"
 
 import { motion } from "framer-motion"
+import { SourcesPanel } from "@/components/sources-panel"
 import { useData } from "@/lib/data-context"
+import { CIERRE_COPY } from "@/lib/site-copy"
 
 export function CierreSection() {
   const { getIndicador, loading } = useData()
@@ -93,10 +95,10 @@ export function CierreSection() {
           className="text-center mb-16"
         >
           <p className="text-primary text-sm uppercase tracking-[0.3em] mb-4">
-            Cierre
+            {CIERRE_COPY.kicker}
           </p>
           <h2 className="text-3xl md:text-5xl font-light tracking-tight text-balance">
-            ¿Es más caro soñar?
+            {CIERRE_COPY.title}
           </h2>
         </motion.div>
         
@@ -109,10 +111,10 @@ export function CierreSection() {
         >
           <div className="p-8 md:p-12 bg-primary-foreground/10 rounded-lg text-center">
             <p className="text-sm text-primary-foreground/60 uppercase tracking-wide mb-4">
-              Índice "Ser campeón del mundo"
+              {CIERRE_COPY.indexLabel}
             </p>
             <p className="text-xs text-primary-foreground/40 mb-6">
-              Base 100 = Qatar 2022 (medido en salarios mínimos)
+              {CIERRE_COPY.indexNote}
             </p>
             
             <motion.p
@@ -138,7 +140,7 @@ export function CierreSection() {
           transition={{ delay: 0.4, duration: 0.6 }}
           className="mb-16"
         >
-          <h4 className="text-sm text-primary-foreground/60 mb-6">Desglose por categoría (en salarios mínimos)</h4>
+          <h4 className="text-sm text-primary-foreground/60 mb-6">{CIERRE_COPY.breakdownTitle}</h4>
           
           <div className="space-y-4">
             {indexData.map((item, i) => (
@@ -182,12 +184,12 @@ export function CierreSection() {
           className="text-center pt-12 border-t border-primary-foreground/20"
         >
           <p className="text-xl md:text-2xl font-light text-primary-foreground/90 max-w-2xl mx-auto leading-relaxed text-balance">
-            En 2022 Argentina fue campeona del mundo.
+            {CIERRE_COPY.lines[0]}
           </p>
           <p className="text-xl md:text-2xl font-light text-primary-foreground/90 max-w-2xl mx-auto leading-relaxed mt-2 text-balance">
-            En 2026 quiere volver a serlo.
+            {CIERRE_COPY.lines[1]}
           </p>
-          
+
           <motion.p
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -195,9 +197,9 @@ export function CierreSection() {
             transition={{ delay: 1.2, duration: 0.6 }}
             className="mt-8 text-2xl md:text-3xl font-light text-primary"
           >
-            La pregunta es:
+            {CIERRE_COPY.questionLead}
           </motion.p>
-          
+
           <motion.p
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -205,7 +207,7 @@ export function CierreSection() {
             transition={{ delay: 1.5, duration: 0.6 }}
             className="mt-4 text-3xl md:text-5xl font-light text-primary text-balance"
           >
-            ¿cuánto cuesta hoy ese sueño?
+            {CIERRE_COPY.question}
           </motion.p>
         </motion.div>
         
@@ -217,7 +219,7 @@ export function CierreSection() {
           className="mt-24 text-center"
         >
           <p className="text-xs text-primary-foreground/40 uppercase tracking-widest">
-            Una visualización de datos
+            {CIERRE_COPY.signature}
           </p>
           <div className="mt-8 flex items-center justify-center gap-4">
             <div className="w-8 h-1 bg-primary/30" />
@@ -225,6 +227,12 @@ export function CierreSection() {
             <div className="w-8 h-1 bg-primary/30" />
           </div>
         </motion.div>
+
+        <div className="mt-16 [&_button]:text-primary-foreground/70 [&_button:hover]:text-primary-foreground [&_li]:text-primary-foreground/75 [&_a:hover]:text-primary">
+          <SourcesPanel
+            items={[ps5, fifa, salario, album, camiseta, viaje, asado, alquiler, jubilacion]}
+          />
+        </div>
       </div>
     </section>
   )

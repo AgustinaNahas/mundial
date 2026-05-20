@@ -6,7 +6,11 @@ import { motion } from "framer-motion"
 import { ChevronDown } from "lucide-react"
 import { cn, formatCurrency } from "@/lib/utils"
 import { useData } from "@/lib/data-context"
+import { SectionClosing } from "@/components/section-closing"
 import { SourcesPanel } from "@/components/sources-panel"
+import { SECTIONS } from "@/lib/site-copy"
+
+const copy = SECTIONS.cancha
 import { InfoIconButton } from "@/components/ui/info-icon-button"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { LazySectionSkeleton } from "@/components/lazy-mount"
@@ -380,7 +384,7 @@ export function CanchaSection() {
 
   if (loading) {
     return (
-      <section className="py-20 md:py-28 bg-background">
+      <section data-progress-anchor="" className="py-20 md:py-28 bg-background">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -459,7 +463,7 @@ export function CanchaSection() {
   ]
 
   return (
-    <section className="py-20 md:py-28 bg-background">
+    <section data-progress-anchor="" className="py-20 md:py-28 bg-background">
       {/* ── Header ── */}
       <div className="container mx-auto px-6 md:px-12 max-w-5xl mb-16">
         <motion.div
@@ -468,12 +472,12 @@ export function CanchaSection() {
           viewport={{ once: true, margin: "-100px" }}
           transition={{ duration: 0.6 }}
         >
-          <span className="text-accent text-sm font-medium tracking-wide">04</span>
+          <span className="text-accent text-sm font-medium tracking-wide">{copy.number}</span>
           <h3 className="text-2xl md:text-4xl font-light text-foreground mt-2 tracking-tight text-balance">
-            El precio de la cancha
+            {copy.title}
           </h3>
           <p className="mt-4 text-base md:text-lg text-muted-foreground max-w-2xl leading-relaxed">
-            De los estadios de primera a los estadios del mundo. ¿Cuánto cuesta ir a ver a la Selección?
+            {copy.intro}
           </p>
         </motion.div>
       </div>
@@ -680,8 +684,9 @@ export function CanchaSection() {
         </div>
       </div>
 
-      {/* ── Fuentes ── */}
+      {/* ── Cierre y fuentes ── */}
       <div className="container mx-auto px-6 md:px-12 max-w-5xl mt-12">
+        <SectionClosing>{copy.closing}</SectionClosing>
         <SourcesPanel
           items={[entradaPrimera, entradaBarata, entradaCara, vueloDohaItem, vueloMiamiItem, salario, dolar]
             .filter(Boolean) as any}

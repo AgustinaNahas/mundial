@@ -6,6 +6,9 @@ import Image from "next/image"
 import { cn, formatCurrency } from "@/lib/utils"
 import { SectionWrapper } from "@/components/section-wrapper"
 import { useData } from "@/lib/data-context"
+import { LOADING_INTRO, SECTIONS } from "@/lib/site-copy"
+
+const copy = SECTIONS.pelota
 
 const BASE_PATH = "/mundial"
 
@@ -160,7 +163,7 @@ export function PelotaSection() {
 
   if (loading) {
     return (
-      <SectionWrapper number="03" title="La pelota" intro="Cargando datos...">
+      <SectionWrapper number={copy.number} title={copy.title} intro={LOADING_INTRO}>
         <div className="h-48 animate-pulse bg-muted rounded-lg" />
       </SectionWrapper>
     )
@@ -168,9 +171,10 @@ export function PelotaSection() {
 
   return (
     <SectionWrapper
-      number="03"
-      title="La pelota"
-      intro="Jugar al fútbol tiene un precio. La pelota oficial del Mundial pasó de ser un capricho caro a un lujo difícil de justificar."
+      number={copy.number}
+      title={copy.title}
+      intro={copy.intro}
+      closing={copy.closing}
       sources={[pelota, salario]}
     >
       <div className="grid grid-cols-2 gap-3 md:gap-12">

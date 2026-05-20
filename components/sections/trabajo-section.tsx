@@ -5,6 +5,9 @@ import { formatCurrency } from "@/lib/utils"
 import { SectionWrapper } from "@/components/section-wrapper"
 import { StatCard } from "@/components/stat-card"
 import { useData } from "@/lib/data-context"
+import { LOADING_INTRO, SECTIONS } from "@/lib/site-copy"
+
+const copy = SECTIONS.trabajo
 
 function ClockIcon({ time, className }: { time: string; className?: string }) {
   const hours = parseInt(time.split(":")[0])
@@ -65,7 +68,12 @@ export function TrabajoSection() {
   
   if (loading) {
     return (
-      <SectionWrapper number="08" title="El que falto al laburo" intro="Cargando datos..." bgColor="muted">
+      <SectionWrapper
+        number={copy.number}
+        title={copy.title}
+        intro={LOADING_INTRO}
+        bgColor="muted"
+      >
         <div className="h-48 animate-pulse bg-muted rounded-lg" />
       </SectionWrapper>
     )
@@ -73,9 +81,10 @@ export function TrabajoSection() {
   
   return (
     <SectionWrapper
-      number="08"
-      title="El que falto al laburo"
-      intro="Faltar en 2022 costaba menos. En 2026, con nuevas reglas, el costo puede ser mayor."
+      number={copy.number}
+      title={copy.title}
+      intro={copy.intro}
+      closing={copy.closing}
       bgColor="muted"
       sources={[salario]}
     >

@@ -9,6 +9,9 @@ import {
   useScroll,
 } from "framer-motion"
 import { SectionWrapper } from "@/components/section-wrapper"
+import { LOADING_INTRO, SECTIONS } from "@/lib/site-copy"
+
+const copy = SECTIONS.micro
 import { useData } from "@/lib/data-context"
 import { formatCurrency } from "@/lib/utils"
 
@@ -341,7 +344,7 @@ export function MicroSection() {
 
   if (loading) {
     return (
-      <SectionWrapper number="11" title="El micro del festejo" intro="Cargando datos...">
+      <SectionWrapper number={copy.number} title={copy.title} intro={LOADING_INTRO}>
         <div className="h-48 animate-pulse bg-muted rounded-lg" />
       </SectionWrapper>
     )
@@ -350,9 +353,10 @@ export function MicroSection() {
   if (prefersReducedMotion) {
     return (
       <SectionWrapper
-        number="11"
-        title="El micro del festejo"
-        intro="Si los campeones del mundo hubieran viajado en colectivo…"
+        number={copy.number}
+        title={copy.title}
+        intro={copy.intro}
+        closing={copy.closing}
         sources={[micro, salario]}
       >
         <p className="text-sm text-muted-foreground text-center py-8 border border-border/40 rounded-xl bg-muted/30">
@@ -367,9 +371,10 @@ export function MicroSection() {
 
   return (
     <SectionWrapper
-      number="11"
-      title="El micro del festejo"
-      intro="Si los campeones del mundo hubieran viajado en colectivo… ¿cuánto les hubiera costado ir a festejar?"
+      number={copy.number}
+      title={copy.title}
+      intro={copy.intro}
+      closing={copy.closing}
       sources={[micro, salario]}
     >
       <motion.div ref={scrollRef} className="relative" style={{ minHeight: SCROLL_MIN_HEIGHT }}>

@@ -7,11 +7,14 @@ import {
   BEBES_POR_MIL_MAX,
   formatPerMil,
   NOMBRES_NINOS,
-  NOMBRES_NINOS_FUENTE,
   perMilNacimientos,
   type NombreNinoRow,
 } from "@/lib/nombres-ninos"
+import { NINOS_SOURCE_ROWS } from "@/lib/ninos-sources"
+import { SECTIONS } from "@/lib/site-copy"
 import { cn } from "@/lib/utils"
+
+const copy = SECTIONS.ninos
 
 function guessFeedback(guess: number, perMil2023: number): { message: string; tone: "hit" | "close" | "miss" } {
   const rounded = Math.round(perMil2023)
@@ -192,16 +195,21 @@ function NombreGuessCard({ row }: { row: NombreNinoRow }) {
 export function NinosSection() {
   return (
     <SectionWrapper
-      number="14"
-      title="Los niños"
-      intro="Después del Mundial, algunos nombres de la Scaloneta explotaron en los registros civiles. ¿Podés adivinar cuántos bebés de cada 1.000 nacidos en 2023 se llamaron así?"
+      number={copy.number}
+      title={copy.title}
+      intro={copy.intro}
+      closing={copy.closing}
       bgColor="muted"
+      extraSources={NINOS_SOURCE_ROWS}
     >
-      <p className="mb-6 text-sm text-muted-foreground max-w-2xl leading-relaxed">
-        Pasá el cursor por los bebés: se van “pintando” de izquierda a derecha. Cada uno
-        representa <span className="font-medium text-foreground">1 niño cada 1.000</span> nacidos.
-        Hacé clic para confirmar tu respuesta.
-      </p>
+      {copy.body && (
+        <p className="mb-6 text-sm text-muted-foreground max-w-2xl leading-relaxed">
+          Pasá el cursor por los bebés: se van “pintando” de izquierda a derecha. Cada uno
+          representa{" "}
+          <span className="font-medium text-foreground">1 niño cada 1.000</span> nacidos.
+          Hacé clic para confirmar tu respuesta.
+        </p>
+      )}
 
       <motion.div
         initial={{ opacity: 0 }}
@@ -214,18 +222,6 @@ export function NinosSection() {
         ))}
       </motion.div>
 
-      <p className="mt-8 text-xs text-muted-foreground leading-relaxed border-t border-border/40 pt-4">
-        Fuente:{" "}
-        <a
-          href={NOMBRES_NINOS_FUENTE}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="underline underline-offset-2 hover:text-foreground transition-colors"
-        >
-          Padrón de nombres — Argentina (2012–2024)
-        </a>
-        . La tasa “cada 1.000” se calcula sobre el total de nacimientos del año.
-      </p>
     </SectionWrapper>
   )
 }
