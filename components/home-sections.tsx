@@ -70,8 +70,8 @@ export default function HomeSections() {
 
             <section id="gente">
               <BlockHeader {...BLOCKS.gente} />
-              <DeferredJubilacionSection />
               <DeferredNinosSection />
+              <DeferredJubilacionSection />
               <DeferredDerechosSection />
             </section>
           </motion.div>

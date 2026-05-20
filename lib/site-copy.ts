@@ -103,15 +103,15 @@ export const SECTIONS = {
       "Si el festejo fuera en colectivo, el boleto pesaría más que la ilusión del recorrido.",
   },
   jubilacion: {
-    number: "12",
-    title: "La abuela que festejó",
+    number: "13",
+    title: "Los hinchas más grandes",
     intro: "Este es uno de los golpes emocionales más fuertes de la comparación.",
     closing:
       "Ni en 2022 ni en 2026 alcanza la jubilación mínima para un monoambiente: el festejo quedó lejos de quien más lo vivió.",
   },
   ninos: {
-    number: "13",
-    title: "Los niños",
+    number: "12",
+    title: "Los hinchas más chiquitos...",
     intro:
       "Después del Mundial, algunos nombres de la Scaloneta explotaron en los registros civiles. ¿Podés adivinar cuántos bebés de cada 1.000 nacidos en 2023 se llamaron así?",
     body: "Pasá el cursor por los bebés: se van “pintando” de izquierda a derecha. Cada uno representa 1 niño cada 1.000 nacidos. Hacé clic para confirmar tu respuesta.",

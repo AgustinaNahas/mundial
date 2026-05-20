@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useMemo, useRef } from "react"
+import Image from "next/image"
 import { motion } from "framer-motion"
 import { SectionClosing } from "@/components/section-closing"
 import { SourcesPanel, type SourceRow } from "@/components/sources-panel"
@@ -16,6 +17,8 @@ interface SectionWrapperProps {
   bgColor?: "background" | "muted"
   sources?: (DataItem | undefined)[]
   extraSources?: SourceRow[]
+  /** Imagen decorativa a la derecha del título (mobile y desktop). */
+  titleImage?: { src: string; alt: string }
 }
 
 function slugify(value: string) {
@@ -36,6 +39,7 @@ export function SectionWrapper({
   bgColor = "background",
   sources,
   extraSources,
+  titleImage,
 }: SectionWrapperProps) {
   const sectionRef = useRef<HTMLElement | null>(null)
   const sectionName = useMemo(() => slugify(title), [title])
@@ -81,9 +85,20 @@ export function SectionWrapper({
           className="mb-12"
         >
           <span className="text-accent text-sm font-medium tracking-wide">{number}</span>
-          <h3 className="text-2xl md:text-4xl font-light text-foreground mt-2 tracking-tight text-balance">
-            {title}
-          </h3>
+          <div className="flex items-start justify-between gap-3 mt-2">
+            <h3 className="text-2xl md:text-4xl font-light text-foreground tracking-tight text-balance min-w-0 flex-1">
+              {title}
+            </h3>
+            {titleImage && (
+              <Image
+                src={titleImage.src}
+                alt={titleImage.alt}
+                width={96}
+                height={96}
+                className="shrink-0 w-12 h-12 md:w-20 md:h-20 object-contain"
+              />
+            )}
+          </div>
           {intro && (
             <p className="mt-4 text-base md:text-lg text-muted-foreground max-w-2xl leading-relaxed">
               {intro}

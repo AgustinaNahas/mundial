@@ -50,11 +50,11 @@ export const debugSectionRegistry = {
     load: () => import("@/components/sections/micro-section").then((m) => m.MicroSection),
   },
   jubilacion: {
-    label: "Jubilacion",
+    label: "Los hinchas más grandes",
     load: () => import("@/components/sections/jubilacion-section").then((m) => m.JubilacionSection),
   },
   ninos: {
-    label: "Los niños",
+    label: "Los hinchas más chiquitos",
     load: () => import("@/components/sections/ninos-section").then((m) => m.NinosSection),
   },
   derechos: {

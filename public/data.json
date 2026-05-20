@@ -399,7 +399,27 @@
       "fuente": "https://www.mediotiempo.com/futbol/copa-mundial/precios-boletos-para-qatar-2022-cuanto-cuestan",
       "fuente_corta": "Medio Tiempo",
       "fecha_fuente": "9/11/2022"
+    },
+    {
+      "indicador": "SUELDO_MEDIO_PESOS",
+      "descripcion": "Sueldo medio en Argentina en pesos en marzo 2026",
+      "periodo": 2026,
+      "valor": 1011000,
+      "unidad": "ARS",
+      "fuente": "https://www.indec.gob.ar/uploads/informesdeprensa/ingresos_3trim22B346C13133.pdf",
+      "fuente_corta": "INDEC",
+      "fecha_fuente": "1/12/2022"
+    },
+    {
+      "indicador": "SUELDO_MEDIO_PESOS",
+      "descripcion": "Sueldo medio en Argentina en pesos en diciembre 2022",
+      "periodo": 2022,
+      "valor": 83755,
+      "unidad": "ARS",
+      "fuente": "https://www.indec.gob.ar/uploads/informesdeprensa/ingresos4trim25474EFC9F16.pdf",
+      "fuente_corta": "INDEC",
+      "fecha_fuente": "1/4/2026"
     }
   ],
-  "updatedAt": "2026-05-19T18:04:00.056Z"
+  "updatedAt": "2026-05-20T17:25:05.888Z"
 }
