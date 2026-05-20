@@ -1,6 +1,7 @@
 "use client"
 
 import dynamic from "next/dynamic"
+import Image from "next/image"
 import { useRef, useState, useEffect } from "react"
 import { motion } from "framer-motion"
 import { ChevronDown } from "lucide-react"
@@ -11,6 +12,7 @@ import { SourcesPanel } from "@/components/sources-panel"
 import { SECTIONS } from "@/lib/site-copy"
 
 const copy = SECTIONS.cancha
+const BASE_PATH = "/mundial"
 import { InfoIconButton } from "@/components/ui/info-icon-button"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { LazySectionSkeleton } from "@/components/lazy-mount"
@@ -124,6 +126,32 @@ function TicketBlock({
 }
 
 /* ─── Dots indicadores de paso ─── */
+const CLUB_ESCUDOS = [
+  { name: "Boca Juniors", src: "boca.png" },
+  { name: "River Plate", src: "river.png" },
+  { name: "Racing Club", src: "racing.png" },
+  { name: "Independiente", src: "independiente.png" },
+  { name: "San Lorenzo", src: "sanlorenzo.png" },
+] as const
+
+function ClubEscudosRow({ className }: { className?: string }) {
+  return (
+    <div className={cn("flex flex-wrap items-center gap-2", className)} role="list" aria-label="Clubes de Primera División">
+      {CLUB_ESCUDOS.map((club) => (
+        <span key={club.name} role="listitem" title={club.name} className="inline-flex shrink-0">
+          <Image
+            src={`${BASE_PATH}/${club.src}`}
+            alt=""
+            width={22}
+            height={26}
+            className="h-6 w-auto max-lg:h-5 object-contain drop-shadow-sm"
+          />
+        </span>
+      ))}
+    </div>
+  )
+}
+
 function StepDots({ active, total }: { active: number; total: number }) {
   return (
     <div className="flex gap-2 items-center">
@@ -260,12 +288,23 @@ function MobileAccumulatorBar({
 }
 
 /* ─── Wrapper de paso con fade-in al entrar en viewport ─── */
-function StepPanel({ children, stepRef }: { children: React.ReactNode; stepRef: React.RefObject<HTMLDivElement | null> }) {
+function StepPanel({
+  children,
+  stepRef,
+  isLast,
+}: {
+  children: React.ReactNode
+  stepRef: React.RefObject<HTMLDivElement | null>
+  isLast?: boolean
+}) {
   const narrow = useIsNarrowForCancha()
   return (
     <div
       ref={stepRef}
-      className="min-h-screen max-lg:min-h-[135svh] flex items-center py-16 lg:py-24 max-lg:py-28 max-lg:pb-36 max-lg:relative max-lg:z-[15] max-lg:pt-20"
+      className={cn(
+        "min-h-screen max-lg:min-h-[135svh] flex items-center py-16 lg:py-24 max-lg:py-28 max-lg:pb-36 max-lg:relative max-lg:z-[15] max-lg:pt-20",
+        isLast && "max-lg:min-h-[155svh] max-lg:pb-[58svh]",
+      )}
     >
       <motion.div
         initial={{ opacity: 0, y: 18 }}
@@ -293,12 +332,24 @@ export function CanchaSection() {
   const vueloMiamiItem = getIndicador("BSAS_MIAMI")
 
   const [activeStep, setActiveStep] = useState(0)
+  const mobileBarRef = useRef<HTMLDivElement>(null)
+  const [mobileBarH, setMobileBarH] = useState(56)
   const ref0 = useRef<HTMLDivElement>(null)
   const ref1 = useRef<HTMLDivElement>(null)
   const ref2 = useRef<HTMLDivElement>(null)
   const ref3 = useRef<HTMLDivElement>(null)
   const ref4 = useRef<HTMLDivElement>(null)
   const refs = [ref0, ref1, ref2, ref3, ref4]
+
+  useEffect(() => {
+    const el = mobileBarRef.current
+    if (!el) return
+    const sync = () => setMobileBarH(el.offsetHeight)
+    sync()
+    const ro = new ResizeObserver(sync)
+    ro.observe(el)
+    return () => ro.disconnect()
+  }, [loading])
 
   // Precargar chunk del mapa en cuanto monta la sección (no esperar al render de ScrollyMap)
   useEffect(() => {
@@ -483,7 +534,10 @@ export function CanchaSection() {
       </div>
 
       {/* ── Scrolly ── */}
-      <div className="container mx-auto px-6 md:px-12 max-w-6xl">
+      <div
+        className="container mx-auto px-6 md:px-12 max-w-6xl max-lg:[--cancha-bar-h:56px]"
+        style={{ ["--cancha-bar-h" as string]: `${mobileBarH}px` }}
+      >
         <div className="hidden lg:block lg:sticky lg:top-3 z-[700] mb-5">
           <div className="relative rounded-xl border border-border/30 bg-background/65 backdrop-blur px-3 py-2">
             <div className="flex items-center justify-between mb-1">
@@ -504,8 +558,11 @@ export function CanchaSection() {
           </div>
         </div>
 
-        {/* Barra acumulado mobile: sticky fuera del grid para que el mapa arranque debajo de ella */}
-        <div className="sticky top-0 z-[30] pt-2 pb-1 bg-background lg:hidden">
+        {/* Barra acumulado mobile: sticky + z alto; el mapa va en contexto aislado para que Leaflet no la tape */}
+        <div
+          ref={mobileBarRef}
+          className="sticky top-0 z-[120] pt-2 pb-1.5 bg-background border-b border-border/25 shadow-sm lg:hidden"
+        >
           <MobileAccumulatorBar
             qatarTotal={qatarTotal}
             usaTotal={usaTotal}
@@ -518,11 +575,17 @@ export function CanchaSection() {
           />
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-0 lg:gap-8 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-0 lg:gap-8 items-start max-lg:isolate">
 
-          {/* Mapa: mobile 100svh arrancando debajo de la barra (~60px); desktop h-screen */}
-          <div className="sticky max-lg:top-[60px] top-0 z-[8] max-lg:h-[calc(100svh-60px)] max-lg:-mb-[calc(100svh-60px)] max-lg:shrink-0 h-60 lg:z-auto lg:mb-0 lg:h-screen lg:py-6">
-            <div className="relative h-full rounded-2xl overflow-hidden">
+          {/* Mapa: mobile ocupa viewport bajo la barra; isolate evita que Leaflet pinte sobre la barra */}
+          <div
+            className={cn(
+              "sticky top-0 z-[8] max-lg:shrink-0 h-60 lg:z-auto lg:mb-0 lg:h-screen lg:py-6",
+              "max-lg:top-[var(--cancha-bar-h)] max-lg:h-[calc(100svh-var(--cancha-bar-h))]",
+              "max-lg:-mb-[calc(100svh-var(--cancha-bar-h)-18svh)]",
+            )}
+          >
+            <div className="relative isolate z-0 h-full overflow-hidden rounded-2xl">
               <ScrollyMap step={activeStep} />
               <div className="absolute bottom-4 left-4 z-500">
                 <StepDots active={activeStep} total={5} />
@@ -531,7 +594,7 @@ export function CanchaSection() {
           </div>
 
           {/* Pasos */}
-          <div className="relative z-[12] max-lg:px-0 max-lg:pb-[50svh]">
+          <div className="relative z-[12] max-lg:px-0 max-lg:pb-[12svh]">
 
             {/* ── Paso 0: Buenos Aires ── */}
             <StepPanel stepRef={refs[0]}>
@@ -548,7 +611,10 @@ export function CanchaSection() {
               </p>
 
               <div className="rounded-2xl bg-card border border-border/30 p-5 max-lg:p-3.5 max-lg:rounded-xl">
-                <p className="text-sm max-lg:text-[11px] text-muted-foreground mb-4 max-lg:mb-2">🏟 Entrada · Primera División</p>
+                <div className="flex flex-wrap items-center justify-between gap-2 mb-4 max-lg:mb-2">
+                  <p className="text-sm max-lg:text-[11px] text-muted-foreground">🏟 Entrada · Primera División</p>
+                  <ClubEscudosRow className="max-lg:gap-1.5" />
+                </div>
                 <div className="grid grid-cols-2 gap-4 max-lg:gap-3">
                   <div>
                     <p className="text-[11px] max-lg:text-[10px] uppercase tracking-wider text-muted-foreground mb-1">Qatar 2022</p>
@@ -647,7 +713,7 @@ export function CanchaSection() {
             </StepPanel>
 
             {/* ── Paso 4: Entradas Miami ── */}
-            <StepPanel stepRef={refs[4]}>
+            <StepPanel stepRef={refs[4]} isLast>
               <div className="flex items-center gap-3 max-lg:gap-2">
                 <span className="text-3xl max-lg:text-2xl leading-none">🏟</span>
                 <div>
@@ -682,6 +748,13 @@ export function CanchaSection() {
 
           </div>
         </div>
+
+        {/* Mobile: runway para que el mapa sticky suelte antes de la sección siguiente */}
+        <div
+          className="hidden max-lg:block shrink-0"
+          style={{ height: "calc(100svh - var(--cancha-bar-h) + 4rem)" }}
+          aria-hidden
+        />
       </div>
 
       {/* ── Cierre y fuentes ── */}

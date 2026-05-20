@@ -54,26 +54,46 @@ const countryStyleForMap = (): PathOptions =>
 
 /* ─── Vistas para cada uno de los 5 pasos ─── */
 const VIEWS: Array<{ center: [number, number]; zoom: number }> = [
-  { center: [-22, -52], zoom: 3.2 },  // 0 · Buenos Aires
+  { center: [-34.6037, -58.3816], zoom: 5.5 }, // 0 · Buenos Aires (zoom metropolitano)
   { center: [-5, -5], zoom: 1.5 },    // 1 · Ruta BS AS → Doha (zoom reducido: muestra ambos extremos en mobile portrait)
   { center: [25.3, 51.5], zoom: 5.5 }, // 2 · Zoom in Qatar
   { center: [-4, -68], zoom: 2.3 },   // 3 · Ruta BS AS → Miami (zoom reducido: muestra ambos extremos en mobile)
   { center: [25.8, -80.2], zoom: 6 }, // 4 · Zoom in Miami
 ]
 
+function useNarrowMap() {
+  const [narrow, setNarrow] = useState(false)
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 1023px)")
+    const sync = () => setNarrow(mq.matches)
+    sync()
+    mq.addEventListener("change", sync)
+    return () => mq.removeEventListener("change", sync)
+  }, [])
+  return narrow
+}
+
+function viewForStep(step: number, narrow: boolean) {
+  if (step === 0) {
+    return { center: [-34.6037, -58.3816] as [number, number], zoom: narrow ? 5 : 2 }
+  }
+  return VIEWS[step] ?? VIEWS[0]
+}
+
 function MapController({ step }: { step: number }) {
   const map = useMap()
   const mounted = useRef(false)
+  const narrow = useNarrowMap()
 
   useEffect(() => {
     if (!mounted.current) {
       mounted.current = true
       return
     }
-    const v = VIEWS[step] ?? VIEWS[0]
+    const v = viewForStep(step, narrow)
     map.stop()
     map.flyTo(v.center, v.zoom, { duration: 1.4, easeLinearity: 0.25 })
-  }, [step, map])
+  }, [step, narrow, map])
   return null
 }
 
@@ -191,10 +211,10 @@ export function ScrollyMapInner({ step }: ScrollyMapProps) {
       `}</style>
 
       <MapContainer
-        center={VIEWS[0].center}
-        zoom={VIEWS[0].zoom}
+        center={[-34.6037, -58.3816]}
+        zoom={5.5}
         minZoom={1}
-        maxZoom={8}
+        maxZoom={5.5}
         style={{ height: "100%", width: "100%" }}
         zoomControl={false}
         scrollWheelZoom={false}

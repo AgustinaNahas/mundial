@@ -57,6 +57,25 @@ interface MobileSnack {
 
 const MotionImage = motion(Image)
 
+/** Precios en grillas 2 columnas: más chicos en mobile para que no desborden. */
+const SUMMARY_PRICE_CLASS =
+  "font-mono font-light tabular-nums tracking-tight leading-tight text-[clamp(0.8125rem,3.6vw,1.5rem)] md:text-2xl"
+const MOBILE_LIVE_PRICE_CLASS =
+  "font-mono font-bold tabular-nums tracking-tight leading-tight text-base"
+
+function FiguCountLine({ count, suffix }: { count: number; suffix: string }) {
+  return (
+    <p className="text-sm text-muted-foreground text-center md:text-right">
+      <span className="inline-flex flex-wrap items-center justify-center md:justify-end gap-x-1 rounded-lg bg-sky-400/10 px-2 py-1">
+        <span className="font-semibold tabular-nums text-foreground">
+          {count.toLocaleString("es-AR")}
+        </span>
+        <span>{suffix}</span>
+      </span>
+    </p>
+  )
+}
+
 /* ─── Portal para el cursor ─── */
 function CursorPortal({ children }: { children: React.ReactNode }) {
   const [mounted, setMounted] = useState(false)
@@ -250,7 +269,7 @@ function CostPanel({
           {total > 0 ? (
             <motion.div key="total" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
               <motion.p
-                className="text-xl font-bold font-mono"
+                className="text-xl font-bold font-mono tabular-nums tracking-tight leading-tight"
                 style={{ color }}
                 key={total}
                 initial={{ y: -6, opacity: 0 }}
@@ -733,15 +752,15 @@ export function AlbumSection() {
 
         {/* ── Paneles en mobile (apilados) ── */}
         {placedCount > 0 && (
-          <div className="mt-6 grid grid-cols-2 gap-4 md:hidden">
-            <div className="rounded-xl bg-card border border-border/30 p-4">
+          <div className="mt-6 grid grid-cols-2 gap-2 md:hidden min-w-0">
+            <div className="rounded-xl bg-card border border-border/30 p-3 min-w-0 overflow-hidden">
               <p className="text-xs uppercase tracking-widest text-muted-foreground mb-2">Qatar 2022</p>
-              <p className="text-lg font-bold text-accent font-mono">{formatCurrency(totalCost2022, unit)}</p>
+              <p className={cn(MOBILE_LIVE_PRICE_CLASS, "text-accent")}>{formatCurrency(totalCost2022, unit)}</p>
               <p className="text-[11px] text-muted-foreground">{horasTrabajo2022.toFixed(1)} horas de trabajo</p>
             </div>
-            <div className="rounded-xl bg-card border border-border/30 p-4">
+            <div className="rounded-xl bg-card border border-border/30 p-3 min-w-0 overflow-hidden">
               <p className="text-xs uppercase tracking-widest text-muted-foreground mb-2">EEUU 2026</p>
-              <p className="text-lg font-bold text-primary font-mono">{formatCurrency(totalCost2026, unit)}</p>
+              <p className={cn(MOBILE_LIVE_PRICE_CLASS, "text-primary")}>{formatCurrency(totalCost2026, unit)}</p>
               <p className="text-[11px] text-muted-foreground">{horasTrabajo2026.toFixed(1)} horas de trabajo</p>
             </div>
           </div>
@@ -768,8 +787,8 @@ export function AlbumSection() {
                 </TooltipContent>
               </Tooltip>
             </div>
-            <div className="grid grid-cols-2 gap-4 md:gap-6">
-              <div className="flex flex-col gap-3 md:flex-row md:items-stretch md:justify-between">
+            <div className="grid grid-cols-2 gap-2 md:gap-6 min-w-0">
+              <div className="flex flex-col gap-3 md:flex-row md:items-stretch md:justify-between min-w-0">
                 <MonthStack
                   className="order-2 md:order-none"
                   months={blessedMonths2022}
@@ -777,18 +796,18 @@ export function AlbumSection() {
                   toneClass="text-accent"
                   align="right"
                 />
-                <div className="order-1 md:order-none space-y-1.5 text-center md:text-right min-w-0 shrink">
+                <div className="order-1 md:order-none space-y-1.5 text-center md:text-right min-w-0 overflow-hidden">
                   <p className="text-xs uppercase tracking-widest text-muted-foreground">Qatar 2022</p>
-                  <p className="text-sm text-muted-foreground">{totalFigus2022} figuritas totales</p>
-                  <p className="text-2xl font-light text-accent font-mono">{formatCurrency(blessedTotal2022, unit)}</p>
+                  <FiguCountLine count={totalFigus2022} suffix="figuritas totales" />
+                  <p className={cn(SUMMARY_PRICE_CLASS, "text-accent")}>{formatCurrency(blessedTotal2022, unit)}</p>
                   <p className="text-sm text-muted-foreground">{blessedHoras2022.toFixed(1)} horas de trabajo</p>
                 </div>
               </div>
-              <div className="flex flex-col gap-3 md:flex-row md:items-stretch md:justify-between md:border-l md:border-border/10 md:pl-6">
-                <div className="order-1 md:order-none space-y-1.5 text-center md:text-right min-w-0 shrink">
+              <div className="flex flex-col gap-3 md:flex-row md:items-stretch md:justify-between md:border-l md:border-border/10 md:pl-6 min-w-0">
+                <div className="order-1 md:order-none space-y-1.5 text-center md:text-right min-w-0 overflow-hidden">
                   <p className="text-xs uppercase tracking-widest text-muted-foreground">EEUU 2026</p>
-                  <p className="text-sm text-muted-foreground">{totalFigus2026} figuritas totales</p>
-                  <p className="text-2xl font-light text-primary font-mono">{formatCurrency(blessedTotal2026, unit)}</p>
+                  <FiguCountLine count={totalFigus2026} suffix="figuritas totales" />
+                  <p className={cn(SUMMARY_PRICE_CLASS, "text-primary")}>{formatCurrency(blessedTotal2026, unit)}</p>
                   <p className="text-sm text-muted-foreground">{blessedHoras2026.toFixed(1)} horas de trabajo</p>
                 </div>
                 <MonthStack
@@ -817,8 +836,8 @@ export function AlbumSection() {
                 </TooltipContent>
               </Tooltip>
             </div>
-            <div className="grid grid-cols-2 gap-4 md:gap-6">
-              <div className="flex flex-col gap-3 md:flex-row md:items-stretch md:justify-between">
+            <div className="grid grid-cols-2 gap-2 md:gap-6 min-w-0">
+              <div className="flex flex-col gap-3 md:flex-row md:items-stretch md:justify-between min-w-0">
                 <MonthStack
                   className="order-2 md:order-none"
                   months={laborMonths2022}
@@ -826,18 +845,18 @@ export function AlbumSection() {
                   toneClass="text-accent"
                   align="right"
                 />
-                <div className="order-1 md:order-none space-y-1.5 text-center md:text-right min-w-0 shrink">
+                <div className="order-1 md:order-none space-y-1.5 text-center md:text-right min-w-0 overflow-hidden">
                   <p className="text-xs uppercase tracking-widest text-muted-foreground">Qatar 2022</p>
-                  <p className="text-sm text-muted-foreground">{laborCount2022} figuritas estimadas</p>
-                  <p className="text-2xl font-light text-accent font-mono">{formatCurrency(laborTotal2022, unit)}</p>
+                  <FiguCountLine count={laborCount2022} suffix="figuritas estimadas" />
+                  <p className={cn(SUMMARY_PRICE_CLASS, "text-accent")}>{formatCurrency(laborTotal2022, unit)}</p>
                   <p className="text-sm text-muted-foreground">{laborHoras2022.toFixed(1)} horas de trabajo</p>
                 </div>
               </div>
-              <div className="flex flex-col gap-3 md:flex-row md:items-stretch md:justify-between md:border-l md:border-border/10 md:pl-6">
-                <div className="order-1 md:order-none space-y-1.5 text-center md:text-right min-w-0 shrink">
+              <div className="flex flex-col gap-3 md:flex-row md:items-stretch md:justify-between md:border-l md:border-border/10 md:pl-6 min-w-0">
+                <div className="order-1 md:order-none space-y-1.5 text-center md:text-right min-w-0 overflow-hidden">
                   <p className="text-xs uppercase tracking-widest text-muted-foreground">EEUU 2026</p>
-                  <p className="text-sm text-muted-foreground">{laborCount2026} figuritas estimadas</p>
-                  <p className="text-2xl font-light text-primary font-mono">{formatCurrency(laborTotal2026, unit)}</p>
+                  <FiguCountLine count={laborCount2026} suffix="figuritas estimadas" />
+                  <p className={cn(SUMMARY_PRICE_CLASS, "text-primary")}>{formatCurrency(laborTotal2026, unit)}</p>
                   <p className="text-sm text-muted-foreground">{laborHoras2026.toFixed(1)} horas de trabajo</p>
                 </div>
                 <MonthStack
