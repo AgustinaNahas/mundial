@@ -3,16 +3,12 @@
 import { useEffect, useRef, useState } from "react"
 import Image from "next/image"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
-import { InfoIconButton } from "@/components/ui/info-icon-button"
 
 const BASE_PATH = "/mundial"
 
 /** Contorno blanco para separar íconos densos (mobile y desktop). */
 const PICTO_HALO =
   "drop-shadow-[0_0_1px_#fff] drop-shadow-[0_0_2px_#fff] md:drop-shadow-[0_0_1.5px_#fff] md:drop-shadow-[0_0_3px_#fff]"
-
-const PICTO_EMOJI_HALO =
-  "[text-shadow:0_0_2px_#fff,0_0_1px_#fff,1px_0_0_#fff,-1px_0_0_#fff,0_1px_0_#fff,0_-1px_0_#fff] md:[text-shadow:0_0_3px_#fff,0_0_1.5px_#fff,1px_0_0_#fff,-1px_0_0_#fff,0_1px_0_#fff,0_-1px_0_#fff]"
 
 export interface PurchasingPowerPictogramProps {
   count2022: number
@@ -25,7 +21,7 @@ export interface PurchasingPowerPictogramProps {
   /** Relativo a `public` con basePath, ej. `viajero.webp` → `/mundial/viajero.webp` */
   imageFile?: string
   imageAlt?: string
-  /** Nota metodológica que aparece en el tooltip del botón ⓘ */
+  /** Nota metodológica mostrada junto al texto descriptivo sobre el pictograma */
   methodologyNote?: string
 }
 
@@ -44,69 +40,61 @@ export function PurchasingPowerPictogram({
   const loss = Math.max(0, count2022 - count2026)
   const src = imageFile ? `${BASE_PATH}/${imageFile}` : null
 
-  // Estado controlado para el tooltip del ⓘ (funciona en mobile con tap)
-  const [infoOpen, setInfoOpen] = useState(false)
-  const infoRef = useRef<HTMLButtonElement>(null)
+  const [gridOpen, setGridOpen] = useState(false)
+  const gridRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    if (!infoOpen) return
+    if (!gridOpen) return
     const close = (e: PointerEvent) => {
-      if (e.pointerType === "touch" && !infoRef.current?.contains(e.target as Node)) {
-        setInfoOpen(false)
+      if (e.pointerType === "touch" && !gridRef.current?.contains(e.target as Node)) {
+        setGridOpen(false)
       }
     }
     document.addEventListener("pointerdown", close)
     return () => document.removeEventListener("pointerdown", close)
-  }, [infoOpen])
+  }, [gridOpen])
 
   const tooltipContentClass =
     "max-w-xs leading-relaxed bg-card border border-border text-card-foreground"
 
+  const defaultDescription =
+    loss > 0
+      ? `Cantidad que alcanzaba un salario mínimo en 2022. Lo que ya no alcanza en 2026 se muestra con menor opacidad (${loss} ${unitLabel} menos).`
+      : "Cantidad que alcanzaba un salario mínimo en 2022. Lo que ya no alcanza en 2026 se muestra con menor opacidad."
+
   return (
     <div className="w-full max-w-md md:max-w-xl p-6 bg-card rounded-lg border border-border">
-      {/* Título con botón ⓘ opcional */}
-      <div className="flex items-center gap-2 mb-2">
-        <h4 className="text-sm font-medium text-foreground">{title}</h4>
-        {methodologyNote && (
-          <Tooltip open={infoOpen} onOpenChange={setInfoOpen}>
-            <TooltipTrigger asChild>
-              <InfoIconButton
-                ref={infoRef}
-                size="sm"
-                label="Nota metodológica"
-                onPointerEnter={(e) => { if (e.pointerType !== "touch") setInfoOpen(true) }}
-                onPointerLeave={(e) => { if (e.pointerType !== "touch") setInfoOpen(false) }}
-                onPointerDown={(e) => {
-                  if (e.pointerType === "touch") {
-                    e.preventDefault()
-                    setInfoOpen((o) => !o)
-                  }
-                }}
-              />
-            </TooltipTrigger>
-            <TooltipContent sideOffset={6} showArrow={false} className={tooltipContentClass}>
-              {methodologyNote}
-            </TooltipContent>
-          </Tooltip>
-        )}
-      </div>
+      <h4 className="text-sm font-medium text-foreground mb-2">{title}</h4>
 
-      {footnote ? (
-        <p className="text-xs text-muted-foreground mb-5">{footnote}</p>
-      ) : (
-        <p className="text-xs text-muted-foreground mb-5">
-          Cantidad que alcanzaba un salario mínimo en 2022. Lo que ya no alcanza en 2026 se muestra con menor opacidad
-          {loss > 0 ? ` (${loss} ${unitLabel} menos).` : "."}
-        </p>
-      )}
+      <p className="text-xs text-muted-foreground mb-5">
+        {footnote ?? defaultDescription}
+        {methodologyNote ? (
+          <>
+            {" "}
+            <span className="block mt-2">{methodologyNote}</span>
+          </>
+        ) : null}
+      </p>
 
-      {/* Grid de íconos con tooltip hover (2022 vs 2026) */}
-      <Tooltip>
+      <Tooltip open={gridOpen} onOpenChange={setGridOpen}>
         <TooltipTrigger asChild>
           <div
-            className="grid grid-cols-8 md:grid-cols-10 gap-0 cursor-default"
+            ref={gridRef}
+            className="grid grid-cols-8 md:grid-cols-10 gap-0 cursor-default touch-manipulation"
             role="img"
             aria-label={`${count2022} ${unitLabel} en 2022, ${count2026} en 2026`}
+            onPointerEnter={(e) => {
+              if (e.pointerType !== "touch") setGridOpen(true)
+            }}
+            onPointerLeave={(e) => {
+              if (e.pointerType !== "touch") setGridOpen(false)
+            }}
+            onPointerDown={(e) => {
+              if (e.pointerType === "touch") {
+                e.preventDefault()
+                setGridOpen((o) => !o)
+              }
+            }}
           >
             {Array.from({ length: total }).map((_, i) => {
               const faded = i >= count2026
@@ -125,7 +113,7 @@ export function PurchasingPowerPictogram({
                     />
                   ) : (
                     <span
-                      className={`text-base leading-none select-none transition-opacity md:text-lg ${PICTO_EMOJI_HALO} ${faded ? "opacity-25" : "opacity-100"}`}
+                      className={`text-base leading-none select-none transition-opacity md:text-lg ${PICTO_HALO} ${faded ? "opacity-25" : "opacity-100"}`}
                     >
                       {emoji}
                     </span>
