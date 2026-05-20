@@ -9,6 +9,10 @@ export function debugLog(
   hypothesisId: string,
   runId = "pre-fix",
 ) {
+  // Solo en dev: en producción un fetch a 127.0.0.1 dispara el permiso
+  // "Acceder a otras apps y servicios" (Local Network Access) en Chrome.
+  if (process.env.NODE_ENV !== "development") return
+
   const payload = {
     sessionId: SESSION_ID,
     runId,
