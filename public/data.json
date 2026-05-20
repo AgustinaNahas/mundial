@@ -419,7 +419,27 @@
       "fuente": "https://www.indec.gob.ar/uploads/informesdeprensa/ingresos4trim25474EFC9F16.pdf",
       "fuente_corta": "INDEC",
       "fecha_fuente": "1/4/2026"
+    },
+    {
+      "indicador": "NOMBRES",
+      "descripcion": "Nombres propios de las personas nacidas en Argentina por provincia y año (2012 - 2024)",
+      "periodo": 2024,
+      "valor": 0,
+      "unidad": "",
+      "fuente": "https://datos.gob.ar/dataset/renaper-nombres-propios-argentina/archivo/renaper_8.5",
+      "fuente_corta": "RENAPER",
+      "fecha_fuente": "22/07/2025"
+    },
+    {
+      "indicador": "DERECHOS",
+      "descripcion": "Indicadores de calidad de gobierno (2022-2024)",
+      "periodo": 2024,
+      "valor": 0,
+      "unidad": "",
+      "fuente": "https://www.gu.se/en/quality-government/qog-data/data-downloads/standard-dataset",
+      "fuente_corta": "QoG",
+      "fecha_fuente": "1/1/2024"
     }
   ],
-  "updatedAt": "2026-05-20T17:31:30.721Z"
+  "updatedAt": "2026-05-20T22:39:00.946Z"
 }

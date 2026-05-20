@@ -201,7 +201,7 @@ function BusTopView({ showObelisco }: { showObelisco?: boolean }) {
   const GA = "#2d6f35"
   const GB = "#1e5228"
   const SEAT_F = "#132c17"
-  const SEAT_S = "#2d6030"
+  const SEAT_BORDER = "#ffffff"
   const DARK = "#0c1f0e"
   const SHELL = "#1a4920"
   const WHEEL = "#0a0a0a"
@@ -265,11 +265,11 @@ function BusTopView({ showObelisco }: { showObelisco?: boolean }) {
         return (
           <g key={row}>
             <rect x={sx} y={MARGIN} width={SEAT_SIZE} height={SEAT_SIZE} rx="3"
-              fill={SEAT_F} stroke={SEAT_S} strokeWidth="0.8" />
+              fill={SEAT_F} stroke={SEAT_BORDER} strokeWidth="1.2" />
             <rect x={sx} y={TOP_SEAT2_Y} width={SEAT_SIZE} height={SEAT_SIZE} rx="3"
-              fill={SEAT_F} stroke={SEAT_S} strokeWidth="0.8" />
+              fill={SEAT_F} stroke={SEAT_BORDER} strokeWidth="1.2" />
             <rect x={sx} y={BOTTOM_SEAT_Y} width={SEAT_SIZE} height={SEAT_SIZE} rx="3"
-              fill={SEAT_F} stroke={SEAT_S} strokeWidth="0.8" />
+              fill={SEAT_F} stroke={SEAT_BORDER} strokeWidth="1.2" />
           </g>
         )
       })}
@@ -288,7 +288,7 @@ function BusTopView({ showObelisco }: { showObelisco?: boolean }) {
       <rect
         x={DRIVER_SEAT_X} y={DRIVER_SEAT_Y}
         width={DRIVER_SEAT_W} height={DRIVER_SEAT_H} rx="3"
-        fill={SEAT_F} stroke={SEAT_S} strokeWidth="0.8"
+        fill={SEAT_F} stroke={SEAT_BORDER} strokeWidth="1.2"
       />
 
       {/* Front windshield (left) */}
@@ -307,7 +307,7 @@ function BusVerticalView({ showObelisco }: { showObelisco?: boolean }) {
   const GA = "#2d6f35"
   const GB = "#1e5228"
   const SEAT_F = "#132c17"
-  const SEAT_S = "#2d6030"
+  const SEAT_BORDER = "#ffffff"
   const DARK = "#0c1f0e"
   const SHELL = "#1a4920"
   const WHEEL = "#0a0a0a"
@@ -367,11 +367,11 @@ function BusVerticalView({ showObelisco }: { showObelisco?: boolean }) {
         return (
           <g key={row}>
             <rect x={MARGIN} y={sy} width={SEAT_SIZE} height={SEAT_SIZE} rx="3"
-              fill={SEAT_F} stroke={SEAT_S} strokeWidth="0.8" />
+              fill={SEAT_F} stroke={SEAT_BORDER} strokeWidth="1.2" />
             <rect x={LEFT_SEAT2_X} y={sy} width={SEAT_SIZE} height={SEAT_SIZE} rx="3"
-              fill={SEAT_F} stroke={SEAT_S} strokeWidth="0.8" />
+              fill={SEAT_F} stroke={SEAT_BORDER} strokeWidth="1.2" />
             <rect x={RIGHT_SEAT_X} y={sy} width={SEAT_SIZE} height={SEAT_SIZE} rx="3"
-              fill={SEAT_F} stroke={SEAT_S} strokeWidth="0.8" />
+              fill={SEAT_F} stroke={SEAT_BORDER} strokeWidth="1.2" />
           </g>
         )
       })}
@@ -387,7 +387,7 @@ function BusVerticalView({ showObelisco }: { showObelisco?: boolean }) {
       <rect
         x={DRIVER_SEAT_X_V} y={DRIVER_SEAT_Y_V}
         width={DRIVER_SEAT_W_V} height={DRIVER_SEAT_H_V} rx="3"
-        fill={SEAT_F} stroke={SEAT_S} strokeWidth="0.8"
+        fill={SEAT_F} stroke={SEAT_BORDER} strokeWidth="1.2"
       />
 
       <rect x={MARGIN + 8} y={MARGIN + 4} width={SVG_W_V - MARGIN * 2 - 16} height="9" rx="3"
@@ -644,7 +644,11 @@ export function MicroSection() {
                 transformOrigin: "top center",
               }}
             >
-            <div className={`relative ${isNarrow ? "pt-4" : "pt-10"}`} style={{ height: svgH }}>
+            <div className="relative" style={{ height: svgH + busTopPad }}>
+              <div
+                className="absolute left-0 right-0 mx-auto"
+                style={{ top: busTopPad, width: svgW, height: svgH }}
+              >
             {isNarrow ? (
               <BusVerticalView showObelisco={allBoarded} />
             ) : (
@@ -730,6 +734,7 @@ export function MicroSection() {
                 />
               )}
             </AnimatePresence>
+              </div>
             </div>
             </div>
           </motion.div>

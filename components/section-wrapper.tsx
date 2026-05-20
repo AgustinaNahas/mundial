@@ -17,8 +17,10 @@ interface SectionWrapperProps {
   bgColor?: "background" | "muted"
   sources?: (DataItem | undefined)[]
   extraSources?: SourceRow[]
+  /** Oculta valores numéricos en el panel de fuentes. */
+  sourcesHideValues?: boolean
   /** Imagen decorativa a la derecha del título (mobile y desktop). */
-  titleImage?: { src: string; alt: string }
+  titleImage?: { src: string; alt: string; className?: string }
 }
 
 function slugify(value: string) {
@@ -39,6 +41,7 @@ export function SectionWrapper({
   bgColor = "background",
   sources,
   extraSources,
+  sourcesHideValues,
   titleImage,
 }: SectionWrapperProps) {
   const sectionRef = useRef<HTMLElement | null>(null)
@@ -85,7 +88,7 @@ export function SectionWrapper({
           className="mb-12"
         >
           <span className="text-accent text-sm font-medium tracking-wide">{number}</span>
-          <div className="flex items-start justify-between gap-3 mt-2">
+          <div className="flex items-start justify-between gap-3 mt-2 relative">
             <h3 className="text-2xl md:text-4xl font-light text-foreground tracking-tight text-balance min-w-0 flex-1">
               {title}
             </h3>
@@ -93,9 +96,12 @@ export function SectionWrapper({
               <Image
                 src={titleImage.src}
                 alt={titleImage.alt}
-                width={96}
-                height={96}
-                className="shrink-0 w-12 h-12 md:w-20 md:h-20 object-contain"
+                width={134}
+                height={250}
+                className={
+                  titleImage.className ??
+                  "shrink-0 w-full h-full object-contain"
+                }
               />
             )}
           </div>
@@ -111,7 +117,11 @@ export function SectionWrapper({
         {closing && <SectionClosing>{closing}</SectionClosing>}
 
         {showSources && (
-          <SourcesPanel items={sources} extraRows={extraSources} />
+          <SourcesPanel
+            items={sources}
+            extraRows={extraSources}
+            hideValues={sourcesHideValues}
+          />
         )}
       </div>
     </section>

@@ -1,7 +1,15 @@
 "use client"
 
+import { useEffect, useRef, useState } from "react"
 import { motion } from "framer-motion"
+import {
+  CLOSED_FOLLOW_TIP,
+  FollowCursorTooltip,
+  bindFollowTooltip,
+} from "@/components/follow-cursor-tooltip"
 import { SectionWrapper } from "@/components/section-wrapper"
+import { InfoIconButton } from "@/components/ui/info-icon-button"
+import { useCloseOnScroll } from "@/hooks/use-close-on-scroll"
 import { useData } from "@/lib/data-context"
 import { formatCurrency } from "@/lib/utils"
 import { LOADING_INTRO, SECTIONS } from "@/lib/site-copy"
@@ -9,6 +17,17 @@ import { LOADING_INTRO, SECTIONS } from "@/lib/site-copy"
 const copy = SECTIONS.jubilacion
 const BASE_PATH = "/mundial"
 const KILOS_POR_ASADO = 5
+const ABUELA_IMAGE_CLASS =
+  "md:absolute md:-top-12 md:right-0 shrink-0 w-fit h-30 -mb-4 -mt-12 md:mb-0 md:mt-0 md:h-[220px] object-contain -scale-x-100"
+
+const PICTO_HALO =
+  "drop-shadow-[0_0_1px_#fff] drop-shadow-[0_0_2px_#fff]"
+
+const PODER_ADQUISITIVO_TOOLTIP =
+  "Promedio del cambio en cuántos álbumes, asados de parrilla (5 kg) y viajes en colectivo alcanza con la jubilación mínima entre 2022 y 2026."
+
+const INFO_TOOLTIP_CLASS =
+  "pointer-events-none z-[100] max-w-xs rounded-md border border-border bg-card px-3 py-2 text-xs leading-relaxed text-card-foreground shadow-lg"
 
 function formatPctChange(pct: number) {
   const rounded = Math.round(pct)
@@ -16,57 +35,97 @@ function formatPctChange(pct: number) {
   return `${rounded}%`
 }
 
-function YearPair({
-  value2022,
-  value2026,
-  suffix = "",
+function MiniEmojiPicto({
+  count2022,
+  count2026,
+  emoji,
 }: {
-  value2022: string | number
-  value2026: string | number
-  suffix?: string
+  count2022: number
+  count2026: number
+  emoji: string
+}) {
+
+  let c2022 = count2022 > 1000 ? count2022/100 : ( count2022 > 100 ? count2022/100 : 
+    (count2022 > 10 ? count2022/10 : count2022))
+  let c2026 = count2022 > 1000 ? count2026/100 : ( count2022 > 100 ? count2026/100 : 
+    (count2022 > 10 ? count2026/10 : count2026))
+
+  const total = Math.min(Math.max(Math.round(c2022), 1), 20)
+  const visible2026 = Math.min(Math.round(c2026), total)
+
+
+  return (
+    <div
+      className="flex justify-center flex-wrap gap-2 mt-2"
+      role="img"
+      aria-label={`${c2022} en 2022, ${c2026} en 2026`}
+    >
+      {Array.from({ length: total }).map((_, i) => (
+        <span
+          key={i}
+          className={`text-base leading-none select-none transition-opacity md:text-lg ${PICTO_HALO} ${
+            i >= visible2026 ? "opacity-25" : "opacity-100"
+          }`}
+        >
+          {emoji}
+        </span>
+      ))}
+    </div>
+  )
+}
+
+function PurchaseCompare({
+  label,
+  count2022,
+  count2026,
+  emoji,
+  format = (n: number) => String(n),
+}: {
+  label: string
+  count2022: number
+  count2026: number
+  emoji: string
+  format?: (n: number) => string
 }) {
   return (
-    <div className="flex flex-col items-center gap-4 md:flex-row md:items-end md:justify-center md:gap-4">
-      <div className="text-center md:text-left">
-        <p className="text-3xl font-light text-primary">
-          {value2022}
-          {suffix}
-        </p>
-        <p className="text-xs text-muted-foreground mt-1">2022</p>
+    <div className="p-4 bg-card rounded-lg border border-border text-center">
+      <p className="text-[10px] text-muted-foreground uppercase tracking-wide mb-2">{label}</p>
+      <div className="flex items-baseline justify-center gap-2 tabular-nums">
+        <span className="text-xl font-light text-primary">{format(count2022)}</span>
+        <span className="text-muted-foreground text-sm">→</span>
+        <span className="text-xl font-light text-accent">{format(count2026)}</span>
       </div>
-      <span className="hidden md:inline text-muted-foreground mb-1">→</span>
-      <div className="text-center md:text-left">
-        <p className="text-3xl font-light text-accent">
-          {value2026}
-          {suffix}
-        </p>
-        <p className="text-xs text-muted-foreground mt-1">2026</p>
-      </div>
+      <MiniEmojiPicto count2022={count2022} count2026={count2026} emoji={emoji} />
     </div>
   )
 }
 
 export function JubilacionSection() {
   const { getIndicador, loading } = useData()
+  const [poderTip, setPoderTip] = useState(CLOSED_FOLLOW_TIP)
+  const poderTipRef = useRef<HTMLSpanElement>(null)
+  const closePoderTip = () => setPoderTip(CLOSED_FOLLOW_TIP)
+
+  useCloseOnScroll(poderTip.open, closePoderTip)
+
+  useEffect(() => {
+    const handleOutsideTouch = (e: PointerEvent) => {
+      if (e.pointerType === "touch" && !poderTipRef.current?.contains(e.target as Node)) {
+        closePoderTip()
+      }
+    }
+    document.addEventListener("pointerdown", handleOutsideTouch)
+    return () => document.removeEventListener("pointerdown", handleOutsideTouch)
+  }, [])
 
   const jubilacion = getIndicador("JUBILACION_MIN_DOLARES")
-  const dolar = getIndicador("VALOR_DOLAR_PESO")
-  const alquiler = getIndicador("ALQUILER_FESTEJO")
   const asado = getIndicador("ASADO_FINAL")
   const album = getIndicador("PRECIO_ALBUM_FIGURITAS")
   const boleto = getIndicador("BOLETO_AMBA")
 
   const jubilacion_2022 = jubilacion?.valor_2022 ?? 50124
   const jubilacion_2026 = jubilacion?.valor_2026 ?? 359254
-  const dolar_2022 = dolar?.valor_2022 ?? 266.43
-  const dolar_2026 = dolar?.valor_2026 ?? 1430
-
-  const jubUsd2022 = jubilacion_2022 / dolar_2022
-  const jubUsd2026 = jubilacion_2026 / dolar_2026
-  const poderAdquisitivoPct = ((jubUsd2026 / jubUsd2022) - 1) * 100
-
-  const alquiler_2022 = alquiler?.valor_2022 ?? 60000
-  const alquiler_2026 = alquiler?.valor_2026 ?? 429953
+  const unit = jubilacion?.unidad ?? "ARS"
 
   const asado_2022 = asado?.valor_2022 ?? 1220
   const asado_2026 = asado?.valor_2026 ?? 16019
@@ -80,8 +139,8 @@ export function JubilacionSection() {
   const costoAsado2022 = asado_2022 * KILOS_POR_ASADO
   const costoAsado2026 = asado_2026 * KILOS_POR_ASADO
 
-  const albumes2022 = (jubilacion_2022 / album_2022).toFixed(1)
-  const albumes2026 = (jubilacion_2026 / album_2026).toFixed(1)
+  const albumes2022 = jubilacion_2022 / album_2022
+  const albumes2026 = jubilacion_2026 / album_2026
 
   const asados2022 = Math.floor(jubilacion_2022 / costoAsado2022)
   const asados2026 = Math.floor(jubilacion_2026 / costoAsado2026)
@@ -89,8 +148,15 @@ export function JubilacionSection() {
   const viajes2022 = Math.floor(jubilacion_2022 / boleto_2022)
   const viajes2026 = Math.floor(jubilacion_2026 / boleto_2026)
 
-  const alquilerPorcentaje2022 = Math.round((alquiler_2022 / jubilacion_2022) * 100)
-  const alquilerPorcentaje2026 = Math.round((alquiler_2026 / jubilacion_2026) * 100)
+  const poderAdquisitivoPct =
+    ((albumes2026 / albumes2022 + asados2026 / asados2022 + viajes2026 / viajes2022) / 3 - 1) *
+    100
+
+  const titleImage = {
+    src: `${BASE_PATH}/abuela.png`,
+    alt: "Abuela festejando",
+    className: ABUELA_IMAGE_CLASS,
+  }
 
   if (loading) {
     return (
@@ -99,7 +165,7 @@ export function JubilacionSection() {
         title={copy.title}
         intro={LOADING_INTRO}
         bgColor="muted"
-        titleImage={{ src: `${BASE_PATH}/abuela.png`, alt: "Abuela festejando" }}
+        titleImage={titleImage}
       >
         <div className="h-48 animate-pulse bg-muted rounded-lg" />
       </SectionWrapper>
@@ -113,131 +179,113 @@ export function JubilacionSection() {
       intro={copy.intro}
       closing={copy.closing}
       bgColor="muted"
-      sources={[jubilacion, dolar, alquiler, asado, album, boleto]}
-      titleImage={{ src: `${BASE_PATH}/abuela.png`, alt: "Abuela festejando" }}
+      sources={[jubilacion, asado, album, boleto]}
+      titleImage={titleImage}
     >
       <motion.div
         initial={{ opacity: 0 }}
         whileInView={{ opacity: 1 }}
         viewport={{ once: true }}
         transition={{ duration: 0.6 }}
-        className="text-center mb-12"
+        className="mb-8"
       >
-        <p className="text-sm text-muted-foreground uppercase tracking-wide mb-4">
-          Jubilación mínima en dólares
+        <p className="text-xs text-muted-foreground uppercase tracking-wide mb-3 text-center">
+          Jubilación mínima en pesos
         </p>
-        <div className="flex flex-col items-center gap-6 md:flex-row md:justify-center md:gap-16">
-          <div>
+        <div className="flex flex-col items-center gap-4 sm:flex-row sm:justify-center sm:items-center sm:gap-5">
+          <div className="text-center sm:text-right">
             <motion.p
               initial={{ scale: 0.5, opacity: 0 }}
               whileInView={{ scale: 1, opacity: 1 }}
               viewport={{ once: true }}
               transition={{ delay: 0.2, duration: 0.5 }}
-              className="text-5xl md:text-7xl font-light text-primary"
+              className="text-4xl md:text-5xl font-light text-primary tabular-nums"
             >
-              {formatCurrency(Math.round(jubUsd2022), "USD")}
+              {formatCurrency(jubilacion_2022, unit)}
             </motion.p>
-            <p className="text-muted-foreground mt-2">2022</p>
+            <p className="text-[11px] text-muted-foreground mt-0.5">2022</p>
           </div>
 
-          <motion.div
-            initial={{ scaleX: 0 }}
-            whileInView={{ scaleX: 1 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.4, duration: 0.4 }}
-            className="w-12 h-0.5 bg-border md:block hidden"
-          />
-
-          <div className="flex flex-col items-center gap-2 py-2 md:py-0">
-            <p className="text-xs text-muted-foreground uppercase tracking-wide">
-              Cambio en poder adquisitivo
-            </p>
-            <p
-              className={`text-2xl md:text-3xl font-medium tabular-nums ${
-                poderAdquisitivoPct < 0 ? "text-destructive" : "text-accent"
-              }`}
-            >
-              {formatPctChange(poderAdquisitivoPct)}
-            </p>
-            <p className="text-[11px] text-muted-foreground max-w-[14rem] leading-snug">
-              En dólares, al tipo de cambio de cada año
+          <div className="flex flex-col items-center gap-0.5 shrink-0">
+            <div className="flex items-center gap-1">
+              <p
+                className={`text-2xl md:text-3xl font-medium tabular-nums ${
+                  poderAdquisitivoPct < 0 ? "text-destructive" : "text-accent"
+                }`}
+              >
+                {formatPctChange(poderAdquisitivoPct)}
+              </p>
+              <span
+                ref={poderTipRef}
+                className="inline-flex touch-manipulation"
+                {...bindFollowTooltip(setPoderTip, () => {})}
+              >
+                <InfoIconButton
+                  size="sm"
+                  label="Cómo se calcula el cambio en poder adquisitivo"
+                />
+              </span>
+              <FollowCursorTooltip
+                open={poderTip.open}
+                x={poderTip.x}
+                y={poderTip.y}
+                placement={poderTip.placement}
+                className={INFO_TOOLTIP_CLASS}
+              >
+                {PODER_ADQUISITIVO_TOOLTIP}
+              </FollowCursorTooltip>
+            </div>
+            <p className="text-[10px] text-muted-foreground uppercase tracking-wide">
+              poder adquisitivo
             </p>
           </div>
 
-          <motion.div
-            initial={{ scaleX: 0 }}
-            whileInView={{ scaleX: 1 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.4, duration: 0.4 }}
-            className="w-12 h-0.5 bg-border md:hidden"
-          />
-
-          <div>
+          <div className="text-center sm:text-left">
             <motion.p
               initial={{ scale: 0.5, opacity: 0 }}
               whileInView={{ scale: 1, opacity: 1 }}
               viewport={{ once: true }}
               transition={{ delay: 0.3, duration: 0.5 }}
-              className="text-5xl md:text-7xl font-light text-accent"
+              className="text-4xl md:text-5xl font-light text-accent tabular-nums"
             >
-              {formatCurrency(Math.round(jubUsd2026), "USD")}
+              {formatCurrency(jubilacion_2026, unit)}
             </motion.p>
-            <p className="text-muted-foreground mt-2">2026</p>
+            <p className="text-[11px] text-muted-foreground mt-0.5">2026</p>
           </div>
         </div>
       </motion.div>
 
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
+        initial={{ opacity: 0, y: 12 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
-        transition={{ delay: 0.4, duration: 0.6 }}
-        className="mb-12"
+        transition={{ delay: 0.3, duration: 0.5 }}
       >
-        <h4 className="text-sm font-medium text-foreground mb-6 text-center">
-          ¿Qué puede comprar una jubilación mínima?
+        <h4 className="text-xs font-medium text-muted-foreground mb-3 text-center uppercase tracking-wide">
+          ¿Qué alcanza con el haber?
         </h4>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-          <div className="p-6 bg-card rounded-lg border border-border">
-            <p className="text-xs text-muted-foreground uppercase tracking-wide mb-3">
-              Álbumes oficiales
-            </p>
-            <YearPair value2022={albumes2022} value2026={albumes2026} />
-            <p className="text-[11px] text-muted-foreground mt-3 leading-snug">
-              Cuántos álbumes del Mundial se compran con el haber mensual.
-            </p>
-          </div>
-
-          <div className="p-6 bg-card rounded-lg border border-border">
-            <p className="text-xs text-muted-foreground uppercase tracking-wide mb-3">
-              Asados de parrilla
-            </p>
-            <YearPair value2022={asados2022} value2026={asados2026} />
-            <p className="text-[11px] text-muted-foreground mt-3 leading-snug">
-              Con {KILOS_POR_ASADO} kg de carne por asado, como en el resto del sitio.
-            </p>
-          </div>
-
-          <div className="p-6 bg-card rounded-lg border border-border">
-            <p className="text-xs text-muted-foreground uppercase tracking-wide mb-3">
-              Viajes en colectivo
-            </p>
-            <YearPair value2022={viajes2022.toLocaleString("es-AR")} value2026={viajes2026.toLocaleString("es-AR")} />
-            <p className="text-[11px] text-muted-foreground mt-3 leading-snug">
-              Pasajes en AMBA si dedicara todo el mes al transporte ({formatCurrency(boleto_2022, boleto?.unidad)} → {formatCurrency(boleto_2026, boleto?.unidad)}).
-            </p>
-          </div>
-
-          <div className="p-6 bg-card rounded-lg border border-border">
-            <p className="text-xs text-muted-foreground uppercase tracking-wide mb-3">
-              % del alquiler monoamb
-            </p>
-            <YearPair value2022={`${alquilerPorcentaje2022}%`} value2026={`${alquilerPorcentaje2026}%`} />
-            <p className="text-[11px] text-muted-foreground mt-3 leading-snug">
-              Cuota de un monoambiente en San Nicolás sobre la jubilación mínima.
-            </p>
-          </div>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <PurchaseCompare
+            label="Álbumes"
+            count2022={albumes2022}
+            count2026={albumes2026}
+            emoji="📒"
+            format={(n) => n.toFixed(1)}
+          />
+          <PurchaseCompare
+            label="Asados"
+            count2022={asados2022}
+            count2026={asados2026}
+            emoji="🥩"
+          />
+          <PurchaseCompare
+            label="Viajes en colectivo"
+            count2022={viajes2022}
+            count2026={viajes2026}
+            emoji="🚌"
+            format={(n) => n.toLocaleString("es-AR")}
+          />
         </div>
       </motion.div>
     </SectionWrapper>

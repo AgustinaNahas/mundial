@@ -21,9 +21,6 @@ export const NOMBRES_NINOS: NombreNinoRow[] = [
   { nombre: "RODRIGO", count2022: 861, count2023: 748 },
 ]
 
-export const NOMBRES_NINOS_FUENTE =
-  "https://docs.google.com/spreadsheets/d/e/2PACX-1vSzYyEETGt1UHh8grdJj-q4dO63InOpLTQ-La74Jx-AT9QTdS3qlxNECjcpD7DW_d_2M3JA_mN1Jz_S/pub?gid=268353573&single=true&output=csv"
-
 /** Cada bebé del slider representa 1 niño cada 1.000 nacidos. */
 export const BEBES_POR_MIL_MAX = 12
 

@@ -21,6 +21,8 @@ export interface SourceRow {
 interface SourcesPanelProps {
   items?: (DataItem | undefined)[]
   extraRows?: SourceRow[]
+  /** No muestra el valor numérico junto a la descripción (p. ej. secciones con muchos datos). */
+  hideValues?: boolean
 }
 
 function formatSourceValue(valor: number, unidad?: string) {
@@ -52,7 +54,7 @@ function SourceAttributionLink({
   )
 }
 
-export function SourcesPanel({ items = [], extraRows = [] }: SourcesPanelProps) {
+export function SourcesPanel({ items = [], extraRows = [], hideValues = false }: SourcesPanelProps) {
   const [open, setOpen] = useState(false)
   const { rawData } = useData()
 
@@ -62,8 +64,8 @@ export function SourcesPanel({ items = [], extraRows = [] }: SourcesPanelProps) 
     .map((row, index) => ({
       key: `${row.indicador}-${row.periodo}-${index}`,
       descripcion: row.descripcion || row.indicador,
-      valor: row.valor,
-      unidad: row.unidad,
+      valor: hideValues ? undefined : row.valor,
+      unidad: hideValues ? undefined : row.unidad,
       fuente: row.fuente,
       fuenteCorta: row.fuente_corta || "Fuente",
       fechaFuente: row.fecha_fuente || "",
