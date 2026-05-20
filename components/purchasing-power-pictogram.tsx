@@ -2,13 +2,21 @@
 
 import { useEffect, useRef, useState } from "react"
 import Image from "next/image"
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
+import {
+  CLOSED_FOLLOW_TIP,
+  FollowCursorTooltip,
+  bindFollowTooltip,
+} from "@/components/follow-cursor-tooltip"
+import { useCloseOnScroll } from "@/hooks/use-close-on-scroll"
 
 const BASE_PATH = "/mundial"
 
 /** Contorno blanco para separar íconos densos (mobile y desktop). */
 const PICTO_HALO =
   "drop-shadow-[0_0_1px_#fff] drop-shadow-[0_0_2px_#fff] md:drop-shadow-[0_0_1.5px_#fff] md:drop-shadow-[0_0_3px_#fff]"
+
+const TOOLTIP_CLASS =
+  "pointer-events-none z-[100] max-w-xs space-y-1 rounded-md border border-border bg-card px-3 py-2 text-xs leading-relaxed text-card-foreground shadow-lg"
 
 export interface PurchasingPowerPictogramProps {
   count2022: number
@@ -40,22 +48,22 @@ export function PurchasingPowerPictogram({
   const loss = Math.max(0, count2022 - count2026)
   const src = imageFile ? `${BASE_PATH}/${imageFile}` : null
 
-  const [gridOpen, setGridOpen] = useState(false)
-  const gridRef = useRef<HTMLDivElement>(null)
+  const [tip, setTip] = useState(CLOSED_FOLLOW_TIP)
+  const containerRef = useRef<HTMLDivElement>(null)
+
+  const closeTip = () => setTip(CLOSED_FOLLOW_TIP)
+
+  useCloseOnScroll(tip.open, closeTip)
 
   useEffect(() => {
-    if (!gridOpen) return
-    const close = (e: PointerEvent) => {
-      if (e.pointerType === "touch" && !gridRef.current?.contains(e.target as Node)) {
-        setGridOpen(false)
+    const handleOutsideTouch = (e: PointerEvent) => {
+      if (e.pointerType === "touch" && !containerRef.current?.contains(e.target as Node)) {
+        closeTip()
       }
     }
-    document.addEventListener("pointerdown", close)
-    return () => document.removeEventListener("pointerdown", close)
-  }, [gridOpen])
-
-  const tooltipContentClass =
-    "max-w-xs leading-relaxed bg-card border border-border text-card-foreground"
+    document.addEventListener("pointerdown", handleOutsideTouch)
+    return () => document.removeEventListener("pointerdown", handleOutsideTouch)
+  }, [])
 
   const defaultDescription =
     loss > 0
@@ -63,7 +71,10 @@ export function PurchasingPowerPictogram({
       : "Cantidad que alcanzaba un salario mínimo en 2022. Lo que ya no alcanza en 2026 se muestra con menor opacidad."
 
   return (
-    <div className="w-full max-w-md md:max-w-xl p-6 bg-card rounded-lg border border-border">
+    <div
+      ref={containerRef}
+      className="w-full max-w-md md:max-w-xl p-6 bg-card rounded-lg border border-border"
+    >
       <h4 className="text-sm font-medium text-foreground mb-2">{title}</h4>
 
       <p className="text-xs text-muted-foreground mb-5">
@@ -76,72 +87,67 @@ export function PurchasingPowerPictogram({
         ) : null}
       </p>
 
-      <Tooltip open={gridOpen} onOpenChange={setGridOpen}>
-        <TooltipTrigger asChild>
-          <div
-            ref={gridRef}
-            className="grid grid-cols-8 md:grid-cols-10 gap-0 cursor-default touch-manipulation"
-            role="img"
-            aria-label={`${count2022} ${unitLabel} en 2022, ${count2026} en 2026`}
-            onPointerEnter={(e) => {
-              if (e.pointerType !== "touch") setGridOpen(true)
-            }}
-            onPointerLeave={(e) => {
-              if (e.pointerType !== "touch") setGridOpen(false)
-            }}
-            onPointerDown={(e) => {
-              if (e.pointerType === "touch") {
-                e.preventDefault()
-                setGridOpen((o) => !o)
-              }
-            }}
-          >
-            {Array.from({ length: total }).map((_, i) => {
-              const faded = i >= count2026
-              return (
+      <div
+        className="grid grid-cols-8 md:grid-cols-10 gap-0 cursor-pointer touch-manipulation"
+        role="img"
+        aria-label={`${count2022} ${unitLabel} en 2022, ${count2026} en 2026`}
+        {...bindFollowTooltip(setTip, closeTip)}
+      >
+        {Array.from({ length: total }).map((_, i) => {
+          const faded = i >= count2026
+          return (
+            <span
+              key={i}
+              className="flex aspect-square w-full items-center justify-center"
+            >
+              {src ? (
+                <Image
+                  src={src}
+                  alt=""
+                  width={28}
+                  height={28}
+                  className={`size-[92%] object-contain transition-opacity ${PICTO_HALO} ${faded ? "opacity-25" : "opacity-100"}`}
+                />
+              ) : (
                 <span
-                  key={i}
-                  className="flex aspect-square w-full items-center justify-center"
+                  className={`text-base leading-none select-none transition-opacity md:text-lg ${PICTO_HALO} ${faded ? "opacity-25" : "opacity-100"}`}
                 >
-                  {src ? (
-                    <Image
-                      src={src}
-                      alt=""
-                      width={28}
-                      height={28}
-                      className={`size-[92%] object-contain transition-opacity ${PICTO_HALO} ${faded ? "opacity-25" : "opacity-100"}`}
-                    />
-                  ) : (
-                    <span
-                      className={`text-base leading-none select-none transition-opacity md:text-lg ${PICTO_HALO} ${faded ? "opacity-25" : "opacity-100"}`}
-                    >
-                      {emoji}
-                    </span>
-                  )}
+                  {emoji}
                 </span>
-              )
-            })}
-          </div>
-        </TooltipTrigger>
-        <TooltipContent sideOffset={8} showArrow={false} className={`${tooltipContentClass} space-y-1`}>
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground mb-1.5">
-            Con un salario mínimo…
+              )}
+            </span>
+          )
+        })}
+      </div>
+
+      <FollowCursorTooltip
+        open={tip.open}
+        x={tip.x}
+        y={tip.y}
+        placement={tip.placement}
+        className={TOOLTIP_CLASS}
+      >
+        <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground mb-1.5">
+          Con un salario mínimo…
+        </p>
+        <div className="flex items-baseline gap-1.5">
+          <span className="text-base font-bold" style={{ color: "oklch(0.97 0.01 220)" }}>
+            {count2022}
+          </span>
+          <span className="text-sm">{unitLabel} en Qatar 2022</span>
+        </div>
+        <div className="flex items-baseline gap-1.5">
+          <span className="text-base font-bold" style={{ color: "oklch(0.65 0.18 222)" }}>
+            {count2026}
+          </span>
+          <span className="text-sm">{unitLabel} en EEUU 2026</span>
+        </div>
+        {loss > 0 && (
+          <p className="pt-1.5 border-t border-border/40 text-xs text-muted-foreground">
+            −{loss} {unitLabel} de poder adquisitivo perdido
           </p>
-          <div className="flex items-baseline gap-1.5">
-            <span className="text-base font-bold" style={{ color: "oklch(0.97 0.01 220)" }}>{count2022}</span>
-            <span className="text-sm">{unitLabel} en Qatar 2022</span>
-          </div>
-          <div className="flex items-baseline gap-1.5">
-            <span className="text-base font-bold" style={{ color: "oklch(0.65 0.18 222)" }}>{count2026}</span>
-            <span className="text-sm">{unitLabel} en EEUU 2026</span>
-          </div>
-          {loss > 0 && (
-            <p className="pt-1.5 border-t border-border/40 text-xs text-muted-foreground">
-              −{loss} {unitLabel} de poder adquisitivo perdido
-            </p>
-          )}
-        </TooltipContent>
-      </Tooltip>
+        )}
+      </FollowCursorTooltip>
 
       <div className="mt-4 text-sm text-muted-foreground">
         <span className="font-medium text-foreground">{count2022}</span> en 2022

@@ -1,37 +1,14 @@
 "use client"
 
 import { motion } from "framer-motion"
-import type { PointerEvent as ReactPointerEvent } from "react"
 import { useEffect, useRef, useState } from "react"
-import { createPortal } from "react-dom"
+import {
+  CLOSED_FOLLOW_TIP,
+  FollowCursorTooltip,
+  bindFollowTooltip,
+} from "@/components/follow-cursor-tooltip"
 import { useCloseOnScroll } from "@/hooks/use-close-on-scroll"
 import { formatCurrency } from "@/lib/utils"
-
-const CURSOR_TOOLTIP_OFFSET = 14
-const TOOLTIP_ABOVE_GAP = 12
-/** Mitad estimada del ancho máximo del tooltip para no salirse del viewport. */
-const TOOLTIP_HALF_WIDTH_EST = 100
-
-type TooltipPlacement = "follow" | "above"
-
-const CLOSED_TIP = { open: false, x: 0, y: 0, placement: "follow" as TooltipPlacement }
-
-function pointerViewportCoords(e: ReactPointerEvent) {
-  const vv = window.visualViewport
-  if (!vv) return { x: e.clientX, y: e.clientY }
-  return { x: e.clientX + vv.offsetLeft, y: e.clientY + vv.offsetTop }
-}
-
-function clampTooltipX(x: number) {
-  const vv = window.visualViewport
-  const left = vv?.offsetLeft ?? 0
-  const width = vv?.width ?? window.innerWidth
-  const margin = 8
-  return Math.min(
-    Math.max(x, left + TOOLTIP_HALF_WIDTH_EST + margin),
-    left + width - TOOLTIP_HALF_WIDTH_EST - margin,
-  )
-}
 
 const HATCH_OPACITY = 0.6
 
@@ -53,49 +30,6 @@ interface ComparisonBarProps {
   referenceValue2022?: number
   referenceValue2026?: number
   referenceLabel?: string
-}
-
-function FollowCursorTooltip({
-  open,
-  x,
-  y,
-  placement = "follow",
-  children,
-}: {
-  open: boolean
-  x: number
-  y: number
-  placement?: TooltipPlacement
-  children: React.ReactNode
-}) {
-  const [mounted, setMounted] = useState(false)
-  useEffect(() => setMounted(true), [])
-  if (!mounted || !open) return null
-
-  const style =
-    placement === "above"
-      ? {
-          position: "fixed" as const,
-          left: x,
-          top: y,
-          transform: `translate(-50%, calc(-100% - ${TOOLTIP_ABOVE_GAP}px))`,
-        }
-      : {
-          position: "fixed" as const,
-          left: x + CURSOR_TOOLTIP_OFFSET,
-          top: y + CURSOR_TOOLTIP_OFFSET,
-        }
-
-  return createPortal(
-    <div
-      role="tooltip"
-      style={style}
-      className="pointer-events-none z-[100] max-w-[min(100vw-2rem,20rem)] rounded-md border border-border bg-card px-3 py-2 text-xs text-card-foreground shadow-lg"
-    >
-      {children}
-    </div>,
-    document.body,
-  )
 }
 
 export function ComparisonBar({
@@ -176,13 +110,13 @@ export function ComparisonBar({
     )
   }
 
-  const [tip2022, setTip2022] = useState(CLOSED_TIP)
-  const [tip2026, setTip2026] = useState(CLOSED_TIP)
+  const [tip2022, setTip2022] = useState(CLOSED_FOLLOW_TIP)
+  const [tip2026, setTip2026] = useState(CLOSED_FOLLOW_TIP)
   const anyTipOpen = tip2022.open || tip2026.open
 
   const closeAllTips = () => {
-    setTip2022(CLOSED_TIP)
-    setTip2026(CLOSED_TIP)
+    setTip2022(CLOSED_FOLLOW_TIP)
+    setTip2026(CLOSED_FOLLOW_TIP)
   }
 
   useCloseOnScroll(anyTipOpen, closeAllTips)
@@ -198,44 +132,6 @@ export function ComparisonBar({
     document.addEventListener("pointerdown", handleOutsideTouch)
     return () => document.removeEventListener("pointerdown", handleOutsideTouch)
   }, [])
-
-  const bindFollowTooltip = (
-    set: typeof setTip2022,
-    other: typeof setTip2022,
-  ): {
-    onPointerEnter: (e: ReactPointerEvent) => void
-    onPointerMove: (e: ReactPointerEvent) => void
-    onPointerLeave: (e: ReactPointerEvent) => void
-    onPointerDown: (e: ReactPointerEvent) => void
-  } => ({
-    onPointerEnter: (e) => {
-      if (e.pointerType !== "touch") {
-        const { x, y } = pointerViewportCoords(e)
-        set({ open: true, x, y, placement: "follow" })
-      }
-    },
-    onPointerMove: (e) => {
-      if (e.pointerType !== "touch") {
-        const { x, y } = pointerViewportCoords(e)
-        set({ open: true, x, y, placement: "follow" })
-      }
-    },
-    onPointerLeave: (e) => {
-      if (e.pointerType !== "touch") set(CLOSED_TIP)
-    },
-    onPointerDown: (e) => {
-      if (e.pointerType === "touch") {
-        e.stopPropagation()
-        const { x, y } = pointerViewportCoords(e)
-        other(CLOSED_TIP)
-        set((prev) =>
-          prev.open
-            ? CLOSED_TIP
-            : { open: true, x: clampTooltipX(x), y, placement: "above" },
-        )
-      }
-    },
-  })
 
   return (
     <motion.div
@@ -262,7 +158,7 @@ export function ComparisonBar({
           <span className="w-10 shrink-0 text-xs text-muted-foreground sm:w-12">2022</span>
           <div
             className="relative min-w-0 flex-1 cursor-pointer touch-manipulation"
-            {...bindFollowTooltip(setTip2022, setTip2026)}
+            {...bindFollowTooltip(setTip2022, () => setTip2026(CLOSED_FOLLOW_TIP))}
           >
             <div className="relative flex h-8 min-w-0 flex-row items-stretch overflow-hidden rounded bg-muted">
               <motion.div
@@ -324,7 +220,7 @@ export function ComparisonBar({
           <span className="w-10 shrink-0 text-xs text-muted-foreground sm:w-12">2026</span>
           <div
             className="relative min-w-0 flex-1 cursor-pointer touch-manipulation"
-            {...bindFollowTooltip(setTip2026, setTip2022)}
+            {...bindFollowTooltip(setTip2026, () => setTip2022(CLOSED_FOLLOW_TIP))}
           >
             <div className="relative flex h-8 items-center overflow-hidden rounded bg-muted">
               <motion.div
