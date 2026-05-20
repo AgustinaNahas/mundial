@@ -163,17 +163,26 @@ function MoneyPop({ amount, playerId }: { amount: number; playerId: PlayerId | "
   )
 }
 
-function PitchCanvas({ children }: { children: ReactNode }) {
+function PitchCanvas({
+  pitch,
+  overlay,
+}: {
+  pitch: ReactNode
+  overlay?: ReactNode
+}) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 12 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-40px" }}
       transition={{ duration: 0.5 }}
-      className="relative min-w-0 flex-1 overflow-hidden rounded-xl border border-border/50 aspect-[2.2/1] min-h-[160px] max-h-[220px]"
+      className="relative min-w-0 flex-1 overflow-visible aspect-[2.2/1] min-h-[160px] max-h-[220px]"
       aria-hidden
     >
-      {children}
+      <div className="absolute inset-0 overflow-hidden rounded-xl border border-border/50">
+        {pitch}
+      </div>
+      {overlay}
     </motion.div>
   )
 }
@@ -238,66 +247,70 @@ export function FifaPitchAnimation() {
     <div ref={containerRef} className="flex min-w-0 items-stretch gap-2 sm:gap-4">
       {/* Mismo offset que las etiquetas 2022/2026 de ComparisonBar */}
       <span className="w-10 shrink-0 sm:w-12" aria-hidden />
-      <PitchCanvas>
-        {/* Pasto */}
-        <motion.div
-          className="absolute inset-0"
-          animate={{ backgroundPosition: ["0% 0%", "100% 0%"] }}
-          transition={{ repeat: Infinity, duration: 14, ease: "linear" }}
-          style={{
-            backgroundImage: `
-              repeating-linear-gradient(
-                90deg,
-                oklch(0.32 0.12 145) 0px,
-                oklch(0.32 0.12 145) ${STRIPE_W}px,
-                oklch(0.28 0.11 148) ${STRIPE_W}px,
-                oklch(0.28 0.11 148) ${STRIPE_PERIOD}px
-              ),
-              linear-gradient(180deg, oklch(0.34 0.13 142) 0%, oklch(0.22 0.09 150) 100%)
-            `,
-            backgroundSize: `${STRIPE_PERIOD * 2}px 100%, 100% 100%`,
-          }}
-        />
+      <PitchCanvas
+        pitch={
+          <>
+            {/* Pasto */}
+            <motion.div
+              className="absolute inset-0"
+              animate={{ backgroundPosition: ["0% 0%", "100% 0%"] }}
+              transition={{ repeat: Infinity, duration: 14, ease: "linear" }}
+              style={{
+                backgroundImage: `
+                  repeating-linear-gradient(
+                    90deg,
+                    oklch(0.32 0.12 145) 0px,
+                    oklch(0.32 0.12 145) ${STRIPE_W}px,
+                    oklch(0.28 0.11 148) ${STRIPE_W}px,
+                    oklch(0.28 0.11 148) ${STRIPE_PERIOD}px
+                  ),
+                  linear-gradient(180deg, oklch(0.34 0.13 142) 0%, oklch(0.22 0.09 150) 100%)
+                `,
+                backgroundSize: `${STRIPE_PERIOD * 2}px 100%, 100% 100%`,
+              }}
+            />
 
-        <PitchMarkings />
-        <GoalNet shaking={isGoal} />
+            <PitchMarkings />
+            <GoalNet shaking={isGoal} />
 
-        {/* Jugadores */}
-        {PLAYERS.map((p, i) => (
-          <motion.div
-            key={p.id}
-            className="absolute -translate-x-1/2"
-            style={{ left: p.left, bottom: p.bottom }}
-            animate={{ y: [0, -2, 0] }}
-            transition={{ repeat: Infinity, duration: 1.4, delay: i * 0.12 }}
-          >
-            <PlayerSilhouette facing={p.facing} />
-          </motion.div>
-        ))}
+            {/* Jugadores */}
+            {PLAYERS.map((p, i) => (
+              <motion.div
+                key={p.id}
+                className="absolute -translate-x-1/2"
+                style={{ left: p.left, bottom: p.bottom }}
+                animate={{ y: [0, -2, 0] }}
+                transition={{ repeat: Infinity, duration: 1.4, delay: i * 0.12 }}
+              >
+                <PlayerSilhouette facing={p.facing} />
+              </motion.div>
+            ))}
 
-        {/* Pelota */}
-        <motion.div
-          className="absolute z-10 flex h-5 w-5 -translate-x-1/2 -translate-y-1/2 items-center justify-center text-[13px]"
-          animate={{
-            left: ballPos.left,
-            bottom: ballPos.bottom,
-            scale: isGoal ? [1, 1.2, 0.85] : 1,
-          }}
-          transition={{
-            left: { duration: 0.7, ease: "easeInOut" },
-            bottom: { duration: 0.7, ease: "easeInOut" },
-            scale: { duration: 0.7 },
-          }}
-          style={{ left: ballPos.left, bottom: ballPos.bottom }}
-        >
-          ⚽
-        </motion.div>
-
-        <AnimatePresence>
-          {moneyPop && <MoneyPop amount={moneyPop.amount} playerId={moneyPop.at} />}
-        </AnimatePresence>
-
-      </PitchCanvas>
+            {/* Pelota */}
+            <motion.div
+              className="absolute z-10 flex h-5 w-5 -translate-x-1/2 -translate-y-1/2 items-center justify-center text-[13px]"
+              animate={{
+                left: ballPos.left,
+                bottom: ballPos.bottom,
+                scale: isGoal ? [1, 1.2, 0.85] : 1,
+              }}
+              transition={{
+                left: { duration: 0.7, ease: "easeInOut" },
+                bottom: { duration: 0.7, ease: "easeInOut" },
+                scale: { duration: 0.7 },
+              }}
+              style={{ left: ballPos.left, bottom: ballPos.bottom }}
+            >
+              ⚽
+            </motion.div>
+          </>
+        }
+        overlay={
+          <AnimatePresence>
+            {moneyPop && <MoneyPop amount={moneyPop.amount} playerId={moneyPop.at} />}
+          </AnimatePresence>
+        }
+      />
     </div>
   )
 }

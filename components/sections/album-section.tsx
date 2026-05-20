@@ -88,11 +88,11 @@ function FiguraCursor({ visible, cursorX, cursorY, src }: { visible: boolean; cu
               <Image
                 src={src}
                 alt="figurita"
-                width={80}
-                height={104}
+                width={96}
+                height={125}
                 loading="eager"
                 fetchPriority="high"
-                className="w-20 h-26 object-cover rounded-md shadow-2xl border border-white/20"
+                className="w-24 h-[125px] object-cover rounded-md shadow-2xl border border-white/20"
               />
             </motion.div>
           </motion.div>
@@ -140,7 +140,7 @@ function Slot({ figu, emoji, onPlace }: { figu: SlotData; emoji: string; onPlace
           />
         ) : (
           <motion.div className="absolute inset-0 flex flex-col items-center justify-center gap-1 group-hover:bg-primary/5 transition-colors rounded-md">
-            <span className="text-[2.625rem] md:text-3xl leading-none select-none">{emoji}</span>
+            <span className="text-[50px] md:text-[38px] leading-none select-none">{emoji}</span>
           </motion.div>
         )}
       </AnimatePresence>
@@ -608,7 +608,8 @@ export function AlbumSection() {
         bgColor="muted"
         sources={[sobreItem, figusSobreItem, albumItem, cantFiguritas, salario]}
       >
-        <p className="text-sm text-muted-foreground text-center max-w-xl mx-auto mb-5 md:mb-6 leading-relaxed px-1">
+        <p className="text-[17px] text-foreground/85 font-medium text-center max-w-xl 
+        mx-auto mb-5 md:mb-12 leading-relaxed px-1">
           <span className="hidden md:inline">
             💡 Pasá el mouse por encima del álbum para revelar las figuritas, y hacé clic en donde te parece que van en función de las pistas dadas.
           </span>
@@ -645,7 +646,7 @@ export function AlbumSection() {
             className="relative isolate rounded-xl overflow-hidden border border-border/40 bg-card"
           >
             <div className="px-4 py-3 flex items-center justify-between bg-primary/10 border-b border-border/20">
-              <p className="text-foreground font-semibold text-sm tracking-wide">
+              <p className="text-foreground font-semibold text-sm tracking-wide text-center mx-auto">
                 {placedCount}/{TOTAL} figuritas
               </p>
               {allFilled && (
@@ -660,7 +661,7 @@ export function AlbumSection() {
             </div>
             {isMobile && !allFilled && (
               <div className="px-4 py-3 border-b border-border/20 bg-card/70">
-                <p className="text-[11px] uppercase tracking-widest text-muted-foreground mb-2">Figurita actual</p>
+                <p className="text-[11px] uppercase tracking-widest text-muted-foreground mb-2 text-center mx-auto">Figurita actual</p>
                 <div className="flex items-center justify-center">
                   <Image
                     src={cursorSrc}
@@ -748,13 +749,13 @@ export function AlbumSection() {
 
         {/* ── Resumen final en dos escenarios ── */}
         <div className="mt-12 pt-8 border-t border-border/10 space-y-8">
-          <h3 className="text-center font-semibold tracking-tight text-foreground text-base md:text-lg px-2">
+          <h3 className="text-center font-semibold tracking-tight text-foreground text-[26px] md:text-[28px] px-2">
             Entonces, ¿cuánto sale completar el álbum?
           </h3>
 
           <div className="rounded-xl bg-card border border-border/20 p-5 md:p-6 space-y-5">
             <div className="flex items-center gap-2 justify-center">
-              <p className="text-sm font-medium text-foreground">Si sos más del "Elijo creer"...</p>
+              <p className="text-[20px] md:text-[22px] font-medium text-foreground">Si sos un iluminado y no te toca ninguna repetida...</p>
               <Tooltip>
                 <TooltipTrigger asChild>
                   <InfoIconButton
@@ -803,7 +804,7 @@ export function AlbumSection() {
 
           <div className="rounded-xl bg-card border border-border/20 p-5 md:p-6 space-y-5">
             <div className="flex items-center gap-2 justify-center">
-              <p className="text-sm font-medium text-foreground">Si lo tuyo es más huevo que suerte...</p>
+              <p className="text-[20px] md:text-[22px] font-medium text-foreground">Si lo tuyo es más huevo que suerte...</p>
             <Tooltip>
                 <TooltipTrigger asChild>
                   <InfoIconButton

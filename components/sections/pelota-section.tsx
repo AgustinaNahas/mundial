@@ -1,11 +1,12 @@
 "use client"
 
-import { useEffect, useRef } from "react"
+import { useCallback, useEffect, useRef } from "react"
 import { motion } from "framer-motion"
 import Image from "next/image"
 import { cn, formatCurrency } from "@/lib/utils"
 import { SectionWrapper } from "@/components/section-wrapper"
 import { useData } from "@/lib/data-context"
+import { useIsMobile } from "@/hooks/use-mobile"
 import { LOADING_INTRO, SECTIONS } from "@/lib/site-copy"
 
 const copy = SECTIONS.pelota
@@ -14,20 +15,52 @@ const BASE_PATH = "/mundial"
 
 const PELOTA_ROTATION_SLOW_S = 14
 const PELOTA_ROTATION_FAST_S = 4
+const PELOTA_TAP_TOTAL_MS = 5000
+const PELOTA_TAP_RAMP_MS = 350
+const PELOTA_TAP_DECEL_MS = 1200
+const PELOTA_TAP_CRUISE_MS = PELOTA_TAP_TOTAL_MS - PELOTA_TAP_RAMP_MS - PELOTA_TAP_DECEL_MS
 
-/** Rotación con rAF: siempre aplica `transform`, el hover solo cambia grados/segundo (sin CSS animation que a veces no corre con Tailwind). */
+function easeOutCubic(t: number) {
+  return 1 - (1 - t) ** 3
+}
+
+/** 0 = lento, 1 = rápido; rampa corta, crucero y desaceleración dentro de 5s. */
+function tapSpeedFactor(elapsedMs: number) {
+  if (elapsedMs < 0) return 0
+  if (elapsedMs < PELOTA_TAP_RAMP_MS) {
+    return easeOutCubic(elapsedMs / PELOTA_TAP_RAMP_MS)
+  }
+  if (elapsedMs < PELOTA_TAP_RAMP_MS + PELOTA_TAP_CRUISE_MS) {
+    return 1
+  }
+  const decelElapsed = elapsedMs - PELOTA_TAP_RAMP_MS - PELOTA_TAP_CRUISE_MS
+  if (decelElapsed < PELOTA_TAP_DECEL_MS) {
+    return 1 - easeOutCubic(decelElapsed / PELOTA_TAP_DECEL_MS)
+  }
+  return 0
+}
+
+/** Rotación con rAF: siempre aplica `transform`; hover en desktop, tap boost en mobile. */
 function PelotaRotator({
   clockwise,
   children,
   className,
+  isMobile,
 }: {
   clockwise: boolean
   children: React.ReactNode
   className?: string
+  isMobile: boolean
 }) {
   const ref = useRef<HTMLDivElement>(null)
   const angleRef = useRef(0)
-  const fastRef = useRef(false)
+  const hoverRef = useRef(false)
+  const boostStartRef = useRef<number | null>(null)
+
+  const handleTap = useCallback(() => {
+    if (!isMobile) return
+    boostStartRef.current = performance.now()
+  }, [isMobile])
 
   useEffect(() => {
     let raf = 0
@@ -37,7 +70,22 @@ function PelotaRotator({
       if (lastMs === null) lastMs = t
       const dt = Math.min((t - lastMs) / 1000, 0.05)
       lastMs = t
-      const period = fastRef.current ? PELOTA_ROTATION_FAST_S : PELOTA_ROTATION_SLOW_S
+
+      let factor = hoverRef.current ? 1 : 0
+      const boostStart = boostStartRef.current
+      if (boostStart !== null) {
+        const elapsed = t - boostStart
+        const total = PELOTA_TAP_TOTAL_MS
+        if (elapsed < total) {
+          factor = tapSpeedFactor(elapsed)
+        } else {
+          boostStartRef.current = null
+        }
+      }
+
+      const period =
+        PELOTA_ROTATION_SLOW_S -
+        (PELOTA_ROTATION_SLOW_S - PELOTA_ROTATION_FAST_S) * factor
       const degPerSec = 360 / period
       angleRef.current += (clockwise ? 1 : -1) * degPerSec * dt
       const el = ref.current
@@ -55,11 +103,12 @@ function PelotaRotator({
       className={cn(className)}
       style={{ transformOrigin: "center center", willChange: "transform" }}
       onPointerEnter={() => {
-        fastRef.current = true
+        if (!isMobile) hoverRef.current = true
       }}
       onPointerLeave={() => {
-        fastRef.current = false
+        if (!isMobile) hoverRef.current = false
       }}
+      onPointerDown={handleTap}
     >
       {children}
     </div>
@@ -149,6 +198,7 @@ function WorkCalendar({ days, color, delay = 0, completionMarker }: {
 
 export function PelotaSection() {
   const { getIndicador, loading } = useData()
+  const isMobile = useIsMobile()
 
   const pelota  = getIndicador("PELOTA_MUNDIAL")
   const salario = getIndicador("SUELDO_MIN_PESOS")
@@ -188,7 +238,7 @@ export function PelotaSection() {
           className="space-y-3 md:space-y-6 min-w-0"
         >
           <div className="w-[5.25rem] h-[5.25rem] md:w-40 md:h-40 mx-auto">
-            <PelotaRotator clockwise className="relative h-full w-full cursor-pointer touch-manipulation">
+            <PelotaRotator isMobile={isMobile} clockwise className="relative h-full w-full cursor-pointer touch-manipulation">
               <Image
                 src={`${BASE_PATH}/pelota2022.webp`}
                 alt="Pelota 2022"
@@ -214,7 +264,7 @@ export function PelotaSection() {
               days={diasTrabajo2022}
               color="oklch(0.97 0.01 220)"
               delay={0.2}
-              completionMarker={<span className="text-[10px] md:text-[13px] leading-none">⚽</span>}
+              completionMarker={<span className="text-[10px] md:text-[16px] leading-none">⚽</span>}
             />
           </div>
         </motion.div>
@@ -228,7 +278,7 @@ export function PelotaSection() {
           className="space-y-3 md:space-y-6 min-w-0"
         >
           <div className="w-[5.25rem] h-[5.25rem] md:w-40 md:h-40 mx-auto">
-            <PelotaRotator clockwise={false} className="relative h-full w-full cursor-pointer touch-manipulation">
+            <PelotaRotator isMobile={isMobile} clockwise={false} className="relative h-full w-full cursor-pointer touch-manipulation">
               <Image
                 src={`${BASE_PATH}/pelota2026.webp`}
                 alt="Pelota 2026"
@@ -254,7 +304,7 @@ export function PelotaSection() {
               days={diasTrabajo2026}
               color="oklch(0.65 0.18 222)"
               delay={0.35}
-              completionMarker={<span className="text-[10px] md:text-[13px] leading-none">⚽</span>}
+              completionMarker={<span className="text-[10px] md:text-[16px] leading-none">⚽</span>}
             />
           </div>
         </motion.div>

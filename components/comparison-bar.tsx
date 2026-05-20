@@ -4,17 +4,42 @@ import { motion } from "framer-motion"
 import type { PointerEvent as ReactPointerEvent } from "react"
 import { useEffect, useRef, useState } from "react"
 import { createPortal } from "react-dom"
+import { useCloseOnScroll } from "@/hooks/use-close-on-scroll"
 import { formatCurrency } from "@/lib/utils"
 
 const CURSOR_TOOLTIP_OFFSET = 14
+const TOOLTIP_ABOVE_GAP = 12
+/** Mitad estimada del ancho máximo del tooltip para no salirse del viewport. */
+const TOOLTIP_HALF_WIDTH_EST = 100
 
-// Barra 2022 (celeste/accent) → rayas blancas contrastantes
-const HATCH_PATTERN_WHITE =
-  "repeating-linear-gradient(-45deg, transparent 0px, transparent 4px, rgba(255,255,255,0.55) 4px, rgba(255,255,255,0.55) 7px)"
+type TooltipPlacement = "follow" | "above"
 
-// Barra 2026 (primary/blanca) → rayas celestes contrastantes
-const HATCH_PATTERN_CELESTE =
-  "repeating-linear-gradient(-45deg, transparent 0px, transparent 4px, rgba(0,164,220,0.55) 4px, rgba(0,164,220,0.55) 7px)"
+const CLOSED_TIP = { open: false, x: 0, y: 0, placement: "follow" as TooltipPlacement }
+
+function pointerViewportCoords(e: ReactPointerEvent) {
+  const vv = window.visualViewport
+  if (!vv) return { x: e.clientX, y: e.clientY }
+  return { x: e.clientX + vv.offsetLeft, y: e.clientY + vv.offsetTop }
+}
+
+function clampTooltipX(x: number) {
+  const vv = window.visualViewport
+  const left = vv?.offsetLeft ?? 0
+  const width = vv?.width ?? window.innerWidth
+  const margin = 8
+  return Math.min(
+    Math.max(x, left + TOOLTIP_HALF_WIDTH_EST + margin),
+    left + width - TOOLTIP_HALF_WIDTH_EST - margin,
+  )
+}
+
+const HATCH_OPACITY = 0.6
+
+// Sueldo en barra 2026 (fondo blanco/primary) → rayas blancas
+const HATCH_PATTERN_WHITE = `repeating-linear-gradient(-45deg, transparent 0px, transparent 4px, rgba(255,255,255,${HATCH_OPACITY}) 4px, rgba(255,255,255,${HATCH_OPACITY}) 7px)`
+
+// Sueldo en barra 2022 (fondo celeste/accent) → rayas celestes
+const HATCH_PATTERN_CELESTE = `repeating-linear-gradient(-45deg, transparent 0px, transparent 4px, rgba(0,164,220,${HATCH_OPACITY}) 4px, rgba(0,164,220,${HATCH_OPACITY}) 7px)`
 
 interface ComparisonBarProps {
   label: string
@@ -34,24 +59,37 @@ function FollowCursorTooltip({
   open,
   x,
   y,
+  placement = "follow",
   children,
 }: {
   open: boolean
   x: number
   y: number
+  placement?: TooltipPlacement
   children: React.ReactNode
 }) {
   const [mounted, setMounted] = useState(false)
   useEffect(() => setMounted(true), [])
   if (!mounted || !open) return null
+
+  const style =
+    placement === "above"
+      ? {
+          position: "fixed" as const,
+          left: x,
+          top: y,
+          transform: `translate(-50%, calc(-100% - ${TOOLTIP_ABOVE_GAP}px))`,
+        }
+      : {
+          position: "fixed" as const,
+          left: x + CURSOR_TOOLTIP_OFFSET,
+          top: y + CURSOR_TOOLTIP_OFFSET,
+        }
+
   return createPortal(
     <div
       role="tooltip"
-      style={{
-        position: "fixed",
-        left: x + CURSOR_TOOLTIP_OFFSET,
-        top: y + CURSOR_TOOLTIP_OFFSET,
-      }}
+      style={style}
       className="pointer-events-none z-[100] max-w-[min(100vw-2rem,20rem)] rounded-md border border-border bg-card px-3 py-2 text-xs text-card-foreground shadow-lg"
     >
       {children}
@@ -99,6 +137,7 @@ export function ComparisonBar({
     referenceValue: number | undefined,
     productSwatchClass: string,
     referenceSwatchBg: string,
+    referenceSwatchPattern: string,
   ) => {
     const multiple =
       referenceLabel != null && referenceValue != null && referenceValue > 0
@@ -121,7 +160,7 @@ export function ComparisonBar({
           <div className="flex items-start gap-2.5">
             <span
               className="mt-1 size-2.5 shrink-0 rounded-sm"
-              style={{ background: referenceSwatchBg, backgroundImage: HATCH_PATTERN_WHITE }}
+              style={{ background: referenceSwatchBg, backgroundImage: referenceSwatchPattern }}
               aria-hidden
             />
             <p className="min-w-0 leading-snug">
@@ -137,16 +176,23 @@ export function ComparisonBar({
     )
   }
 
-  const [tip2022, setTip2022] = useState({ open: false, x: 0, y: 0 })
-  const [tip2026, setTip2026] = useState({ open: false, x: 0, y: 0 })
+  const [tip2022, setTip2022] = useState(CLOSED_TIP)
+  const [tip2026, setTip2026] = useState(CLOSED_TIP)
+  const anyTipOpen = tip2022.open || tip2026.open
+
+  const closeAllTips = () => {
+    setTip2022(CLOSED_TIP)
+    setTip2026(CLOSED_TIP)
+  }
+
+  useCloseOnScroll(anyTipOpen, closeAllTips)
 
   // Cierra ambos tooltips cuando el usuario toca fuera de las barras
   const containerRef = useRef<HTMLDivElement>(null)
   useEffect(() => {
     const handleOutsideTouch = (e: PointerEvent) => {
       if (e.pointerType === "touch" && !containerRef.current?.contains(e.target as Node)) {
-        setTip2022({ open: false, x: 0, y: 0 })
-        setTip2026({ open: false, x: 0, y: 0 })
+        closeAllTips()
       }
     }
     document.addEventListener("pointerdown", handleOutsideTouch)
@@ -163,25 +209,29 @@ export function ComparisonBar({
     onPointerDown: (e: ReactPointerEvent) => void
   } => ({
     onPointerEnter: (e) => {
-      if (e.pointerType !== "touch") set({ open: true, x: e.clientX, y: e.clientY })
+      if (e.pointerType !== "touch") {
+        const { x, y } = pointerViewportCoords(e)
+        set({ open: true, x, y, placement: "follow" })
+      }
     },
     onPointerMove: (e) => {
-      if (e.pointerType !== "touch") set({ open: true, x: e.clientX, y: e.clientY })
+      if (e.pointerType !== "touch") {
+        const { x, y } = pointerViewportCoords(e)
+        set({ open: true, x, y, placement: "follow" })
+      }
     },
     onPointerLeave: (e) => {
-      if (e.pointerType !== "touch") set({ open: false, x: 0, y: 0 })
+      if (e.pointerType !== "touch") set(CLOSED_TIP)
     },
     onPointerDown: (e) => {
       if (e.pointerType === "touch") {
         e.stopPropagation()
-        // Posicionar el tooltip encima del dedo y centrado horizontalmente
-        const xFinal = Math.max(8, e.clientX - 100)
-        const yFinal = Math.max(60, e.clientY - 160)
-        other({ open: false, x: 0, y: 0 })
+        const { x, y } = pointerViewportCoords(e)
+        other(CLOSED_TIP)
         set((prev) =>
           prev.open
-            ? { open: false, x: 0, y: 0 }
-            : { open: true, x: xFinal - CURSOR_TOOLTIP_OFFSET, y: yFinal - CURSOR_TOOLTIP_OFFSET },
+            ? CLOSED_TIP
+            : { open: true, x: clampTooltipX(x), y, placement: "above" },
         )
       }
     },
@@ -247,7 +297,7 @@ export function ComparisonBar({
                   viewport={{ once: true }}
                   transition={{ delay: delay + 0.9, duration: 0.6, ease: "easeOut" }}
                   className="pointer-events-none absolute top-0 left-0 z-10 h-full rounded-l"
-                  style={{ backgroundImage: HATCH_PATTERN_WHITE }}
+                  style={{ backgroundImage: HATCH_PATTERN_CELESTE }}
                 />
               )}
             </div>
@@ -256,8 +306,16 @@ export function ComparisonBar({
             open={tip2022.open}
             x={tip2022.x}
             y={tip2022.y}
+            placement={tip2022.placement}
           >
-            {tooltipLines("2022", value2022, referenceValue2022, "bg-accent", "rgba(0, 164, 220, 0.85)")}
+            {tooltipLines(
+              "2022",
+              value2022,
+              referenceValue2022,
+              "bg-accent",
+              "rgba(0, 164, 220, 0.85)",
+              HATCH_PATTERN_CELESTE,
+            )}
           </FollowCursorTooltip>
         </div>
 
@@ -297,7 +355,7 @@ export function ComparisonBar({
                   viewport={{ once: true }}
                   transition={{ delay: delay + 1.1, duration: 0.6, ease: "easeOut" }}
                   className="pointer-events-none absolute top-0 left-0 z-10 h-full rounded-l"
-                  style={{ backgroundImage: HATCH_PATTERN_CELESTE }}
+                  style={{ backgroundImage: HATCH_PATTERN_WHITE }}
                 />
               )}
             </div>
@@ -306,8 +364,16 @@ export function ComparisonBar({
             open={tip2026.open}
             x={tip2026.x}
             y={tip2026.y}
+            placement={tip2026.placement}
           >
-            {tooltipLines("2026", value2026, referenceValue2026, "bg-primary", "oklch(0.65 0.18 222 / 0.85)")}
+            {tooltipLines(
+              "2026",
+              value2026,
+              referenceValue2026,
+              "bg-primary",
+              "oklch(0.65 0.18 222 / 0.85)",
+              HATCH_PATTERN_WHITE,
+            )}
           </FollowCursorTooltip>
         </div>
 
@@ -316,14 +382,14 @@ export function ComparisonBar({
             {referenceValue2022 != null && (
               <div
                 className="h-3 w-5 shrink-0 rounded-sm bg-accent/75"
-                style={{ backgroundImage: HATCH_PATTERN_WHITE }}
+                style={{ backgroundImage: HATCH_PATTERN_CELESTE }}
                 aria-hidden
               />
             )}
             {referenceValue2026 != null && (
               <div
                 className="h-3 w-5 shrink-0 rounded-sm bg-primary/75"
-                style={{ backgroundImage: HATCH_PATTERN_CELESTE }}
+                style={{ backgroundImage: HATCH_PATTERN_WHITE }}
                 aria-hidden
               />
             )}

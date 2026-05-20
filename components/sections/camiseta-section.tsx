@@ -1,15 +1,99 @@
 "use client"
 
+import { useCallback, useState } from "react"
 import { motion } from "framer-motion"
 import Image from "next/image"
 import { formatCurrency } from "@/lib/utils"
 import { SectionWrapper } from "@/components/section-wrapper"
 import { useData } from "@/lib/data-context"
+import { useIsMobile } from "@/hooks/use-mobile"
 import { LOADING_INTRO, SECTIONS } from "@/lib/site-copy"
 
 const copy = SECTIONS.camiseta
 
 const BASE_PATH = "/mundial"
+
+const CAMISETA_BG_PEAK_SCALE = 2.5
+const CAMISETA_TAP_TOTAL_S = 2.5
+const CAMISETA_TAP_HOLD_AT = 0.6
+
+function JerseyInteractive({
+  src,
+  alt,
+  imageClassName,
+  isMobile,
+}: {
+  src: string
+  alt: string
+  imageClassName?: string
+  isMobile: boolean
+}) {
+  const [tapGeneration, setTapGeneration] = useState(0)
+
+  const handleTap = useCallback(() => {
+    if (!isMobile) return
+    setTapGeneration(g => g + 1)
+  }, [isMobile])
+
+  const bgAnimate =
+    isMobile && tapGeneration > 0
+      ? {
+          scale: [1, CAMISETA_BG_PEAK_SCALE, CAMISETA_BG_PEAK_SCALE, 1],
+          y: [0, 4, 4, 0],
+        }
+      : undefined
+
+  return (
+    <motion.div
+      whileHover={isMobile ? undefined : "hovered"}
+      onPointerDown={handleTap}
+      className="relative w-[5.25rem] h-[5.25rem] md:w-40 md:h-40 mx-auto cursor-pointer touch-manipulation"
+    >
+      <motion.div
+        key={tapGeneration}
+        variants={{
+          hovered: { scale: CAMISETA_BG_PEAK_SCALE, y: 4 },
+        }}
+        initial={false}
+        animate={bgAnimate}
+        transition={
+          bgAnimate
+            ? {
+                duration: CAMISETA_TAP_TOTAL_S,
+                times: [0, 0.2, CAMISETA_TAP_HOLD_AT, 1],
+                ease: ["easeIn", "linear", "easeOut"],
+              }
+            : { duration: 0.3, ease: "easeOut" }
+        }
+        className="absolute inset-0 opacity-25"
+        aria-hidden="true"
+      >
+        <Image
+          src={src}
+          alt=""
+          fill
+          sizes="(max-width: 767px) 84px, 160px"
+          className={imageClassName ?? "object-contain"}
+        />
+      </motion.div>
+      <motion.div
+        variants={{
+          hovered: { scale: 1.06 },
+        }}
+        transition={{ duration: 0.25, ease: "easeOut" }}
+        className="relative z-10 h-full w-full"
+      >
+        <Image
+          src={src}
+          alt={alt}
+          fill
+          sizes="(max-width: 767px) 84px, 160px"
+          className={imageClassName ?? "object-contain"}
+        />
+      </motion.div>
+    </motion.div>
+  )
+}
 
 function WorkCalendar({ days, color, delay = 0, completionMarker }: {
   days: number
@@ -74,6 +158,7 @@ function WorkCalendar({ days, color, delay = 0, completionMarker }: {
 
 export function CamisetaSection() {
   const { getIndicador, loading } = useData()
+  const isMobile = useIsMobile()
 
   const camiseta = getIndicador("CAMISETA_ADIDAS")
   const salario = getIndicador("SUELDO_MIN_PESOS")
@@ -118,43 +203,11 @@ export function CamisetaSection() {
           transition={{ duration: 0.6 }}
           className="space-y-3 md:space-y-6 min-w-0"
         >
-          {/* Jersey */}
-          <motion.div
-            whileHover="hovered"
-            className="relative w-[5.25rem] h-[5.25rem] md:w-40 md:h-40 mx-auto cursor-pointer"
-          >
-            <motion.div
-              variants={{
-                hovered: { scale: 2.5, y: 4 },
-              }}
-              transition={{ duration: 0.3, ease: "easeOut" }}
-              className="absolute inset-0 opacity-25"
-              aria-hidden="true"
-            >
-              <Image
-                src={`${BASE_PATH}/camiseta2022.webp`}
-                alt=""
-                fill
-                sizes="(max-width: 767px) 84px, 160px"
-                className="object-contain"
-              />
-            </motion.div>
-            <motion.div
-              variants={{
-                hovered: { scale: 1.06 },
-              }}
-              transition={{ duration: 0.25, ease: "easeOut" }}
-              className="relative z-10 h-full w-full"
-            >
-              <Image
-                src={`${BASE_PATH}/camiseta2022.webp`}
-                alt="Camiseta 2022"
-                fill
-                sizes="(max-width: 767px) 84px, 160px"
-                className="object-contain"
-              />
-            </motion.div>
-          </motion.div>
+          <JerseyInteractive
+            isMobile={isMobile}
+            src={`${BASE_PATH}/camiseta2022.webp`}
+            alt="Camiseta 2022"
+          />
 
           {/* Precios */}
           <div className="text-center space-y-0.5 md:space-y-1">
@@ -176,7 +229,7 @@ export function CamisetaSection() {
               days={diasTrabajo2022}
               color="oklch(0.97 0.01 220)"
               delay={0.2}
-              completionMarker={<Image src={`${BASE_PATH}/camiseta2022.webp`} alt="" width={20} height={20} className="h-3.5 w-auto md:h-5 object-contain" />}
+              completionMarker={<Image src={`${BASE_PATH}/camiseta2022.webp`} alt="" width={20} height={20} className="h-3.5 w-auto md:h-[25px] object-contain" />}
             />
           </div>
         </motion.div>
@@ -189,43 +242,12 @@ export function CamisetaSection() {
           transition={{ duration: 0.6, delay: 0.15 }}
           className="space-y-3 md:space-y-6 min-w-0"
         >
-          {/* Jersey */}
-          <motion.div
-            whileHover="hovered"
-            className="relative w-[5.25rem] h-[5.25rem] md:w-40 md:h-40 mx-auto cursor-pointer"
-          >
-            <motion.div
-              variants={{
-                hovered: { scale: 2.5, y: 4 },
-              }}
-              transition={{ duration: 0.3, ease: "easeOut" }}
-              className="absolute inset-0 opacity-25"
-              aria-hidden="true"
-            >
-              <Image
-                src={`${BASE_PATH}/camiseta2026.webp`}
-                alt=""
-                fill
-                sizes="(max-width: 767px) 84px, 160px"
-                className="object-contain [transform:rotateY(180deg)]"
-              />
-            </motion.div>
-            <motion.div
-              variants={{
-                hovered: { scale: 1.06 },
-              }}
-              transition={{ duration: 0.25, ease: "easeOut" }}
-              className="relative z-10 h-full w-full"
-            >
-              <Image
-                src={`${BASE_PATH}/camiseta2026.webp`}
-                alt="Camiseta 2026"
-                fill
-                sizes="(max-width: 767px) 84px, 160px"
-                className="object-contain [transform:rotateY(180deg)]"
-              />
-            </motion.div>
-          </motion.div>
+          <JerseyInteractive
+            isMobile={isMobile}
+            src={`${BASE_PATH}/camiseta2026.webp`}
+            alt="Camiseta 2026"
+            imageClassName="object-contain [transform:rotateY(180deg)]"
+          />
 
           {/* Precios */}
           <div className="text-center space-y-0.5 md:space-y-1">
@@ -247,7 +269,7 @@ export function CamisetaSection() {
               days={diasTrabajo2026}
               color="oklch(0.65 0.18 222)"
               delay={0.35}
-              completionMarker={<Image src={`${BASE_PATH}/camiseta2026.webp`} alt="" width={20} height={20} className="h-3.5 w-auto md:h-5 object-contain [transform:rotateY(180deg)]" />}
+              completionMarker={<Image src={`${BASE_PATH}/camiseta2026.webp`} alt="" width={20} height={20} className="h-3.5 w-auto md:h-[25px] object-contain [transform:rotateY(180deg)]" />}
             />
           </div>
         </motion.div>
