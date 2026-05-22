@@ -2,6 +2,8 @@ import type { Metadata, Viewport } from "next"
 import { Analytics } from "@vercel/analytics/next"
 import { DM_Sans, Barlow_Condensed } from "next/font/google"
 import Script from "next/script"
+import { fontHand } from "@/lib/fonts"
+import { AppProviders } from "@/components/app-providers"
 import "./globals.css"
 
 const dmSans = DM_Sans({ subsets: ["latin"], variable: "--font-dm-sans" })
@@ -46,7 +48,7 @@ export default function RootLayout({
   const gaId = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID
 
   return (
-    <html lang="es" className={`${dmSans.variable} ${barlowCondensed.variable}`}>
+    <html lang="es" className={`${dmSans.variable} ${barlowCondensed.variable} ${fontHand.variable}`}>
       <body className="font-sans antialiased bg-background text-foreground">
         {gaId ? (
           <>
@@ -65,7 +67,7 @@ export default function RootLayout({
             />
           </>
         ) : null}
-        {children}
+        <AppProviders>{children}</AppProviders>
         <Analytics />
       </body>
     </html>

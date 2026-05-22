@@ -1,6 +1,6 @@
 "use client"
 
-import { useCallback, useState } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 import { motion } from "framer-motion"
 import Image from "next/image"
 import { formatCurrency } from "@/lib/utils"
@@ -16,27 +16,58 @@ const BASE_PATH = "/mundial"
 const CAMISETA_BG_PEAK_SCALE = 2.5
 const CAMISETA_TAP_TOTAL_S = 2.5
 const CAMISETA_TAP_HOLD_AT = 0.6
+const CAMISETA_IN_VIEW_DELAY_MS = 700
 
 function JerseyInteractive({
   src,
   alt,
   imageClassName,
   isMobile,
+  inViewDelayMs = 0,
 }: {
   src: string
   alt: string
   imageClassName?: string
   isMobile: boolean
+  inViewDelayMs?: number
 }) {
-  const [tapGeneration, setTapGeneration] = useState(0)
+  const containerRef = useRef<HTMLDivElement>(null)
+  const inViewTriggeredRef = useRef(false)
+  const [animGeneration, setAnimGeneration] = useState(0)
+
+  const triggerAnim = useCallback(() => {
+    setAnimGeneration(g => g + 1)
+  }, [])
 
   const handleTap = useCallback(() => {
     if (!isMobile) return
-    setTapGeneration(g => g + 1)
-  }, [isMobile])
+    triggerAnim()
+  }, [isMobile, triggerAnim])
+
+  useEffect(() => {
+    if (!isMobile) return
+    const el = containerRef.current
+    if (!el) return
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (!entry.isIntersecting || inViewTriggeredRef.current) continue
+          inViewTriggeredRef.current = true
+          observer.disconnect()
+          window.setTimeout(triggerAnim, inViewDelayMs)
+          return
+        }
+      },
+      { threshold: 0.25 },
+    )
+
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [isMobile, inViewDelayMs, triggerAnim])
 
   const bgAnimate =
-    isMobile && tapGeneration > 0
+    isMobile && animGeneration > 0
       ? {
           scale: [1, CAMISETA_BG_PEAK_SCALE, CAMISETA_BG_PEAK_SCALE, 1],
           y: [0, 4, 4, 0],
@@ -45,12 +76,13 @@ function JerseyInteractive({
 
   return (
     <motion.div
+      ref={containerRef}
       whileHover={isMobile ? undefined : "hovered"}
       onPointerDown={handleTap}
       className="relative w-[5.25rem] h-[5.25rem] md:w-40 md:h-40 mx-auto cursor-pointer touch-manipulation"
     >
       <motion.div
-        key={tapGeneration}
+        key={animGeneration}
         variants={{
           hovered: { scale: CAMISETA_BG_PEAK_SCALE, y: 4 },
         }}
@@ -205,6 +237,7 @@ export function CamisetaSection() {
         >
           <JerseyInteractive
             isMobile={isMobile}
+            inViewDelayMs={0}
             src={`${BASE_PATH}/camiseta2022.webp`}
             alt="Camiseta 2022"
           />
@@ -244,6 +277,7 @@ export function CamisetaSection() {
         >
           <JerseyInteractive
             isMobile={isMobile}
+            inViewDelayMs={CAMISETA_IN_VIEW_DELAY_MS}
             src={`${BASE_PATH}/camiseta2026.webp`}
             alt="Camiseta 2026"
             imageClassName="object-contain [transform:rotateY(180deg)]"

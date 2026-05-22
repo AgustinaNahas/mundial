@@ -20,7 +20,17 @@ interface SectionWrapperProps {
   /** Oculta valores numéricos en el panel de fuentes. */
   sourcesHideValues?: boolean
   /** Imagen decorativa a la derecha del título (mobile y desktop). */
-  titleImage?: { src: string; alt: string; className?: string }
+  titleImage?: {
+    src: string
+    alt: string
+    className?: string
+    width?: number
+    height?: number
+    /** Contenedor de imagen + decoración (p. ej. posición absolute en desktop). */
+    wrapperClassName?: string
+    /** Capa detrás de la imagen (p. ej. burbujas de texto). */
+    decoration?: React.ReactNode
+  }
 }
 
 function slugify(value: string) {
@@ -93,16 +103,28 @@ export function SectionWrapper({
               {title}
             </h3>
             {titleImage && (
-              <Image
-                src={titleImage.src}
-                alt={titleImage.alt}
-                width={134}
-                height={250}
+              <div
                 className={
-                  titleImage.className ??
-                  "shrink-0 w-full h-full object-contain"
+                  titleImage.wrapperClassName ??
+                  "relative shrink-0 w-fit overflow-visible"
                 }
-              />
+              >
+                {titleImage.decoration && (
+                  <div className="absolute inset-0 z-[5] overflow-visible pointer-events-none">
+                    {titleImage.decoration}
+                  </div>
+                )}
+                <Image
+                  src={titleImage.src}
+                  alt={titleImage.alt}
+                  width={titleImage.width ?? 134}
+                  height={titleImage.height ?? 250}
+                  className={
+                    titleImage.className ??
+                    "shrink-0 w-full h-full object-contain"
+                  }
+                />
+              </div>
             )}
           </div>
           {intro && (

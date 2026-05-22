@@ -83,19 +83,19 @@ export function SourcesPanel({ items = [], extraRows = [], hideValues = false }:
   })
 
   return (
-    <div className="mt-10 pt-6 border-t border-border/40">
+    <div className="mt-8 pt-4 border-t border-border/40">
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
         aria-expanded={open}
-        className="cursor-pointer flex w-full max-w-full items-center gap-3 text-left text-sm font-medium text-muted-foreground hover:text-foreground transition-colors group"
+        className="cursor-pointer flex w-full max-w-full items-center gap-2 text-left text-xs font-medium text-muted-foreground hover:text-foreground transition-colors group"
       >
         <InfoIconSurface size="sm" />
-        <span className="uppercase tracking-[0.16em]">Fuentes</span>
+        <span className="uppercase tracking-[0.14em]">Fuentes</span>
         <ChevronDown
           strokeWidth={2.6}
           className={cn(
-            "ml-auto size-5 shrink-0 text-primary transition-transform duration-200",
+            "ml-auto size-4 shrink-0 text-primary transition-transform duration-200",
             open && "rotate-180",
           )}
           aria-hidden
@@ -104,30 +104,44 @@ export function SourcesPanel({ items = [], extraRows = [], hideValues = false }:
 
       <AnimatePresence>
         {open && (
-          <motion.ul
+          <motion.div
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.25 }}
-            className="mt-3 space-y-1.5 overflow-hidden"
+            className="mt-2 overflow-hidden overflow-x-auto"
           >
-            {sortedRows.map((row) => (
-              <li key={row.key} className="text-sm text-muted-foreground/85 leading-relaxed">
-                {row.valor != null ? (
-                  <>
-                    {row.descripcion}: {formatSourceValue(row.valor, row.unidad)} — Fuente:{" "}
-                  </>
-                ) : (
-                  <>{row.descripcion} — Fuente: </>
-                )}
-                <SourceAttributionLink
-                  url={row.fuente}
-                  corta={row.fuenteCorta}
-                  fecha={row.fechaFuente}
-                />
-              </li>
-            ))}
-          </motion.ul>
+            <table className="w-full min-w-[280px] md:mt-6 text-xs text-muted-foreground/85 border-collapse">
+              <thead>
+                <tr className="border-b border-border/50 text-left text-[10px] 
+                uppercase tracking-[0.12em] text-muted-foreground bg-muted/50">
+                  <th className="py-1.5 pr-3 font-bold pl-4">Indicador</th>
+                  <th className="py-1.5 pr-3 font-bold whitespace-nowrap">Valor</th>
+                  <th className="py-1.5 font-bold">Fuente</th>
+                </tr>
+              </thead>
+              <tbody>
+                {sortedRows.map((row) => (
+                  <tr
+                    key={row.key}
+                    className="border-b border-border/30 last:border-0 align-top even:bg-muted/50"
+                  >
+                    <td className="py-1.5 pr-3 leading-snug pl-4">{row.descripcion}</td>
+                    <td className="py-1.5 pr-3 whitespace-nowrap tabular-nums">
+                      {row.valor != null ? formatSourceValue(row.valor, row.unidad) : "—"}
+                    </td>
+                    <td className="py-1.5 leading-snug">
+                      <SourceAttributionLink
+                        url={row.fuente}
+                        corta={row.fuenteCorta}
+                        fecha={row.fechaFuente}
+                      />
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </motion.div>
         )}
       </AnimatePresence>
     </div>

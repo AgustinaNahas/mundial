@@ -128,8 +128,20 @@ export function MonthStack({
     ...(remainder > 0 ? [remainder] : []),
   ]
 
+  const durationLabel = formatLaborDurationFromSalaryMonths(months)
+
   return (
     <div className={cn("flex flex-col w-full md:max-w-[min(100%,13rem)]", className)}>
+      <p
+        className={cn(
+          "text-sm font-medium mb-2 leading-snug tabular-nums",
+          toneClass,
+          "text-center",
+          align === "right" ? "md:text-right" : "md:text-left",
+        )}
+      >
+        {durationLabel}
+      </p>
       <div
         className={cn(
           "w-full gap-x-3 gap-y-2 max-md:grid max-md:grid-cols-2 max-md:gap-x-2 max-md:gap-y-3 max-md:justify-items-center",
@@ -141,15 +153,6 @@ export function MonthStack({
           <MiniMonthCalendar key={i} progress={p} color={color} label={`Mes ${i + 1}`} />
         ))}
       </div>
-      <p
-        className={cn(
-          "text-xs font-medium mt-2 leading-snug tabular-nums text-center",
-          toneClass,
-          // align === "right" ? "text-right" : "text-left",
-        )}
-      >
-        {formatLaborDurationFromSalaryMonths(months)}
-      </p>
     </div>
   )
 }

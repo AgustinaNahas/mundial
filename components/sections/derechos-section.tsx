@@ -1,12 +1,16 @@
 "use client"
 
-import { useEffect, useState } from "react"
-import { motion } from "framer-motion"
+import { useCallback, useEffect, useRef, useState } from "react"
+import { AnimatePresence, motion } from "framer-motion"
+import { BarChart3, Radar } from "lucide-react"
 import { SectionWrapper } from "@/components/section-wrapper"
 import { useData } from "@/lib/data-context"
 import {
   buildRadarData,
+  DERECHOS_INDICATORS,
   fetchDerechosData,
+  getDerechosIndicator,
+  type DerechosIndicatorKey,
   type DerechosRawRow,
   type DerechosYear,
   type RadarDataPoint,
@@ -25,6 +29,52 @@ const countries = [
 ]
 
 type CountryKey = (typeof countries)[number]["key"]
+type ChartView = "radar" | "bars"
+
+function ViewToggle({
+  view,
+  onChange,
+}: {
+  view: ChartView
+  onChange: (view: ChartView) => void
+}) {
+  return (
+    <div
+      className="inline-flex shrink-0 rounded-full border border-border bg-muted/50 p-1"
+      role="group"
+      aria-label="Tipo de gráfico"
+    >
+      <button
+        type="button"
+        aria-pressed={view === "radar"}
+        aria-label="Vista radar"
+        onClick={() => onChange("radar")}
+        className={cn(
+          "cursor-pointer rounded-full p-2 transition-colors",
+          view === "radar"
+            ? "bg-background text-foreground shadow-sm"
+            : "text-muted-foreground hover:text-foreground",
+        )}
+      >
+        <Radar className="size-4" strokeWidth={2} />
+      </button>
+      <button
+        type="button"
+        aria-pressed={view === "bars"}
+        aria-label="Vista barras"
+        onClick={() => onChange("bars")}
+        className={cn(
+          "cursor-pointer rounded-full p-2 transition-colors",
+          view === "bars"
+            ? "bg-background text-foreground shadow-sm"
+            : "text-muted-foreground hover:text-foreground",
+        )}
+      >
+        <BarChart3 className="size-4" strokeWidth={2} />
+      </button>
+    </div>
+  )
+}
 
 function YearToggle({
   year,
@@ -64,51 +114,44 @@ function YearToggle({
   )
 }
 
-const ALL_COUNTRY_KEYS = countries.map((c) => c.key)
-
 function CountryPills({
-  active,
-  hovered,
-  onToggle,
-  onHover,
+  selectedCountry,
+  onSelect,
 }: {
-  active: Set<CountryKey>
-  hovered: CountryKey | null
-  onToggle: (key: CountryKey) => void
-  onHover: (key: CountryKey | null) => void
+  selectedCountry: CountryKey | null
+  onSelect: (key: CountryKey) => void
 }) {
+  const solo = selectedCountry !== null
+
   return (
     <div
       className="flex flex-wrap justify-center gap-2"
       role="group"
-      aria-label="Mostrar u ocultar países en el gráfico"
-      onMouseLeave={() => onHover(null)}
+      aria-label="Seleccionar país"
     >
       {countries.map((country) => {
-        const isOn = active.has(country.key)
-        const isHovered = hovered === country.key
+        const isSelected = selectedCountry === country.key
+        const dimmed = solo && !isSelected
 
         return (
           <button
             key={country.key}
             type="button"
-            aria-pressed={isOn}
-            onClick={() => onToggle(country.key)}
-            onMouseEnter={() => onHover(country.key)}
-            onFocus={() => onHover(country.key)}
-            onBlur={() => onHover(null)}
+            aria-pressed={isSelected}
+            onClick={() => onSelect(country.key)}
             className={cn(
               "cursor-pointer inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-sm font-medium transition-all duration-200",
-              isHovered && "ring-2 ring-foreground/15",
-              isOn
+              isSelected
                 ? "border-foreground/25 bg-muted shadow-sm opacity-100"
-                : "border-border/60 bg-transparent text-muted-foreground opacity-45 hover:opacity-60",
+                : dimmed
+                  ? "border-border/50 bg-transparent text-muted-foreground opacity-40"
+                  : "border-border bg-muted/30 opacity-100 hover:border-foreground/20 hover:bg-muted/60",
             )}
           >
             <span
               className={cn(
                 "size-2.5 shrink-0 rounded-full transition-opacity",
-                !isOn && "opacity-50",
+                dimmed && "opacity-50",
               )}
               style={{ backgroundColor: country.color }}
               aria-hidden
@@ -121,28 +164,189 @@ function CountryPills({
   )
 }
 
-function RadarChart({
+function IndicatorInfoPanel({ indicatorKey }: { indicatorKey: DerechosIndicatorKey }) {
+  const info = getDerechosIndicator(indicatorKey)
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: 8 }}
+      transition={{ duration: 0.2 }}
+      className="w-full max-w-md rounded-lg border border-border bg-card px-4 py-3 text-left shadow-sm"
+      role="region"
+      aria-label={`Información sobre ${info.label}`}
+    >
+      <p className="text-sm font-medium text-foreground">{info.title}</p>
+      <p className="mt-2 text-sm text-muted-foreground leading-relaxed">{info.description}</p>
+      <p className="mt-2 text-xs text-muted-foreground">
+        Fuente: <span className="text-foreground/85">{info.fuente}</span>
+      </p>
+    </motion.div>
+  )
+}
+
+function RadarAxisLabels({
+  openIndicator,
+  onToggleIndicator,
+  dimmed,
+}: {
+  openIndicator: DerechosIndicatorKey | null
+  onToggleIndicator: (key: DerechosIndicatorKey) => void
+  dimmed: boolean
+}) {
+  const size = 400
+  const center = size / 2
+  const maxRadius = size / 2 - 72
+  const labelRadius = maxRadius + 44
+  const angleStep = (2 * Math.PI) / DERECHOS_INDICATORS.length
+
+  return (
+    <div className="pointer-events-none absolute inset-0">
+      {DERECHOS_INDICATORS.map((ind, i) => {
+        const angle = i * angleStep - Math.PI / 2
+        const xPct = ((center + labelRadius * Math.cos(angle)) / size) * 100
+        const yPct = ((center + labelRadius * Math.sin(angle)) / size) * 100
+        const isOpen = openIndicator === ind.key
+
+        return (
+          <button
+            key={ind.key}
+            type="button"
+            aria-expanded={isOpen}
+            aria-label={`${ind.label}. Tocá para más información.`}
+            onClick={() => onToggleIndicator(ind.key)}
+            className={cn(
+              "pointer-events-auto absolute -translate-x-1/2 -translate-y-1/2",
+              "max-w-[6.25rem] sm:max-w-[4.75rem] rounded-md px-1 py-1",
+              "text-center text-xs leading-[1.2] font-medium sm:text-[10px] sm:leading-tight",
+              "transition-colors duration-200 cursor-pointer",
+              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+              isOpen
+                ? "text-foreground"
+                : dimmed
+                  ? "text-muted-foreground/50"
+                  : "text-muted-foreground hover:text-foreground",
+            )}
+            style={{ left: `${xPct}%`, top: `${yPct}%` }}
+          >
+            {ind.labelLines.map((line, lineIdx) => (
+              <span key={lineIdx} className={lineIdx > 0 ? "block" : undefined}>
+                {line}
+              </span>
+            ))}
+          </button>
+        )
+      })}
+    </div>
+  )
+}
+
+function IndicatorBarsCard({
+  point,
+  selectedCountry,
+  index,
+}: {
+  point: RadarDataPoint
+  selectedCountry: CountryKey | null
+  index: number
+}) {
+  const info = getDerechosIndicator(point.key)
+
+  const visibleCountries = selectedCountry
+    ? countries.filter((c) => c.key === selectedCountry)
+    : countries
+
+  const maxVal = Math.max(
+    ...countries.map((c) => point[c.key]),
+    1,
+  )
+
+  return (
+    <motion.article
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: index * 0.05, duration: 0.35 }}
+      className="rounded-lg border border-border bg-card px-4 py-4 sm:px-5"
+    >
+      <div>
+        <h4 className="text-sm font-medium text-foreground sm:text-base">{info.label}</h4>
+        <p className="mt-1.5 text-xs text-muted-foreground leading-relaxed sm:text-sm">
+          {info.description}
+        </p>
+      </div>
+
+      <ul className="mt-4 space-y-2.5" aria-label={`Valores: ${info.label}`}>
+        {visibleCountries.map((country) => {
+          const value = point[country.key]
+          const widthPct = (value / maxVal) * 100
+
+          return (
+            <li key={country.key} className="flex items-center gap-2 sm:gap-3">
+              <span className="w-14 shrink-0 text-xs text-muted-foreground sm:w-16">
+                {country.name}
+              </span>
+              <div className="relative h-2.5 flex-1 overflow-hidden rounded-full bg-muted">
+                <motion.div
+                  className="absolute inset-y-0 left-0 rounded-full"
+                  style={{ backgroundColor: country.color }}
+                  initial={{ width: 0 }}
+                  animate={{ width: `${widthPct}%` }}
+                  transition={{ duration: 0.5, ease: "easeOut", delay: index * 0.05 }}
+                />
+              </div>
+              <span className="w-8 shrink-0 text-right text-xs font-semibold tabular-nums text-foreground">
+                {value}
+              </span>
+            </li>
+          )
+        })}
+      </ul>
+    </motion.article>
+  )
+}
+
+function BarsView({
   radarData,
-  active,
-  hovered,
+  selectedCountry,
 }: {
   radarData: RadarDataPoint[]
-  active: Set<CountryKey>
-  hovered: CountryKey | null
+  selectedCountry: CountryKey | null
 }) {
-  const size = 360
+  return (
+    <div className="flex w-full max-w-2xl flex-col gap-4">
+      {radarData.map((point, index) => (
+        <IndicatorBarsCard
+          key={point.key}
+          point={point}
+          selectedCountry={selectedCountry}
+          index={index}
+        />
+      ))}
+    </div>
+  )
+}
+
+function RadarChart({
+  radarData,
+  selectedCountry,
+  openIndicator,
+  onToggleIndicator,
+}: {
+  radarData: RadarDataPoint[]
+  selectedCountry: CountryKey | null
+  openIndicator: DerechosIndicatorKey | null
+  onToggleIndicator: (key: DerechosIndicatorKey) => void
+}) {
+  const size = 400
   const center = size / 2
-  const maxRadius = size / 2 - 56
+  const maxRadius = size / 2 - 72
   const levels = 5
   const angleStep = (2 * Math.PI) / radarData.length
-  const activeCount = active.size
-  const valuesCountry: CountryKey | null =
-    hovered ??
-    (activeCount === 1 ? ([...active][0] as CountryKey) : null)
+  const solo = selectedCountry !== null
+  const valuesCountry = selectedCountry
   const valuesCountryMeta = valuesCountry
     ? countries.find((c) => c.key === valuesCountry)
     : null
-  const hasHover = hovered !== null
 
   const getPoint = (value: number, index: number) => {
     const angle = index * angleStep - Math.PI / 2
@@ -159,8 +363,15 @@ function RadarChart({
     return points.map((p, i) => `${i === 0 ? "M" : "L"} ${p.x} ${p.y}`).join(" ") + " Z"
   }
 
+  const showValues = valuesCountry !== null
+
   return (
-    <svg viewBox={`0 0 ${size} ${size}`} className="w-full max-w-lg mx-auto">
+    <div className="relative mx-auto aspect-square w-full max-w-[min(100%,28rem)]">
+      <svg
+        viewBox={`0 0 ${size} ${size}`}
+        className="pointer-events-none absolute inset-0 h-full w-full"
+        aria-hidden
+      >
       {Array.from({ length: levels }).map((_, i) => (
         <circle
           key={i}
@@ -193,28 +404,23 @@ function RadarChart({
       })}
 
       {countries.map((country) => {
-        const isOn = active.has(country.key)
         const isHighlighted = valuesCountry === country.key
-        const solo = !hasHover && activeCount === 1 && isOn
+        const isVisible = !solo || isHighlighted
 
         let opacity = 0.08
         let fillOpacity = 0.02
         let strokeWidth = 1.5
 
-        if (isOn) {
-          if (hasHover) {
-            opacity = isHighlighted ? 1 : 0.12
-            fillOpacity = isHighlighted ? 0.22 : 0.02
-            strokeWidth = isHighlighted ? 2.5 : 1.5
+        if (isVisible) {
+          if (solo) {
+            opacity = 1
+            fillOpacity = 0.22
+            strokeWidth = 2.5
           } else {
-            opacity = solo || activeCount <= 2 ? 1 : 0.8
-            fillOpacity = solo ? 0.22 : 0.1
-            strokeWidth = solo ? 2.5 : 2
+            opacity = 0.8
+            fillOpacity = 0.1
+            strokeWidth = 2
           }
-        } else if (hasHover && isHighlighted) {
-          opacity = 0.5
-          fillOpacity = 0.12
-          strokeWidth = 2
         }
 
         return (
@@ -258,7 +464,7 @@ function RadarChart({
                 y={ly}
                 textAnchor="middle"
                 dominantBaseline="middle"
-                className="text-[9px] font-semibold fill-foreground"
+                className="text-[12px] md:text-[14px] font-semibold fill-foreground"
               >
                 {value}
               </text>
@@ -266,40 +472,26 @@ function RadarChart({
           )
         })}
 
-      {radarData.map((d, i) => {
-        const angle = i * angleStep - Math.PI / 2
-        const labelRadius = maxRadius + 32
-        const x = center + labelRadius * Math.cos(angle)
-        const y = center + labelRadius * Math.sin(angle)
-        return (
-          <text
-            key={d.category}
-            x={x}
-            y={y}
-            textAnchor="middle"
-            dominantBaseline="middle"
-            className={cn(
-              "text-[6px] md:text-[7px] transition-opacity duration-200",
-              valuesCountry ? "fill-muted-foreground/60" : "fill-muted-foreground",
-            )}
-          >
-            {d.category}
-          </text>
-        )
-      })}
-    </svg>
+      </svg>
+
+      <RadarAxisLabels
+        openIndicator={openIndicator}
+        onToggleIndicator={onToggleIndicator}
+        dimmed={showValues}
+      />
+    </div>
   )
 }
 
 export function DerechosSection() {
   const { getIndicador } = useData()
   const derechos = getIndicador("DERECHOS")
+  const chartAreaRef = useRef<HTMLDivElement>(null)
 
   const [year, setYear] = useState<DerechosYear>(2024)
-  const [activeCountries, setActiveCountries] = useState<Set<CountryKey>>(
-    () => new Set(ALL_COUNTRY_KEYS),
-  )
-  const [hoveredCountry, setHoveredCountry] = useState<CountryKey | null>(null)
+  const [chartView, setChartView] = useState<ChartView>("radar")
+  const [selectedCountry, setSelectedCountry] = useState<CountryKey | null>(null)
+  const [openIndicator, setOpenIndicator] = useState<DerechosIndicatorKey | null>(null)
   const [rows, setRows] = useState<DerechosRawRow[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -326,17 +518,29 @@ export function DerechosSection() {
 
   const radarData = buildRadarData(rows, year)
 
-  const toggleCountry = (key: CountryKey) => {
-    setActiveCountries((prev) => {
-      const next = new Set(prev)
-      if (next.has(key)) {
-        if (next.size > 1) next.delete(key)
-      } else {
-        next.add(key)
-      }
-      return next
-    })
+  const toggleIndicator = (key: DerechosIndicatorKey) => {
+    setOpenIndicator((prev) => (prev === key ? null : key))
   }
+
+  const clearCountrySelection = useCallback(() => {
+    setSelectedCountry(null)
+  }, [])
+
+  const selectCountry = (key: CountryKey) => {
+    setSelectedCountry((prev) => (prev === key ? null : key))
+  }
+
+  useEffect(() => {
+    if (selectedCountry === null) return
+
+    const handlePointerDown = (event: PointerEvent) => {
+      if (chartAreaRef.current?.contains(event.target as Node)) return
+      clearCountrySelection()
+    }
+
+    document.addEventListener("pointerdown", handlePointerDown)
+    return () => document.removeEventListener("pointerdown", handlePointerDown)
+  }, [selectedCountry, clearCountrySelection])
 
   return (
     <SectionWrapper
@@ -347,8 +551,18 @@ export function DerechosSection() {
       sources={[derechos]}
       sourcesHideValues
     >
-      <div className="flex flex-col items-center gap-8">
-        <YearToggle year={year} onChange={setYear} />
+      <div ref={chartAreaRef} className="flex flex-col items-center gap-8">
+        <div
+          className={cn(
+            "sticky top-0 z-30 flex w-full max-w-2xl items-center justify-between gap-3 min-h-10",
+            "py-2 -mx-1 px-1 sm:mx-0",
+            "bg-background/85 backdrop-blur-md shadow-[0_4px_24px_-4px_rgba(0,0,0,0.12)]",
+            "border-b border-border/40",
+          )}
+        >
+          <YearToggle year={year} onChange={setYear} />
+          <ViewToggle view={chartView} onChange={setChartView} />
+        </div>
 
         {loading && (
           <p className="text-sm text-muted-foreground">Cargando indicadores…</p>
@@ -357,23 +571,57 @@ export function DerechosSection() {
           <p className="text-sm text-destructive">No se pudieron cargar los datos: {error}</p>
         )}
         {!loading && !error && rows.length > 0 && (
-          <>
-            <RadarChart
-              radarData={radarData}
-              active={activeCountries}
-              hovered={hoveredCountry}
-            />
-            <CountryPills
-              active={activeCountries}
-              hovered={hoveredCountry}
-              onToggle={toggleCountry}
-              onHover={setHoveredCountry}
-            />
+          <div className="flex w-full flex-col items-center gap-8">
+            <AnimatePresence mode="wait">
+              {chartView === "radar" ? (
+                <motion.div
+                  key="radar"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.25 }}
+                  className="flex w-full flex-col items-center gap-8"
+                >
+                  <RadarChart
+                    radarData={radarData}
+                    selectedCountry={selectedCountry}
+                    openIndicator={openIndicator}
+                    onToggleIndicator={toggleIndicator}
+                  />
+                  <AnimatePresence mode="wait">
+                    {openIndicator && (
+                      <IndicatorInfoPanel key={openIndicator} indicatorKey={openIndicator} />
+                    )}
+                  </AnimatePresence>
+                </motion.div>
+              ) : (
+                <motion.div
+                  key="bars"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.25 }}
+                  className="w-full flex justify-center"
+                >
+                  <BarsView radarData={radarData} selectedCountry={selectedCountry} />
+                </motion.div>
+              )}
+            </AnimatePresence>
+            <CountryPills selectedCountry={selectedCountry} onSelect={selectCountry} />
             <p className="text-xs text-muted-foreground text-center max-w-md">
-              Tocá un país para ocultarlo. Pasá el mouse por una pill para ver sus valores en
-              cada eje (0–100, donde 100 es mejor).
+              {chartView === "radar" ? (
+                <>
+                  Tocá un eje para ver qué mide cada indicador. Tocá un país para ver solo sus valores;
+                  volvé a tocarlo o tocá afuera del gráfico para mostrar todos (0–100, donde 100 es mejor).
+                </>
+              ) : (
+                <>
+                  Cada indicador muestra el puntaje por sede. Usá las pills de abajo para filtrar un país
+                  (0–100, donde 100 es mejor).
+                </>
+              )}
             </p>
-          </>
+          </div>
         )}
       </div>
     </SectionWrapper>

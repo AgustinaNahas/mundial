@@ -65,9 +65,10 @@ function NombreGuessCard({ row }: { row: NombreNinoRow }) {
 
   const handlePick = (index: number) => {
     setGuess(index)
-    setRevealed(true)
     setDragging(false)
   }
+
+  const revealAnswer = () => setRevealed(true)
 
   const updatePreviewFromPointer = useCallback(
     (clientX: number, clientY: number) => {
@@ -110,8 +111,8 @@ function NombreGuessCard({ row }: { row: NombreNinoRow }) {
       transition={{ duration: 0.45 }}
       className="rounded-xl border border-border bg-card/80 p-4 md:p-5"
     >
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between sm:gap-3">
-        <p className="text-xl font-light text-foreground tracking-tight">{row.nombre}</p>
+      <div className="flex flex-row gap-2 sm:flex-row sm:items-start justify-between sm:gap-3">
+        <p className="text-xl font-bold text-foreground tracking-tight">{row.nombre}</p>
         <span
           className={cn(
             "inline-flex shrink-0 items-center gap-1.5 self-end rounded-lg border border-primary/30",
@@ -122,13 +123,14 @@ function NombreGuessCard({ row }: { row: NombreNinoRow }) {
             👶
           </span>
           <span className="tabular-nums">
-            Dato 2022: {row.count2022.toLocaleString("es-AR")} (
-            {formatPerMil(perMil2022)} de cada 1.000)
+            Dato 2022: {row.count2022.toLocaleString("es-AR")} 
+            <br/>
+            (<b>{formatPerMil(perMil2022)} de cada 1.000)</b> 
           </span>
         </span>
       </div>
 
-      <p className="mt-4 text-[10px] uppercase tracking-wide text-muted-foreground">
+      <p className="mt-4 text-[12px] uppercase tracking-wide text-muted-foreground">
         ¿Cuántos de cada 1.000 nacidos en 2023 se llamaron así?
       </p>
 
@@ -177,7 +179,7 @@ function NombreGuessCard({ row }: { row: NombreNinoRow }) {
               }}
               className={cn(
                 "relative shrink-0 flex size-8 sm:size-8 items-center justify-center justify-self-center",
-                "text-lg sm:text-xl leading-none transition-all duration-150",
+                "text-2xl md:text-xl leading-none transition-all duration-150",
                 "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60",
                 revealed ? "cursor-default" : isMobile ? "pointer-events-none" : "cursor-pointer hover:scale-110",
                 !revealed && hoverPicked && "scale-105",
@@ -206,7 +208,7 @@ function NombreGuessCard({ row }: { row: NombreNinoRow }) {
 
       {/* Desktop: altura fija para que la tarjeta no salte al hacer hover */}
       {!revealed && (
-        <div className="mt-2 hidden md:block min-h-5">
+        <div className="mt-2 hidden md:flex md:min-h-5 md:items-start md:gap-1.5">
           <p
             className={cn(
               "text-[12px] text-muted-foreground leading-relaxed",
@@ -218,26 +220,44 @@ function NombreGuessCard({ row }: { row: NombreNinoRow }) {
             <span className="font-light text-foreground tabular-nums">
               {previewCount || 0} cada 1.000
             </span>
-            <span className="text-muted-foreground/60"> · clic para confirmar</span>
           </p>
+            <button
+              type="button"
+              onClick={revealAnswer}
+              className={`shrink-0 ml-auto rounded border border-primary/40 bg-primary/10 px-2 py-2 text-[12px] 
+              font-medium cursor-pointer leading-none text-primary hover:bg-primary/15 focus-visible:outline-none focus-visible:ring-1 
+              focus-visible:ring-primary/60 ${guess === null ? "invisible" : "visible"}`} 
+            >
+              Ver respuesta
+            </button>
         </div>
       )}
 
       <AnimatePresence mode="wait">
         {!revealed && previewCount > 0 && (
-          <motion.p
+          <motion.div
             key="hint"
             initial={{ opacity: 0, y: 4 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0 }}
-            className="mt-2 text-[12px] text-muted-foreground leading-relaxed md:hidden"
+            className="mt-2 flex items-center gap-1.5 md:hidden"
           >
-            Tu estimación:{" "}
-            <span className="font-light text-foreground tabular-nums">
-              {previewCount} cada 1.000
-            </span>
-            <span className="text-muted-foreground/60"> · soltá para confirmar</span>
-          </motion.p>
+            <p className="text-[12px] text-muted-foreground leading-relaxed">
+              Tu estimación:{" "}
+              <span className="font-light text-foreground tabular-nums">
+                {previewCount} cada 1.000
+              </span>
+            </p>
+              <button
+                type="button"
+                onClick={revealAnswer}
+                  className={`shrink-0 rounded border border-primary/40 bg-primary/10 ml-auto px-2 py-2 text-[12px] 
+                  font-medium cursor-pointer leading-none text-primary hover:bg-primary/15 focus-visible:outline-none 
+                  focus-visible:ring-1 focus-visible:ring-primary/60 ${guess === null ? "invisible" : "visible"}`}
+              >
+                Ver respuesta
+              </button>
+          </motion.div>
         )}
         {revealed && guess !== null && (
           <motion.div
@@ -296,18 +316,18 @@ export function NinosSection() {
       sourcesHideValues
     >
       {copy.body && (
-        <p className="mb-6 text-base md:text-lg text-muted-foreground max-w-2xl leading-relaxed">
+        <p className="mb-6 text-sm md:text-lg text-muted-foreground max-w-2xl leading-relaxed">
           <span className="md:hidden">
-            Tocá y arrastrá sobre los bebés: se van “pintando” de izquierda a derecha. Cada uno
-            representa{" "}
-            <span className="font-light text-foreground">1 niño cada 1.000</span> nacidos. Soltá
-            el dedo para confirmar tu respuesta.
+            💡 Seleccioná tu estimación y tocá{" "}
+            <span className="font-light text-foreground">Ver respuesta</span> cuando quieras ver el
+            dato real.
           </span>
           <span className="hidden md:inline">
             Pasá el cursor por los bebés: se van “pintando” de izquierda a derecha. Cada uno
             representa{" "}
-            <span className="font-light text-foreground">1 niño cada 1.000</span> nacidos. Hacé
-            clic para confirmar tu respuesta.
+            <span className="font-light text-foreground">1 niño cada 1.000</span> nacidos. Elegí tu
+            estimación con un clic y después{" "}
+            <span className="font-light text-foreground">Ver respuesta</span>.
           </span>
         </p>
       )}

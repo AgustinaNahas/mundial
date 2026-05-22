@@ -3,11 +3,10 @@
 import * as React from 'react'
 import * as TooltipPrimitive from '@radix-ui/react-tooltip'
 
-import { useCloseOnScroll } from '@/hooks/use-close-on-scroll'
 import { cn } from '@/lib/utils'
 
 function TooltipProvider({
-  delayDuration = 0,
+  delayDuration = 300,
   ...props
 }: React.ComponentProps<typeof TooltipPrimitive.Provider>) {
   return (
@@ -19,35 +18,8 @@ function TooltipProvider({
   )
 }
 
-function Tooltip({
-  open: openProp,
-  defaultOpen,
-  onOpenChange,
-  ...props
-}: React.ComponentProps<typeof TooltipPrimitive.Root>) {
-  const [internalOpen, setInternalOpen] = React.useState(defaultOpen ?? false)
-  const open = openProp ?? internalOpen
-
-  const handleOpenChange = React.useCallback(
-    (next: boolean) => {
-      if (openProp === undefined) setInternalOpen(next)
-      onOpenChange?.(next)
-    },
-    [openProp, onOpenChange],
-  )
-
-  useCloseOnScroll(open, () => handleOpenChange(false))
-
-  return (
-    <TooltipProvider>
-      <TooltipPrimitive.Root
-        data-slot="tooltip"
-        open={open}
-        onOpenChange={handleOpenChange}
-        {...props}
-      />
-    </TooltipProvider>
-  )
+function Tooltip({ ...props }: React.ComponentProps<typeof TooltipPrimitive.Root>) {
+  return <TooltipPrimitive.Root data-slot="tooltip" {...props} />
 }
 
 function TooltipTrigger({
@@ -58,7 +30,7 @@ function TooltipTrigger({
 
 function TooltipContent({
   className,
-  sideOffset = 0,
+  sideOffset = 6,
   showArrow = true,
   children,
   ...props

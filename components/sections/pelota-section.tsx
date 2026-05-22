@@ -14,7 +14,9 @@ const copy = SECTIONS.pelota
 const BASE_PATH = "/mundial"
 
 const PELOTA_ROTATION_SLOW_S = 14
-const PELOTA_ROTATION_FAST_S = 4
+const PELOTA_ROTATION_FAST_HOVER_S = 4
+const PELOTA_ROTATION_FAST_MOBILE_S = 2
+const PELOTA_IN_VIEW_DELAY_MS = 800
 const PELOTA_TAP_TOTAL_MS = 5000
 const PELOTA_TAP_RAMP_MS = 350
 const PELOTA_TAP_DECEL_MS = 1200
@@ -46,21 +48,49 @@ function PelotaRotator({
   children,
   className,
   isMobile,
+  inViewDelayMs = 0,
 }: {
   clockwise: boolean
   children: React.ReactNode
   className?: string
   isMobile: boolean
+  inViewDelayMs?: number
 }) {
   const ref = useRef<HTMLDivElement>(null)
   const angleRef = useRef(0)
   const hoverRef = useRef(false)
-  const boostStartRef = useRef<number | null>(null)
+  const tapBoostStartRef = useRef<number | null>(null)
+  const inViewBoostStartRef = useRef<number | null>(null)
+  const inViewTriggeredRef = useRef(false)
 
   const handleTap = useCallback(() => {
     if (!isMobile) return
-    boostStartRef.current = performance.now()
+    tapBoostStartRef.current = performance.now()
   }, [isMobile])
+
+  useEffect(() => {
+    if (!isMobile) return
+    const el = ref.current
+    if (!el) return
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (!entry.isIntersecting || inViewTriggeredRef.current) continue
+          inViewTriggeredRef.current = true
+          observer.disconnect()
+          window.setTimeout(() => {
+            inViewBoostStartRef.current = performance.now()
+          }, inViewDelayMs)
+          return
+        }
+      },
+      { threshold: 0.25 },
+    )
+
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [isMobile, inViewDelayMs])
 
   useEffect(() => {
     let raf = 0
@@ -72,20 +102,27 @@ function PelotaRotator({
       lastMs = t
 
       let factor = hoverRef.current ? 1 : 0
-      const boostStart = boostStartRef.current
-      if (boostStart !== null) {
+      let fastPeriod = PELOTA_ROTATION_FAST_HOVER_S
+      const total = PELOTA_TAP_TOTAL_MS
+
+      for (const boostRef of [tapBoostStartRef, inViewBoostStartRef]) {
+        const boostStart = boostRef.current
+        if (boostStart === null) continue
         const elapsed = t - boostStart
-        const total = PELOTA_TAP_TOTAL_MS
         if (elapsed < total) {
-          factor = tapSpeedFactor(elapsed)
+          const boostFactor = tapSpeedFactor(elapsed)
+          if (boostFactor > factor) {
+            factor = boostFactor
+            fastPeriod = PELOTA_ROTATION_FAST_MOBILE_S
+          }
         } else {
-          boostStartRef.current = null
+          boostRef.current = null
         }
       }
 
       const period =
         PELOTA_ROTATION_SLOW_S -
-        (PELOTA_ROTATION_SLOW_S - PELOTA_ROTATION_FAST_S) * factor
+        (PELOTA_ROTATION_SLOW_S - fastPeriod) * factor
       const degPerSec = 360 / period
       angleRef.current += (clockwise ? 1 : -1) * degPerSec * dt
       const el = ref.current
@@ -238,7 +275,7 @@ export function PelotaSection() {
           className="space-y-3 md:space-y-6 min-w-0"
         >
           <div className="w-[5.25rem] h-[5.25rem] md:w-40 md:h-40 mx-auto">
-            <PelotaRotator isMobile={isMobile} clockwise className="relative h-full w-full cursor-pointer touch-manipulation">
+            <PelotaRotator isMobile={isMobile} inViewDelayMs={0} clockwise className="relative h-full w-full cursor-pointer touch-manipulation">
               <Image
                 src={`${BASE_PATH}/pelota2022.webp`}
                 alt="Pelota 2022"
@@ -278,7 +315,7 @@ export function PelotaSection() {
           className="space-y-3 md:space-y-6 min-w-0"
         >
           <div className="w-[5.25rem] h-[5.25rem] md:w-40 md:h-40 mx-auto">
-            <PelotaRotator isMobile={isMobile} clockwise={false} className="relative h-full w-full cursor-pointer touch-manipulation">
+            <PelotaRotator isMobile={isMobile} inViewDelayMs={PELOTA_IN_VIEW_DELAY_MS} clockwise={false} className="relative h-full w-full cursor-pointer touch-manipulation">
               <Image
                 src={`${BASE_PATH}/pelota2026.webp`}
                 alt="Pelota 2026"

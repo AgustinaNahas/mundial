@@ -12,3 +12,7 @@ node_modules/
 .claude/
 .cursor/
 .history/
+
+# Datos locales / artefactos de build
+.data/
+tsconfig.tsbuildinfo

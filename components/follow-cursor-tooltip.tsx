@@ -9,7 +9,7 @@ export const TOOLTIP_ABOVE_GAP = 12
 /** Mitad estimada del ancho máximo del tooltip para no salirse del viewport. */
 export const TOOLTIP_HALF_WIDTH_EST = 100
 
-export type TooltipPlacement = "follow" | "above"
+export type TooltipPlacement = "follow" | "above" | "above-left"
 
 export type FollowTooltipState = {
   open: boolean
@@ -69,11 +69,18 @@ export function FollowCursorTooltip({
           top: y,
           transform: `translate(-50%, calc(-100% - ${TOOLTIP_ABOVE_GAP}px))`,
         }
-      : {
-          position: "fixed" as const,
-          left: x + CURSOR_TOOLTIP_OFFSET,
-          top: y + CURSOR_TOOLTIP_OFFSET,
-        }
+      : placement === "above-left"
+        ? {
+            position: "fixed" as const,
+            left: x,
+            top: y,
+            transform: `translate(-100%, calc(-100% - ${TOOLTIP_ABOVE_GAP}px))`,
+          }
+        : {
+            position: "fixed" as const,
+            left: x + CURSOR_TOOLTIP_OFFSET,
+            top: y + CURSOR_TOOLTIP_OFFSET,
+          }
 
   return createPortal(
     <div

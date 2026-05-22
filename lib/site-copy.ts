@@ -42,9 +42,10 @@ export const SECTIONS = {
     number: "01",
     title: "El álbum del Mundial",
     intro:
-      "Completar el álbum era una promesa de las vacaciones de invierno. Hoy, pegar la última figurita exige varios sueldos de paciencia.",
+      "Completar el álbum era un desafío de las vacaciones de invierno (¡o de verano, como en el 2022!).",
+ 
     closing:
-      "El álbum ya no se llena con vuelto: pasó de hobby accesible a proyecto de largo aliento.",
+      "Hoy, llenar el album no solo no se llena con el vuelto, sino que puede que se estire hasta después del receso.",
   },
   playstation: {
     number: "02",
@@ -82,9 +83,10 @@ export const SECTIONS = {
     number: "06",
     title: "El mate mundialista",
     intro:
-      "El mate acompañó cada partido en Qatar y va a acompañar cada uno en 2026. Lo que cambió es cuánta yerba entra en un sueldo mínimo.",
+      "El mate acompañó a muchos en los partidos de Qatar y seguramente los va a acompañar en el 2026. "+
+      "En el supuesto caso de que te gastes todo tu sueldo en yerba... (¡escuchamos pero no juzgamos! 😅)",
     closing:
-      "El mate sigue siendo el mismo; el sueldo que lo financia, bastante menos generoso.",
+      "El mate del campeón subió más que los likes en la foto de Messi.",
   },
   asado: {
     number: "07",
@@ -92,7 +94,7 @@ export const SECTIONS = {
     intro:
       "La parrilla encendida antes del partido es una constante argentina. Lo que varía es cuántos kilos de carne compra un salario desde 2022 a hoy.",
     closing:
-      "El asado no cambió de forma; sí cambió cuántas veces por mes un sueldo alcanza para hacerlo.",
+      "El asado no cambió de gusto, pero el sueldo cada vez sabe a menos.",
   },
   fernet: {
     number: "09",
@@ -100,7 +102,7 @@ export const SECTIONS = {
     intro:
       "El brindis del festejo también se mide en salarios. Comparado con Qatar, una botella de fernet pesa más sobre el bolsillo del trabajador.",
     closing:
-      "Brindar cuesta lo mismo en botellas; cuesta más en horas trabajadas para pagarlas.",
+      "El 'viajero' en cualquier momento nos cuesta como si fuese un viaje a Miami.",
   },
   micro: {
     number: "11",
@@ -108,24 +110,24 @@ export const SECTIONS = {
     intro:
       "Si los campeones del mundo hubieran viajado en colectivo, ¿cuánto les hubiera costado el recorrido del festejo? El boleto también registró el paso del tiempo.",
     closing:
-      "El recorrido es el mismo; lo que cambió es cuántos días de laburo vale el pasaje.",
-  },
-  jubilacion: {
-    number: "13",
-    title: "Los hinchas más grandes",
-    intro:
-      "Los jubilados vivieron el Mundial de Qatar con una haber mínimo que no alcanzaba para un monoambiente. En 2026, la brecha no se cerró.",
-    closing:
-      "Ni en 2022 ni en 2026 la jubilación mínima cubre un alquiler básico: el festejo más emotivo quedó lejos de quienes más lo sintieron.",
+      "🕯️ Si pasa lo que queremos que pase 🕯️, este 2026 ir al obelisco nos costaría casi 4 veces más que en 2022.",
   },
   ninos: {
     number: "12",
     title: "Los hinchas más chiquitos...",
     intro:
       "Después del título, algunos nombres de la Scaloneta explotaron en los registros civiles. ¿Podés adivinar cuántos bebés de cada 1.000 nacidos en 2023 se llamaron así?",
-    body: "Pasá el cursor por los bebés: se van pintando de izquierda a derecha. Cada uno representa 1 niño cada 1.000 nacidos. Hacé clic para confirmar tu respuesta.",
+    body: "Pasá el cursor por los bebés: se van pintando de izquierda a derecha. Cada uno representa 1 niño cada 1.000 nacidos. Elegí tu estimación y tocá Ver respuesta.",
     closing:
       "El Mundial también dejó huella en los padrones: algunos nombres crecieron junto con la copa.",
+  },
+  jubilacion: {
+    number: "13",
+    title: "Los hinchas más grandes",
+    intro:
+      "Nos emocionamos con la abuela la la la la la, ¿pero cómo vivieron y viven los hinchas más longevos?",
+    closing:
+      "La jubilación aleja a los adultos mayores de la cancha y de la calle",
   },
   derechos: {
     number: "13",
@@ -167,12 +169,19 @@ export function formatViajeIntro(salarios2022: string, salarios2026: string): st
 }
 
 export const HERO_COPY = {
-  titleLine1: "¿Cuánto cuesta",
-  titleLine2: "ser campeón del mundo?",
+  handwrittenInsert: "hincha del",
+  titleLine1: "¿Cuánto cuesta ser",
+  titleLine2: "campeón del mundo?",
   subtitle:
-    "Argentina se coronó en Qatar con un sueldo mínimo que ya no alcanzaba para mucho. Hoy, con el mismo torneo a la vuelta de la esquina, ¿qué tan lejos quedó ese precio?",
-  badge2022: { label: "2022", place: "Qatar · Campeones" },
-  badge2026: { label: "2026", place: "EEUU · Can · Méx" },
+    "Argentina se coronó en Qatar mientras sus ciudadanos contaban con un sueldo mínimo" + 
+    " que ya no alcanzaba para mucho. " + 
+    "Hoy, con el mismo torneo a la vuelta de la esquina, ¿qué tan lejos quedó ese precio?",
+  badge2022: { label: "2022", place: "Qatar", emoji: "🇶🇦" },
+  badge2026: {
+    label: "2026",
+    place: "EEUU · Can · Méx",
+    emojis: ["🇺🇸", "🇨🇦", "🇲🇽"],
+  },
 } as const
 
 export const SPREADSHEET_URL =

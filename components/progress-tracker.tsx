@@ -125,8 +125,18 @@ export function ProgressTracker() {
   const handleScroll = useCallback(() => {
     const scrollY = window.scrollY
     const windowH = window.innerHeight
+    const isMobile = window.innerWidth < 768
 
-    setIsVisible(scrollY > windowH * 0.85)
+    if (isMobile) {
+      const previa = document.getElementById("previa")
+      setIsVisible(
+        previa
+          ? previa.getBoundingClientRect().top <= windowH * PIVOT_RATIO
+          : scrollY >= windowH,
+      )
+    } else {
+      setIsVisible(scrollY > windowH * 0.85)
+    }
 
     const measured = measureProgress()
     if (!measured) return
@@ -179,23 +189,23 @@ export function ProgressTracker() {
       }}
     >
       {/* Capa fija sin transform (iOS Safari rompe fixed + transform en el mismo nodo). */}
-      <div
+      <motion.div
+        initial={false}
+        animate={{
+          opacity: isVisible ? 1 : 0,
+          y: isVisible ? 0 : 24,
+        }}
+        transition={{ duration: 0.3, ease: "easeOut" }}
         className="bg-card/90 backdrop-blur-md border-t border-border/50"
         style={{
+          pointerEvents: isVisible ? "auto" : "none",
           paddingBottom: anchor
             ? `calc(env(safe-area-inset-bottom, 0px) + ${anchor.bleed}px)`
             : "env(safe-area-inset-bottom, 0px)",
         }}
+        aria-hidden={!isVisible}
       >
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{
-            opacity: isVisible ? 1 : 0,
-            y: isVisible ? 0 : 24,
-          }}
-          transition={{ duration: 0.3, ease: "easeOut" }}
-          className="max-w-3xl mx-auto px-5 pt-3 pb-4"
-        >
+        <div className="max-w-3xl mx-auto px-5 pt-3 pb-4">
           <div className="flex mb-2">
             {blocks.map((b, i) => {
               const range = blockRanges[i]
@@ -271,8 +281,8 @@ export function ProgressTracker() {
               ⚽
             </motion.span>
           </div>
-        </motion.div>
-      </div>
+        </div>
+      </motion.div>
     </div>
   )
 }

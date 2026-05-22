@@ -5,15 +5,73 @@ export type DerechosYear = 2022 | 2024
 export type DerechosCountryKey = "argentina" | "qatar" | "eeuu" | "canada" | "mexico"
 
 export const DERECHOS_INDICATORS = [
-  { key: "rsf_pfi", label: "Libertad de prensa" },
-  { key: "vdem_gender", label: "Empoderamiento político femenino" },
-  { key: "vdem_polyarchy", label: "Democracia electoral" },
-  { key: "vdem_egal", label: "Igualdad e inclusión" },
-  { key: "wbgi_cce", label: "Control de corrupción" },
-  { key: "wbgi_rle", label: "Estado de derecho" },
+  {
+    key: "rsf_pfi",
+    label: "Libertad de prensa",
+    labelLines: ["Libertad de prensa"],
+    title: "Libertad de prensa",
+    description:
+      "Mide el nivel de libertad de prensa y periodismo: independencia de los medios, censura, presiones políticas y seguridad de los periodistas.",
+    fuente: "Reporters Without Borders (RSF)",
+  },
+  {
+    key: "vdem_gender",
+    label: "Empoderamiento político femenino",
+    labelLines: ["Empoderamiento", "político femenino"],
+    title: "Empoderamiento político femenino",
+    description:
+      "Mide la participación y el poder político de las mujeres: representación, acceso a cargos públicos e igualdad en la participación política.",
+    fuente: "Varieties of Democracy Institute (V-Dem)",
+  },
+  {
+    key: "vdem_polyarchy",
+    label: "Democracia electoral",
+    labelLines: ["Democracia electoral"],
+    title: "Democracia electoral",
+    description:
+      "Mide la democracia electoral: elecciones libres y justas, libertad de expresión y asociación, derecho al voto y competencia política.",
+    fuente: "Varieties of Democracy Institute (V-Dem)",
+  },
+  {
+    key: "vdem_egal",
+    label: "Igualdad e inclusión",
+    labelLines: ["Igualdad e", "inclusión"],
+    title: "Igualdad e inclusión",
+    description:
+      "Mide qué tan distribuido está el acceso efectivo a derechos, recursos y oportunidades: igualdad ante la ley, educación, salud e inclusión social.",
+    fuente: "Varieties of Democracy Institute (V-Dem)",
+  },
+  {
+    key: "wbgi_cce",
+    label: "Control de corrupción",
+    labelLines: ["Control de", "corrupción"],
+    title: "Control de corrupción",
+    description:
+      "Mide en qué medida el poder público se usa para beneficio privado: corrupción estatal, sobornos y captura del Estado.",
+    fuente: "World Bank – Worldwide Governance Indicators",
+  },
+  {
+    key: "wbgi_rle",
+    label: "Estado de derecho",
+    labelLines: ["Estado de derecho"],
+    title: "Estado de derecho",
+    description:
+      "Mide la confianza en las instituciones y el cumplimiento de las leyes: independencia judicial, contratos, derechos y seguridad pública.",
+    fuente: "World Bank – Worldwide Governance Indicators",
+  },
 ] as const
 
 export type DerechosIndicatorKey = (typeof DERECHOS_INDICATORS)[number]["key"]
+
+export type DerechosIndicatorMeta = (typeof DERECHOS_INDICATORS)[number]
+
+const INDICATOR_BY_KEY = Object.fromEntries(
+  DERECHOS_INDICATORS.map((ind) => [ind.key, ind]),
+) as Record<DerechosIndicatorKey, DerechosIndicatorMeta>
+
+export function getDerechosIndicator(key: DerechosIndicatorKey): DerechosIndicatorMeta {
+  return INDICATOR_BY_KEY[key]
+}
 
 const PAIS_TO_KEY: Record<string, DerechosCountryKey> = {
   ARG: "argentina",
@@ -39,6 +97,7 @@ export interface DerechosRawRow {
 }
 
 export interface RadarDataPoint {
+  key: DerechosIndicatorKey
   category: string
   argentina: number
   qatar: number
@@ -128,6 +187,7 @@ export function buildRadarData(rows: DerechosRawRow[], year: DerechosYear): Rada
 
   return DERECHOS_INDICATORS.map(({ key, label }) => {
     const point: RadarDataPoint = {
+      key,
       category: label,
       argentina: 0,
       qatar: 0,

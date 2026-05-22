@@ -1,8 +1,162 @@
 "use client"
 
-import { useEffect, useRef } from "react"
+import { useEffect, useRef, useState } from "react"
 import { motion } from "framer-motion"
+import { fontHand } from "@/lib/fonts"
 import { HERO_COPY } from "@/lib/site-copy"
+import { cn } from "@/lib/utils"
+
+type HeroEra = "2022" | "2026"
+
+const STAR_TRANSITION = { duration: 0.4, ease: [0.4, 0, 0.2, 1] as const }
+const HANDWRITTEN_START_DELAY_MS = 2000
+const HANDWRITTEN_CHAR_MS = 85
+
+function HeroInsertLine() {
+  const text = HERO_COPY.handwrittenInsert
+  const [started, setStarted] = useState(false)
+  const [charIndex, setCharIndex] = useState(0)
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => setStarted(true), HANDWRITTEN_START_DELAY_MS)
+    return () => window.clearTimeout(timer)
+  }, [])
+
+  useEffect(() => {
+    if (!started || charIndex >= text.length) return
+    const timer = window.setTimeout(() => setCharIndex((i) => i + 1), HANDWRITTEN_CHAR_MS)
+    return () => window.clearTimeout(timer)
+  }, [started, charIndex, text.length])
+
+  const visible = started ? text.slice(0, charIndex) : ""
+  const typing = started && charIndex < text.length
+
+  return (
+    <p
+      className="flex flex-wrap items-baseline justify-center w-full gap-x-[0.2em] sm:gap-x-3 leading-none 
+      pointer-events-auto min-h-[1.4rem] sm:min-h-[2rem] md:min-h-[2.5rem] -mt-0 sm:-mt-2 md:-mt-2.5"
+      aria-live="polite"
+      aria-label={started && charIndex >= text.length ? `v ${text}` : undefined}
+    >
+      <span
+        className={cn(
+          fontHand.className,
+          "normal-case text-[1.5rem] sm:text-[2.25rem] md:text-[3rem] text-secondary ",
+          "leading-none -rotate-1 shrink-0",
+          "transition-opacity duration-300",
+          started ? "opacity-100" : "opacity-0"
+        )}
+      >
+        {visible}
+      </span>
+    </p>
+  )
+}
+
+function HeroStars({ era }: { era: HeroEra }) {
+  const showFourth = era === "2026"
+
+  return (
+    <motion.div
+      layout
+      className="flex items-center justify-center mt-4 md:mt-6 pointer-events-auto"
+      transition={{ layout: STAR_TRANSITION }}
+      aria-label="Tres estrellas del mundial ganado"
+    >
+      {[0, 1, 2].map((i) => (
+        <motion.span
+          key={i}
+          layout
+          initial={{ opacity: 0, scale: 0 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.15 + i * 0.08, duration: 0.45, type: "spring", stiffness: 320 }}
+          className={cn(
+            "text-xl sm:text-2xl md:text-4xl text-secondary leading-none select-none",
+            i > 0 && "ml-1.5 sm:ml-2"
+          )}
+          aria-hidden
+        >
+          ⭐
+        </motion.span>
+      ))}
+      <motion.div
+        layout
+        initial={false}
+        className="overflow-hidden flex items-center justify-center shrink-0"
+        animate={{
+          width: showFourth ? "3rem" : 0,
+          marginLeft: showFourth ? "0.375rem" : 0,
+        }}
+        transition={STAR_TRANSITION}
+      >
+        <motion.span
+          initial={false}
+          animate={{
+            opacity: showFourth ? 1 : 0,
+            scale: showFourth ? 1 : 0.4,
+            rotate: showFourth ? 0 : -24,
+          }}
+          transition={STAR_TRANSITION}
+          className="text-xl sm:text-2xl md:text-4xl leading-none select-none text-muted-foreground/45 
+          grayscale"
+          aria-hidden
+        >
+          ⭐
+        </motion.span>
+      </motion.div>
+    </motion.div>
+  )
+}
+
+function EraBadgeButton({
+  active,
+  onClick,
+  emoji,
+  emojis,
+  label,
+  place,
+}: {
+  active: boolean
+  onClick: () => void
+  emoji?: string
+  emojis?: readonly string[]
+  label: string
+  place: string
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-pressed={active}
+      className={cn(
+        "flex w-full flex-col items-center gap-1.5 px-4 sm:px-7 py-4 transition-colors duration-300 cursor-pointer",
+        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary/60 focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+        active ? "bg-secondary/25" : "bg-transparent hover:bg-card/25"
+      )}
+    >
+      {emojis ? (
+        <span className="text-xl leading-relaxed flex items-center gap-1">
+          {emojis.map((flag) => (
+            <span key={flag}>{flag}</span>
+          ))}
+        </span>
+      ) : (
+        <span className="text-xl leading-relaxed">{emoji}</span>
+      )}
+      <span className="font-display font-black text-2xl md:text-3xl text-foreground tracking-[0.04em] leading-none">
+        {label}
+      </span>
+      <span
+        className={cn(
+          "text-[9px] uppercase tracking-[0.18em] transition-colors duration-300",
+          active ? "text-secondary" : "text-muted-foreground"
+        )}
+      >
+        {place}
+      </span>
+    </button>
+  )
+}
 
 function HeroParticles() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -227,6 +381,8 @@ function HeroParticles() {
 }
 
 export function HeroSection() {
+  const [era, setEra] = useState<HeroEra>("2022")
+
   return (
     <section className="relative overflow-hidden h-screen flex items-center justify-center bg-background">
       {/* Glow celeste desde arriba */}
@@ -238,9 +394,10 @@ export function HeroSection() {
       {/* Partículas puras en Canvas */}
       <HeroParticles />
 
-      <div className="pointer-events-none absolute top-0 left-0 w-full h-full bg-linear-to-b from-[#00000044] to-[#00000099] ">
-      </div>
-
+      <div className="pointer-events-none absolute top-0 left-0 w-full h-full bg-linear-to-b 
+      from-[#00000090] to-[#000000ee] 
+      md:from-[#00000070] md:to-[#000000cc]" />
+ 
 
       {/* Contenido principal */}
       <div className="container relative z-10 mx-auto px-6 md:px-12 pointer-events-none">
@@ -248,16 +405,23 @@ export function HeroSection() {
           initial={{ opacity: 0, y: 40 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.9, ease: "easeOut" }}
-          className="max-w-5xl mx-auto text-center space-y-10"
+          className="max-w-6xl mx-auto text-center space-y-10"
         >
-          <div className="space-y-3">
-            <h1 className="font-display font-black text-5xl sm:text-6xl md:text-8xl lg:text-9xl text-foreground tracking-[0.04em] leading-none uppercase pointer-events-auto">
-              {HERO_COPY.titleLine1}
-            </h1>
-            <h2 className="font-display font-bold text-3xl sm:text-4xl md:text-6xl lg:text-7xl text-primary tracking-[0.06em] leading-none uppercase pointer-events-auto">
-              {HERO_COPY.titleLine2}
-            </h2>
-            <p className="mt-12 max-w-3xl mx-auto text-sm sm:text-base md:text-lg text-foreground/80 leading-relaxed pointer-events-auto">
+          <div className="space-y-3 overflow-visible">
+            <div className="flex flex-col items-center gap-0.5 sm:gap-1">
+              <h1 className="font-display font-black text-5xl 
+              sm:text-6xl md:text-8xl lg:text-9xl text-foreground tracking-[0.04em] 
+              leading-none uppercase pointer-events-auto">
+                {HERO_COPY.titleLine1}
+              </h1>
+              <HeroInsertLine />
+              <h2 className="font-display font-bold text-3xl sm:text-4xl md:text-6xl lg:text-7xl text-primary tracking-[0.06em] leading-none uppercase pointer-events-auto">
+                {HERO_COPY.titleLine2}
+              </h2>
+            </div>
+            <HeroStars era={era} />
+            <p className="mt-6 md:mt-12 max-w-3xl mx-auto text-sm sm:text-base md:text-lg text-foreground/80 
+            leading-relaxed pointer-events-auto">
               {HERO_COPY.subtitle}
             </p>
           </div>
@@ -267,26 +431,22 @@ export function HeroSection() {
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.5, duration: 0.8 }}
-            className="flex flex-wrap items-center justify-center gap-0 mx-auto w-fit rounded-2xl overflow-hidden border border-border/30 bg-card/40 backdrop-blur-sm pointer-events-auto"
+            className="grid grid-cols-2 mx-auto w-full max-w-[17rem] sm:max-w-[20rem] rounded-2xl overflow-hidden border border-border/30 bg-card/40 backdrop-blur-sm pointer-events-auto"
           >
-            <div className="flex flex-col items-center gap-1.5 px-4 sm:px-7 py-4 bg-primary/10">
-              <span className="text-xl">⭐</span>
-              <span className="font-display font-black text-2xl md:text-3xl text-foreground tracking-[0.04em] leading-none">
-                {HERO_COPY.badge2022.label}
-              </span>
-              <span className="text-[9px] uppercase tracking-[0.18em] text-primary">
-                {HERO_COPY.badge2022.place}
-              </span>
-            </div>
-            <div className="flex flex-col items-center gap-1.5 px-4 sm:px-7 py-4">
-              <span className="text-xl">⚽</span>
-              <span className="font-display font-black text-2xl md:text-3xl text-foreground tracking-[0.04em] leading-none">
-                {HERO_COPY.badge2026.label}
-              </span>
-              <span className="text-[9px] uppercase tracking-[0.18em] text-muted-foreground">
-                {HERO_COPY.badge2026.place}
-              </span>
-            </div>
+            <EraBadgeButton
+              active={era === "2022"}
+              onClick={() => setEra("2022")}
+              emoji={HERO_COPY.badge2022.emoji}
+              label={HERO_COPY.badge2022.label}
+              place={HERO_COPY.badge2022.place}
+            />
+            <EraBadgeButton
+              active={era === "2026"}
+              onClick={() => setEra("2026")}
+              emojis={HERO_COPY.badge2026.emojis}
+              label={HERO_COPY.badge2026.label}
+              place={HERO_COPY.badge2026.place}
+            />
           </motion.div>
         </motion.div>
       </div>
@@ -296,7 +456,7 @@ export function HeroSection() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 1.3, duration: 0.8 }}
-        className="absolute bottom-16 sm:bottom-24 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 z-10"
+        className="absolute bottom-8 sm:bottom-24 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 z-10"
       >
         <span className="text-[9px] uppercase tracking-[0.3em] text-foreground/40 hidden sm:inline-block">Deslizá</span>
         <div className="w-5 h-8 rounded-full border-2 border-foreground/25 flex justify-center pt-1.5">

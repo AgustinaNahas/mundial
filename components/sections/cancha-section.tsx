@@ -13,8 +13,7 @@ import { SECTIONS } from "@/lib/site-copy"
 
 const copy = SECTIONS.cancha
 const BASE_PATH = "/mundial"
-import { InfoIconButton } from "@/components/ui/info-icon-button"
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
+import { InfoTooltip } from "@/components/info-tooltip"
 import { LazySectionSkeleton } from "@/components/lazy-mount"
 import { loadCountriesGeo } from "@/lib/countries-geo"
 import { debugLog } from "@/lib/debug-log"
@@ -302,7 +301,8 @@ function StepPanel({
     <div
       ref={stepRef}
       className={cn(
-        "min-h-screen max-lg:min-h-[135svh] flex items-center py-16 lg:py-24 max-lg:py-28 max-lg:pb-36 max-lg:relative max-lg:z-[15] max-lg:pt-20",
+        "min-h-screen max-lg:min-h-[135svh] flex items-center py-16 px-2 md:px-0",
+        "lg:py-24 max-lg:py-28 max-lg:pb-36 max-lg:relative max-lg:z-[15] max-lg:pt-20",
         isLast && "max-lg:min-h-[155svh] max-lg:pb-[58svh]",
       )}
     >
@@ -311,7 +311,7 @@ function StepPanel({
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: false, margin: narrow ? "-18% 0px -32% 0px" : "-100px" }}
         transition={{ duration: 0.5, delay: narrow ? 0.5 : 0 }}
-        className="space-y-5 w-full max-lg:space-y-3 max-lg:rounded-2xl max-lg:border max-lg:border-border/25 max-lg:bg-background/78 max-lg:backdrop-blur-md max-lg:px-3 max-lg:py-4 max-lg:shadow-sm"
+        className="space-y-5 w-full max-lg:space-y-3 max-lg:mx-3 max-lg:rounded-2xl max-lg:border max-lg:border-border/25 max-lg:bg-background/78 max-lg:backdrop-blur-md max-lg:px-3 max-lg:py-4 max-lg:shadow-sm"
       >
         {children}
       </motion.div>
@@ -333,7 +333,9 @@ export function CanchaSection() {
 
   const [activeStep, setActiveStep] = useState(0)
   const mobileBarRef = useRef<HTMLDivElement>(null)
+  const desktopAccRef = useRef<HTMLDivElement>(null)
   const [mobileBarH, setMobileBarH] = useState(56)
+  const [desktopAccH, setDesktopAccH] = useState(72)
   const ref0 = useRef<HTMLDivElement>(null)
   const ref1 = useRef<HTMLDivElement>(null)
   const ref2 = useRef<HTMLDivElement>(null)
@@ -350,6 +352,17 @@ export function CanchaSection() {
     ro.observe(el)
     return () => ro.disconnect()
   }, [loading])
+
+  useEffect(() => {
+    if (loading) return
+    const el = desktopAccRef.current
+    if (!el) return
+    const sync = () => setDesktopAccH(el.offsetHeight)
+    sync()
+    const ro = new ResizeObserver(sync)
+    ro.observe(el)
+    return () => ro.disconnect()
+  }, [loading, activeStep])
 
   // Precargar chunk del mapa en cuanto monta la sección (no esperar al render de ScrollyMap)
   useEffect(() => {
@@ -381,7 +394,7 @@ export function CanchaSection() {
 
   useEffect(() => {
     const t0 = Date.now()
-    void loadCountriesGeo({ detail: "lite" })
+    void loadCountriesGeo({ detail: "full" })
       .then(() => {
         // #region agent log
         debugLog(
@@ -535,21 +548,22 @@ export function CanchaSection() {
 
       {/* ── Scrolly ── */}
       <div
-        className="container mx-auto px-6 md:px-12 max-w-6xl max-lg:[--cancha-bar-h:56px]"
-        style={{ ["--cancha-bar-h" as string]: `${mobileBarH}px` }}
+        className="container mx-auto px-6 md:px-12 max-w-6xl max-lg:[--cancha-bar-h:90px]"
+        style={{
+          ["--cancha-bar-h" as string]: `${mobileBarH}px`,
+          ["--cancha-desktop-acc-h" as string]: `${desktopAccH}px`,
+        }}
       >
         <div className="hidden lg:block lg:sticky lg:top-3 z-[700] mb-5">
-          <div className="relative rounded-xl border border-border/30 bg-background/65 backdrop-blur px-3 py-2">
+          <div
+            ref={desktopAccRef}
+            className="relative rounded-xl border border-border/30 bg-background/65 backdrop-blur px-3 py-2"
+          >
             <div className="flex items-center justify-between mb-1">
               <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Acumulado</p>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <InfoIconButton size="sm" label="Información del acumulado" />
-                </TooltipTrigger>
-                <TooltipContent side="bottom" sideOffset={8} className="max-w-xs leading-relaxed text-balance">
-                  Acumulado del paso actual (entrada mundial calculada con la categoría más barata).
-                </TooltipContent>
-              </Tooltip>
+              <InfoTooltip label="Información del acumulado">
+                Acumulado del paso actual (entrada mundial calculada con la categoría más barata).
+              </InfoTooltip>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <AccumulatorColumn label="Qatar" total={qatarTotal} detail={qatarDetail} color={COLOR_QATAR} items={qatarItems} />
@@ -558,7 +572,7 @@ export function CanchaSection() {
           </div>
         </div>
 
-        {/* Barra acumulado mobile: sticky + z alto; el mapa va en contexto aislado para que Leaflet no la tape */}
+        {/* Barra acumulado mobile: sticky + z alto; el mapa va en contexto aislado para que no tape la barra */}
         <div
           ref={mobileBarRef}
           className="sticky top-0 z-[120] pt-2 pb-1.5 bg-background border-b border-border/25 shadow-sm lg:hidden"
@@ -577,16 +591,16 @@ export function CanchaSection() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-0 lg:gap-8 items-start max-lg:isolate">
 
-          {/* Mapa: mobile ocupa viewport bajo la barra; isolate evita que Leaflet pinte sobre la barra */}
+          {/* Mapa SVG: mobile ocupa viewport bajo la barra */}
           <div
             className={cn(
-              "sticky top-0 z-[8] max-lg:shrink-0 h-60 lg:z-auto lg:mb-0 lg:h-screen lg:py-6",
-              "max-lg:top-[var(--cancha-bar-h)] max-lg:h-[calc(100svh-var(--cancha-bar-h))]",
+              "sticky z-[10] max-lg:top-[var(--cancha-bar-h)] max-lg:shrink-0 max-lg:h-[calc(100svh-var(--cancha-bar-h))]",
               "max-lg:-mb-[calc(100svh-var(--cancha-bar-h)-18svh)]",
+              "lg:sticky lg:top-[calc(0.75rem+var(--cancha-desktop-acc-h)+1.25rem)] lg:h-[60vh] lg:w-full lg:min-h-[60vh]",
             )}
           >
             <div className="relative isolate z-0 h-full overflow-hidden rounded-2xl">
-              <ScrollyMap step={activeStep} />
+              <ScrollyMap step={activeStep} stepRefs={refs} />
               <div className="absolute bottom-4 left-4 z-500">
                 <StepDots active={activeStep} total={5} />
               </div>
@@ -617,14 +631,14 @@ export function CanchaSection() {
                 </div>
                 <div className="grid grid-cols-2 gap-4 max-lg:gap-3">
                   <div>
-                    <p className="text-[11px] max-lg:text-[10px] uppercase tracking-wider text-muted-foreground mb-1">Qatar 2022</p>
+                    <p className="text-[11px] max-lg:text-[10px] uppercase tracking-wider text-muted-foreground mb-1">2022</p>
                     <p className="text-2xl max-lg:text-lg font-bold font-mono leading-tight" style={{ color: COLOR_QATAR }}>
                       {formatCurrency(primera_2022, "ARS")}
                     </p>
                     <p className="text-xs max-lg:text-[10px] text-muted-foreground mt-1 max-lg:mt-0.5">{fmtHours(horas_primera_2022)} de trabajo</p>
                   </div>
                   <div>
-                    <p className="text-[11px] max-lg:text-[10px] uppercase tracking-wider text-muted-foreground mb-1">EEUU 2026</p>
+                    <p className="text-[11px] max-lg:text-[10px] uppercase tracking-wider text-muted-foreground mb-1">2026</p>
                     <p className="text-2xl max-lg:text-lg font-bold font-mono leading-tight" style={{ color: COLOR_MIAMI }}>
                       {formatCurrency(primera_2026, "ARS")}
                     </p>

@@ -12,13 +12,14 @@ export interface NombreNinoRow {
 
 /** Fuente: padrón de nombres publicado en Google Sheets (ver sync script). */
 export const NOMBRES_NINOS: NombreNinoRow[] = [
+  { nombre: "LEANDRO", count2022: 758, count2023: 700 },
   { nombre: "ALEXIS", count2022: 1153, count2023: 1192 },
+  { nombre: "ENZO", count2022: 3330, count2023: 6579 },
   { nombre: "ANGEL", count2022: 2231, count2023: 2127 },
   { nombre: "EMILIANO", count2022: 1952, count2023: 3254 },
-  { nombre: "ENZO", count2022: 3330, count2023: 6579 },
+  { nombre: "RODRIGO", count2022: 861, count2023: 748 },
   { nombre: "JULIAN", count2022: 3525, count2023: 7294 },
   { nombre: "LIONEL", count2022: 4863, count2023: 9505 },
-  { nombre: "RODRIGO", count2022: 861, count2023: 748 },
 ]
 
 /** Cada bebé del slider representa 1 niño cada 1.000 nacidos. */

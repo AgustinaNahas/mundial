@@ -11,15 +11,22 @@ import { LOADING_INTRO, SECTIONS } from "@/lib/site-copy"
 const copy = SECTIONS.album
 import { useData } from "@/lib/data-context"
 import { cn } from "@/lib/utils"
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
-import { InfoIconButton } from "@/components/ui/info-icon-button"
+import { InfoTooltip } from "@/components/info-tooltip"
 import { useIsMobile } from "@/hooks/use-mobile"
 import { MonthStack } from "@/components/month-stack"
 import { LazySectionSkeleton } from "@/components/lazy-mount"
 import { sendGaEvent } from "@/lib/analytics"
 
 /* ─── Constantes ────────────────────────────────────────────── */
-const SLOTS = [
+type AlbumSlot = {
+  readonly player: string
+  readonly emoji: string
+  readonly src: string
+  /** Filtro CSS sobre el emoji-pista (p. ej. otro tono del mismo 🍬). */
+  readonly emojiClassName?: string
+}
+
+const SLOTS: readonly AlbumSlot[] = [
   { player: "Lionel Messi",       emoji: "🐐", src: "/mundial/album/figu1.webp"  },
   { player: "Rodrigo De Paul",    emoji: "🍬", src: "/mundial/album/figu3.webp"  },
   { player: "Ángel Di María",     emoji: "🍝", src: "/mundial/album/figu10.webp" },
@@ -31,15 +38,42 @@ const SLOTS = [
   { player: "Emiliano Martínez",  emoji: "🧤", src: "/mundial/album/figu2.webp"  },
   { player: "Nahuel Molina",      emoji: "🚀", src: "/mundial/album/figu6.webp"  },
   { player: "Cristian Romero",    emoji: "🪓", src: "/mundial/album/figu9.webp"  },
-  { player: "Leandro Paredes",    emoji: "🧱", src: "/mundial/album/figu11.webp" },
-] as const
+  {
+    player: "Leandro Paredes",
+    emoji: "🍬",
+    src: "/mundial/album/figu11.webp",
+    emojiClassName: "inline-block [filter:hue-rotate(155deg)_saturate(1.15)]",
+  },
+]
 const COLS = 4
 const ROWS = 3
 const TOTAL = COLS * ROWS
 /** Índice en SLOTS / celda del álbum de Messi (siempre el cierre). */
 const MESSI_INDEX = 0
+/** Primeras figuritas posibles: uno de estos sale primero (al azar). */
+const PRIORITY_FIRST_INDICES = [
+  SLOTS.findIndex(s => s.player === "Julián Álvarez"),
+  SLOTS.findIndex(s => s.player === "Ángel Di María"),
+  SLOTS.findIndex(s => s.player === "Marcos Acuña"),
+  SLOTS.findIndex(s => s.player === "Lautaro Martínez"),
+].filter(i => i >= 0)
+
+const ALBUM_ERA_2022 = {
+  year: "2022",
+  mobileLabel: "En 2022",
+  flags: ["🇶🇦"] as const,
+} as const
+
+const ALBUM_ERA_2026 = {
+  year: "2026",
+  mobileLabel: "En 2026",
+  flags: ["🇺🇸", "🇨🇦", "🇲🇽"] as const,
+} as const
+
+const SLOT_FLASH_MS = 700
 
 /* ─── Types ──────────────────────────────────────────────────── */
+type SlotFlash = "ok" | "err"
 interface PlacedFigu { src: string; price2022: number; price2026: number }
 type SlotData = PlacedFigu | null
 interface StickerEntry {
@@ -59,7 +93,7 @@ const MotionImage = motion(Image)
 
 /** Precios en grillas 2 columnas: más chicos en mobile para que no desborden. */
 const SUMMARY_PRICE_CLASS =
-  "font-mono font-light tabular-nums tracking-tight leading-tight text-[clamp(0.8125rem,3.6vw,1.5rem)] md:text-2xl"
+  "font-sans font-bold tabular-nums mt-4 tracking-tight leading-tight text-2xl"
 const MOBILE_LIVE_PRICE_CLASS =
   "font-mono font-bold tabular-nums tracking-tight leading-tight text-base"
 
@@ -122,14 +156,35 @@ function FiguraCursor({ visible, cursorX, cursorY, src }: { visible: boolean; cu
 }
 
 /* ─── Slot individual ─── */
-function Slot({ figu, emoji, onPlace }: { figu: SlotData; emoji: string; onPlace: () => void }) {
+function Slot({
+  figu,
+  emoji,
+  emojiClassName,
+  flash,
+  onPlace,
+}: {
+  figu: SlotData
+  emoji: string
+  emojiClassName?: string
+  flash?: SlotFlash
+  onPlace: () => void
+}) {
   return (
     <div
       onClick={figu === null ? onPlace : undefined}
       className={cn(
-        "relative aspect-[10/13] rounded-md",
-        // overflow-visible cuando hay figurita para que pueda sobresalir durante la animación
-        figu ? "overflow-visible" : "overflow-hidden cursor-pointer group border border-dashed border-border/40 hover:border-primary/60 transition-colors",
+        "relative aspect-[10/13] rounded-md transition-[border-color,box-shadow] duration-200",
+        figu
+          ? "overflow-visible"
+          : cn(
+              "overflow-hidden cursor-pointer group border border-dashed",
+              flash === "ok" &&
+                "border-solid border-emerald-500 shadow-[0_0_0_2px_rgba(16,185,129,0.4)]",
+              flash === "err" &&
+                "border-solid border-red-500 shadow-[0_0_0_2px_rgba(239,68,68,0.4)]",
+              flash == null &&
+                "border-border/40 hover:border-primary/60",
+            ),
       )}
     >
       <AnimatePresence mode="wait">
@@ -159,7 +214,14 @@ function Slot({ figu, emoji, onPlace }: { figu: SlotData; emoji: string; onPlace
           />
         ) : (
           <motion.div className="absolute inset-0 flex flex-col items-center justify-center gap-1 group-hover:bg-primary/5 transition-colors rounded-md">
-            <span className="text-[50px] md:text-[38px] leading-none select-none">{emoji}</span>
+            <span
+              className={cn(
+                "text-[50px] md:text-[38px] leading-none select-none",
+                emojiClassName,
+              )}
+            >
+              {emoji}
+            </span>
           </motion.div>
         )}
       </AnimatePresence>
@@ -167,31 +229,46 @@ function Slot({ figu, emoji, onPlace }: { figu: SlotData; emoji: string; onPlace
   )
 }
 
+function EraFlags({
+  flags,
+  className,
+}: {
+  flags: readonly string[]
+  className?: string
+}) {
+  return (
+    <span className={cn("inline-flex items-center gap-0.5 text-lg leading-none", className)}>
+      {flags.map(flag => (
+        <span key={flag}>{flag}</span>
+      ))}
+    </span>
+  )
+}
+
 /* ─── Panel lateral de costos ─── */
 function CostPanel({
   year,
+  flags,
   color,
   total,
   entries,
-  currentCount,
-  targetCount,
   pricePerFigu,
-  salario,
   unit,
   align,
+  albumComplete,
+  horasTrabajo,
 }: {
   year: string
+  flags: readonly string[]
   color: string
   total: number
   entries: StickerEntry[]
-  currentCount: number
-  targetCount: number
   pricePerFigu: number
-  salario: number
   unit?: string
   align: "left" | "right"
+  albumComplete: boolean
+  horasTrabajo: number
 }) {
-  const horasTrabajo = total > 0 ? total / (salario / 176) : 0
   const isRight = align === "right"
   const listRef = useRef<HTMLDivElement>(null)
 
@@ -205,6 +282,10 @@ function CostPanel({
     <div className={cn("flex flex-col h-full", isRight ? "items-start" : "items-end")}>
       {/* Header */}
       <div className={cn("mb-4", isRight ? "text-left" : "text-right")}>
+        <EraFlags
+          flags={flags}
+          className={cn("mb-1.5", isRight ? "justify-start" : "justify-end")}
+        />
         <p className="text-xs uppercase tracking-widest text-muted-foreground">{year}</p>
         <p className="text-[11px] text-muted-foreground mt-0.5">
           {formatCurrency(pricePerFigu, unit)}/figurita
@@ -268,6 +349,7 @@ function CostPanel({
         <AnimatePresence mode="wait">
           {total > 0 ? (
             <motion.div key="total" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+              <p className="text-[11px] text-muted-foreground mb-1">{ albumComplete ? "En total gastaste..." : "Hasta ahora gastaste..."}</p>
               <motion.p
                 className="text-xl font-bold font-mono tabular-nums tracking-tight leading-tight"
                 style={{ color }}
@@ -278,6 +360,11 @@ function CostPanel({
               >
                 {formatCurrency(total, unit)}
               </motion.p>
+              {albumComplete && horasTrabajo > 0 && (
+                <p className="text-[11px] text-muted-foreground mt-2 leading-snug max-w-2xl">
+                  Entonces son al menos {horasTrabajo.toFixed(1)} horas de trabajo para el álbum completo
+                </p>
+              )}
             </motion.div>
           ) : (
             <p className="text-xs text-muted-foreground/30">—</p>
@@ -298,10 +385,14 @@ function shuffled<T>(arr: T[]): T[] {
   return a
 }
 
-/** Orden de celdas a completar: primero el resto al azar, Messi siempre al final. */
+/** Orden de celdas a completar: primero uno de los “estrellas”, resto al azar, Messi al final. */
 function buildSlotOrder(): number[] {
-  const rest = Array.from({ length: TOTAL }, (_, i) => i).filter(i => i !== MESSI_INDEX)
-  return [...shuffled(rest), MESSI_INDEX]
+  const first =
+    PRIORITY_FIRST_INDICES[Math.floor(Math.random() * PRIORITY_FIRST_INDICES.length)]
+  const rest = Array.from({ length: TOTAL }, (_, i) => i).filter(
+    i => i !== MESSI_INDEX && i !== first,
+  )
+  return [first, ...shuffled(rest), MESSI_INDEX]
 }
 
 const CELESTE_CONFETTI = "#5BA3E8"
@@ -387,7 +478,7 @@ export function AlbumSection() {
   const pricePerFigu2022 = sobre_2022 / Math.max(figusSobre2022, 1)
   const pricePerFigu2026 = sobre_2026 / Math.max(figusSobre2026, 1)
 
-  // orden random al montar; Messi (índice 0) siempre es la última figurita
+  // orden al montar: primero Álvarez/Di María/Acuña/Lautaro, resto al azar, Messi al final
   const [slotOrder] = useState(() => buildSlotOrder())
   // posición dentro del orden shuffled
   const [orderIdx, setOrderIdx] = useState(0)
@@ -409,6 +500,8 @@ export function AlbumSection() {
   const albumCompleteConfettiRef = useRef(false)
 
   const [inAlbum, setInAlbum] = useState(false)
+  const [slotFlash, setSlotFlash] = useState<Partial<Record<number, SlotFlash>>>({})
+  const flashTimeoutRef = useRef<Record<number, number>>({})
   const rawX = useMotionValue(-200)
   const rawY = useMotionValue(-200)
   const cursorX = useSpring(rawX, { stiffness: 420, damping: 30 })
@@ -435,10 +528,41 @@ export function AlbumSection() {
     }, 1100)
   }, [])
 
+  const pulseSlotFlash = useCallback((idx: number, kind: SlotFlash) => {
+    const prev = flashTimeoutRef.current[idx]
+    if (prev) window.clearTimeout(prev)
+    setSlotFlash(s => ({ ...s, [idx]: kind }))
+    flashTimeoutRef.current[idx] = window.setTimeout(() => {
+      setSlotFlash(s => {
+        if (s[idx] !== kind) return s
+        const next = { ...s }
+        delete next[idx]
+        return next
+      })
+      delete flashTimeoutRef.current[idx]
+    }, SLOT_FLASH_MS)
+  }, [])
+
+  useEffect(() => {
+    return () => {
+      for (const id of Object.values(flashTimeoutRef.current)) {
+        window.clearTimeout(id)
+      }
+    }
+  }, [])
+
+  const placedCount = placed.filter(Boolean).length
+  const allFilled = placedCount === TOTAL
+
   const placeSticker = useCallback((clickedIdx: number) => {
     const targetSlot = slotOrder[orderIdx]
-    if (placed[clickedIdx]) return
-    if (clickedIdx !== targetSlot) return
+    if (placed[clickedIdx] || allFilled) return
+    if (clickedIdx !== targetSlot) {
+      pulseSlotFlash(clickedIdx, "err")
+      return
+    }
+
+    pulseSlotFlash(clickedIdx, "ok")
 
     const newPlaced = [...placed]
     const figuIdx = clickedIdx
@@ -480,10 +604,17 @@ export function AlbumSection() {
       stickers_completed: newPlaced.filter(Boolean).length,
       is_mobile: isMobile,
     })
-  }, [slotOrder, orderIdx, placed, pricePerFigu2022, pricePerFigu2026, isMobile, pushMobileSnack])
-
-  const placedCount = placed.filter(Boolean).length
-  const allFilled = placedCount === TOTAL
+  }, [
+    slotOrder,
+    orderIdx,
+    placed,
+    allFilled,
+    pricePerFigu2022,
+    pricePerFigu2026,
+    isMobile,
+    pushMobileSnack,
+    pulseSlotFlash,
+  ])
 
   useEffect(() => {
     if (!allFilled) {
@@ -584,13 +715,8 @@ export function AlbumSection() {
 
   const blessedTotal2022 = totalFigus2022 * pricePerFigu2022
   const blessedTotal2026 = totalFigus2026 * pricePerFigu2026
-  const blessedHoras2022 = blessedTotal2022 / hora_2022
-  const blessedHoras2026 = blessedTotal2026 / hora_2026
-
   const laborTotal2022 = laborCount2022 * pricePerFigu2022
   const laborTotal2026 = laborCount2026 * pricePerFigu2026
-  const laborHoras2022 = laborTotal2022 / hora_2022
-  const laborHoras2026 = laborTotal2026 / hora_2026
   const blessedMonths2022 = blessedTotal2022 / salario_2022
   const blessedMonths2026 = blessedTotal2026 / salario_2026
   const laborMonths2022 = laborTotal2022 / salario_2022
@@ -643,16 +769,16 @@ export function AlbumSection() {
           {/* Panel 2022 (izquierda) */}
           <div className="hidden md:block">
             <CostPanel
-              year="Qatar 2022"
+              year={ALBUM_ERA_2022.year}
+              flags={ALBUM_ERA_2022.flags}
               color="oklch(0.97 0.01 220)"
               total={totalCost2022}
               entries={entries2022}
-              currentCount={effectiveCount2022}
-              targetCount={totalFigus2022}
               pricePerFigu={pricePerFigu2022}
-              salario={salario_2022}
               unit={unit}
               align="left"
+              albumComplete={allFilled}
+              horasTrabajo={horasTrabajo2022}
             />
           </div>
 
@@ -728,7 +854,14 @@ export function AlbumSection() {
             )}
             <div className="p-3 grid gap-1.5" style={{ gridTemplateColumns: `repeat(${COLS}, minmax(0, 1fr))` }}>
               {placed.map((figu, idx) => (
-                <Slot key={idx} figu={figu} emoji={SLOTS[idx].emoji} onPlace={() => placeSticker(idx)} />
+                <Slot
+                  key={idx}
+                  figu={figu}
+                  emoji={SLOTS[idx].emoji}
+                  emojiClassName={SLOTS[idx].emojiClassName}
+                  flash={slotFlash[idx]}
+                  onPlace={() => placeSticker(idx)}
+                />
               ))}
             </div>
           </div>
@@ -736,16 +869,16 @@ export function AlbumSection() {
           {/* Panel 2026 (derecha) */}
           <div className="hidden md:block">
             <CostPanel
-              year="EEUU 2026"
+              year={ALBUM_ERA_2026.year}
+              flags={ALBUM_ERA_2026.flags}
               color="oklch(0.65 0.18 222)"
               total={totalCost2026}
               entries={entries2026}
-              currentCount={effectiveCount2026}
-              targetCount={totalFigus2026}
               pricePerFigu={pricePerFigu2026}
-              salario={salario_2026}
               unit={unit}
               align="right"
+              albumComplete={allFilled}
+              horasTrabajo={horasTrabajo2026}
             />
           </div>
         </div>
@@ -753,15 +886,37 @@ export function AlbumSection() {
         {/* ── Paneles en mobile (apilados) ── */}
         {placedCount > 0 && (
           <div className="mt-6 grid grid-cols-2 gap-2 md:hidden min-w-0">
-            <div className="rounded-xl bg-card border border-border/30 p-3 min-w-0 overflow-hidden">
-              <p className="text-xs uppercase tracking-widest text-muted-foreground mb-2">Qatar 2022</p>
+            <div className="relative rounded-xl bg-card border border-border/30 p-3 min-w-0 overflow-hidden">
+              <EraFlags
+                flags={ALBUM_ERA_2022.flags}
+                className="absolute top-2.5 right-2.5 text-base"
+              />
+              <p className="text-xs uppercase tracking-widest text-muted-foreground mb-2 pr-10">
+                {ALBUM_ERA_2022.mobileLabel}
+              </p>
+              <p className="text-[11px] text-muted-foreground mb-1">{allFilled ? "En total gastaste..." : "Hasta ahora gastaste..."}</p>
               <p className={cn(MOBILE_LIVE_PRICE_CLASS, "text-accent")}>{formatCurrency(totalCost2022, unit)}</p>
-              <p className="text-[11px] text-muted-foreground">{horasTrabajo2022.toFixed(1)} horas de trabajo</p>
+              {allFilled && horasTrabajo2022 > 0 && (
+                <p className="text-[11px] text-muted-foreground mt-1.5 leading-snug">
+                  Entonces son al menos {horasTrabajo2022.toFixed(1)} horas de trabajo para el álbum completo
+                </p>
+              )}
             </div>
-            <div className="rounded-xl bg-card border border-border/30 p-3 min-w-0 overflow-hidden">
-              <p className="text-xs uppercase tracking-widest text-muted-foreground mb-2">EEUU 2026</p>
+            <div className="relative rounded-xl bg-card border border-border/30 p-3 min-w-0 overflow-hidden">
+              <EraFlags
+                flags={ALBUM_ERA_2026.flags}
+                className="absolute top-2.5 right-2.5 text-base"
+              />
+              <p className="text-xs uppercase tracking-widest text-muted-foreground mb-2 pr-14">
+                {ALBUM_ERA_2026.mobileLabel}
+              </p>
+              <p className="text-[11px] text-muted-foreground mb-1">{allFilled ? "En total gastaste..." : "Hasta ahora gastaste..."}</p>
               <p className={cn(MOBILE_LIVE_PRICE_CLASS, "text-primary")}>{formatCurrency(totalCost2026, unit)}</p>
-              <p className="text-[11px] text-muted-foreground">{horasTrabajo2026.toFixed(1)} horas de trabajo</p>
+              {allFilled && horasTrabajo2026 > 0 && (
+                <p className="text-[11px] text-muted-foreground mt-1.5 leading-snug max-w-2xl">
+                  Entonces son {horasTrabajo2026.toFixed(1)} horas de trabajo para el álbum completo
+                </p>
+              )}
             </div>
           </div>
         )}
@@ -775,17 +930,13 @@ export function AlbumSection() {
           <div className="rounded-xl bg-card border border-border/20 p-5 md:p-6 space-y-5">
             <div className="flex items-center gap-2 justify-center">
               <p className="text-[20px] md:text-[22px] font-medium text-foreground">Si sos un iluminado y no te toca ninguna repetida...</p>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <InfoIconButton
-                    size="sm"
-                    label="Más información sobre completar el álbum sin repetidas"
-                  />
-                </TooltipTrigger>
-                <TooltipContent sideOffset={6} className="max-w-xs leading-relaxed">
-                  Solo vas a necesitar 980 figuritas si no te toca ninguna repetida; es como ganar el loto 60 veces, es decir, imposible.
-                </TooltipContent>
-              </Tooltip>
+              <InfoTooltip
+                placement="above-left"
+                wide
+                label="Más información sobre completar el álbum sin repetidas"
+              >
+                Solo vas a necesitar 980 figuritas si no te toca ninguna repetida; es como ganar el loto 60 veces, es decir, imposible.
+              </InfoTooltip>
             </div>
             <div className="grid grid-cols-2 gap-2 md:gap-6 min-w-0">
               <div className="flex flex-col gap-3 md:flex-row md:items-stretch md:justify-between min-w-0">
@@ -800,7 +951,6 @@ export function AlbumSection() {
                   <p className="text-xs uppercase tracking-widest text-muted-foreground">Qatar 2022</p>
                   <FiguCountLine count={totalFigus2022} suffix="figuritas totales" />
                   <p className={cn(SUMMARY_PRICE_CLASS, "text-accent")}>{formatCurrency(blessedTotal2022, unit)}</p>
-                  <p className="text-sm text-muted-foreground">{blessedHoras2022.toFixed(1)} horas de trabajo</p>
                 </div>
               </div>
               <div className="flex flex-col gap-3 md:flex-row md:items-stretch md:justify-between md:border-l md:border-border/10 md:pl-6 min-w-0">
@@ -808,7 +958,6 @@ export function AlbumSection() {
                   <p className="text-xs uppercase tracking-widest text-muted-foreground">EEUU 2026</p>
                   <FiguCountLine count={totalFigus2026} suffix="figuritas totales" />
                   <p className={cn(SUMMARY_PRICE_CLASS, "text-primary")}>{formatCurrency(blessedTotal2026, unit)}</p>
-                  <p className="text-sm text-muted-foreground">{blessedHoras2026.toFixed(1)} horas de trabajo</p>
                 </div>
                 <MonthStack
                   className="order-2 md:order-none"
@@ -824,17 +973,13 @@ export function AlbumSection() {
           <div className="rounded-xl bg-card border border-border/20 p-5 md:p-6 space-y-5">
             <div className="flex items-center gap-2 justify-center">
               <p className="text-[20px] md:text-[22px] font-medium text-foreground">Si lo tuyo es más huevo que suerte...</p>
-            <Tooltip>
-                <TooltipTrigger asChild>
-                  <InfoIconButton
-                    size="sm"
-                    label="Más información sobre el promedio de figuritas (coupon collector)"
-                  />
-                </TooltipTrigger>
-                <TooltipContent sideOffset={6} className="max-w-xs leading-relaxed">
-                  Promedio sin intercambiar figuritas (coupon collector): n · (ln n + γ)
-                </TooltipContent>
-              </Tooltip>
+            <InfoTooltip
+              placement="above-left"
+              wide
+              label="Más información sobre el promedio de figuritas (coupon collector)"
+            >
+                Promedio sin intercambiar figuritas (coupon collector): n · (ln n + γ)
+              </InfoTooltip>
             </div>
             <div className="grid grid-cols-2 gap-2 md:gap-6 min-w-0">
               <div className="flex flex-col gap-3 md:flex-row md:items-stretch md:justify-between min-w-0">
@@ -849,7 +994,6 @@ export function AlbumSection() {
                   <p className="text-xs uppercase tracking-widest text-muted-foreground">Qatar 2022</p>
                   <FiguCountLine count={laborCount2022} suffix="figuritas estimadas" />
                   <p className={cn(SUMMARY_PRICE_CLASS, "text-accent")}>{formatCurrency(laborTotal2022, unit)}</p>
-                  <p className="text-sm text-muted-foreground">{laborHoras2022.toFixed(1)} horas de trabajo</p>
                 </div>
               </div>
               <div className="flex flex-col gap-3 md:flex-row md:items-stretch md:justify-between md:border-l md:border-border/10 md:pl-6 min-w-0">
@@ -857,7 +1001,6 @@ export function AlbumSection() {
                   <p className="text-xs uppercase tracking-widest text-muted-foreground">EEUU 2026</p>
                   <FiguCountLine count={laborCount2026} suffix="figuritas estimadas" />
                   <p className={cn(SUMMARY_PRICE_CLASS, "text-primary")}>{formatCurrency(laborTotal2026, unit)}</p>
-                  <p className="text-sm text-muted-foreground">{laborHoras2026.toFixed(1)} horas de trabajo</p>
                 </div>
                 <MonthStack
                   className="order-2 md:order-none"

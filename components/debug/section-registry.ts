@@ -65,22 +65,6 @@ export const debugSectionRegistry = {
     label: "Cierre",
     load: () => import("@/components/sections/cierre-section").then((m) => m.CierreSection),
   },
-  viaje: {
-    label: "Viaje",
-    load: () => import("@/components/sections/viaje-section").then((m) => m.ViajeSection),
-  },
-  trabajo: {
-    label: "Trabajo",
-    load: () => import("@/components/sections/trabajo-section").then((m) => m.TrabajoSection),
-  },
-  alquiler: {
-    label: "Alquiler",
-    load: () => import("@/components/sections/alquiler-section").then((m) => m.AlquilerSection),
-  },
-  timeline: {
-    label: "Timeline",
-    load: () => import("@/components/sections/timeline-section").then((m) => m.TimelineSection),
-  },
 } satisfies Record<string, DebugSectionConfig>
 
 export const debugSectionSlugs = Object.keys(debugSectionRegistry) as DebugSectionSlug[]

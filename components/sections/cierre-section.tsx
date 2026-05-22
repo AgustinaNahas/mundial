@@ -19,7 +19,7 @@ export function CierreSection() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.7 }}
-          className="text-xl md:text-2xl lg:text-3xl font-light italic text-center text-balance leading-snug"
+          className="text-[22px] md:text-2xl lg:text-3xl font-light italic text-center text-balance leading-snug"
         >
           {closing}
         </motion.p>

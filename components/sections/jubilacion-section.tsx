@@ -1,33 +1,163 @@
 "use client"
 
 import { useEffect, useRef, useState } from "react"
-import { motion } from "framer-motion"
-import {
-  CLOSED_FOLLOW_TIP,
-  FollowCursorTooltip,
-  bindFollowTooltip,
-} from "@/components/follow-cursor-tooltip"
+import { motion, useInView } from "framer-motion"
+import { InfoTooltip } from "@/components/info-tooltip"
 import { SectionWrapper } from "@/components/section-wrapper"
-import { InfoIconButton } from "@/components/ui/info-icon-button"
-import { useCloseOnScroll } from "@/hooks/use-close-on-scroll"
 import { useData } from "@/lib/data-context"
 import { formatCurrency } from "@/lib/utils"
+import { useIsMobile } from "@/hooks/use-mobile"
 import { LOADING_INTRO, SECTIONS } from "@/lib/site-copy"
 
 const copy = SECTIONS.jubilacion
 const BASE_PATH = "/mundial"
 const KILOS_POR_ASADO = 5
+/** Desktop: +60% respecto a 220×134px. */
+const ABUELA_IMAGE_WIDTH = 300
+const ABUELA_IMAGE_HEIGHT = 500
+
+const ABUELA_IMAGE_WRAPPER_CLASS =
+  "relative shrink-0 w-fit overflow-visible h-30 -mb-4 -mt-12 md:absolute md:-top-12 md:right-0 md:mb-0 md:mt-0 md:h-[352px] md:w-[214px]"
 const ABUELA_IMAGE_CLASS =
-  "md:absolute md:-top-12 md:right-0 shrink-0 w-fit h-30 -mb-4 -mt-12 md:mb-0 md:mt-0 md:h-[220px] object-contain -scale-x-100"
+  "relative z-10 block h-full w-full object-contain -scale-x-100"
+
+/** Punto único detrás de la señora (centro de la imagen). */
+const ABUELA_BUBBLE_ORIGIN = { left: "50%", top: "52%" } as const
+
+const BUBBLE_EMERGE_DURATION_MS = 500
+/** Espera entre burbuja y burbuja (orden del array: abuela → la × 5). */
+const BUBBLE_STAGGER_MS = BUBBLE_EMERGE_DURATION_MS - 150
+
+type BubbleRest = { left: string; top: string }
+
+/** Posición de reposo de cada burbuja (mobile / desktop). */
+const ABUELA_BUBBLE_WORDS: ReadonlyArray<{
+  text: string
+  mobile: BubbleRest
+  desktop: BubbleRest
+}> = [
+  { text: "abuela", mobile: { left: "24%", top: "-94px" }, desktop: { left: "24%", top: "-64px" } },
+  { text: "la", mobile: { left: "8%", top: "-80px" }, desktop: { left: "8%", top: "-42px" } },
+  { text: "la", mobile: { left: "30%", top: "-65px" }, desktop: { left: "30%", top: "-18px" } },
+  { text: "la", mobile: { left: "48%", top: "-90px" }, desktop: { left: "48%", top: "-29px" } },
+  { text: "la", mobile: { left: "64%", top: "-80px" }, desktop: { left: "64%", top: "-42px" } },
+  { text: "la", mobile: { left: "78%", top: "-80px" }, desktop: { left: "78%", top: "-10px" } },
+]
+
+const BUBBLE_PILL_CLASS =
+  "inline-block whitespace-nowrap rounded-full border border-primary/30 bg-primary/10 px-1.5 py-px text-[10px] font-medium leading-tight text-primary md:text-sm"
+
+type BubbleLayout = (typeof ABUELA_BUBBLE_WORDS)[number]
+
+function AbuelaBubble({
+  bubble,
+  index,
+  inView,
+}: {
+  bubble: BubbleLayout
+  index: number
+  inView: boolean
+}) {
+  const isMobile = useIsMobile()
+  const rest = isMobile ? bubble.mobile : bubble.desktop
+  const [phase, setPhase] = useState<"idle" | "emerge" | "float">("idle")
+
+  const startMs = index * BUBBLE_STAGGER_MS
+
+  useEffect(() => {
+    if (!inView) return
+    const emergeT = window.setTimeout(() => setPhase("emerge"), startMs)
+    const floatT = window.setTimeout(
+      () => setPhase("float"),
+      startMs + BUBBLE_EMERGE_DURATION_MS,
+    )
+    return () => {
+      window.clearTimeout(emergeT)
+      window.clearTimeout(floatT)
+    }
+  }, [inView, startMs])
+
+  return (
+    <motion.span
+      className={`absolute ${BUBBLE_PILL_CLASS}`}
+      variants={{
+        idle: {
+          left: ABUELA_BUBBLE_ORIGIN.left,
+          top: ABUELA_BUBBLE_ORIGIN.top,
+          // x: "-50%",
+          y: 0,
+          opacity: 0,
+          scale: 0.35,
+        },
+        emerge: {
+          left: rest.left,
+          top: rest.top,
+          x: 0,
+          y: 0,
+          opacity: [0, 0.6, 1],
+          scale: 1,
+          transition: {
+            left: { duration: BUBBLE_EMERGE_DURATION_MS / 1000, ease: [0.33, 1, 0.38, 1] },
+            top: { duration: BUBBLE_EMERGE_DURATION_MS / 1000, ease: [0.33, 1, 0.38, 1] },
+            x: { duration: BUBBLE_EMERGE_DURATION_MS / 1000, ease: [0.33, 1, 0.38, 1] },
+            y: { duration: BUBBLE_EMERGE_DURATION_MS / 1000, ease: [0.33, 1, 0.38, 1] },
+            opacity: { duration: 0.75, times: [0, 0.4, 1], ease: "easeOut" },
+            scale: { duration: 0.85, ease: [0.22, 1, 0.36, 1] },
+          },
+        },
+        float: {
+          left: rest.left,
+          top: rest.top,
+          x: [0, index % 2 === 0 ? 2 : -2, 0],
+          y: [0, -4, 2, 0],
+          opacity: 1,
+          scale: 1,
+          transition: {
+            left: { duration: 0 },
+            top: { duration: 0 },
+            y: {
+              duration: 2.6 + index * 0.35,
+              repeat: Infinity,
+              ease: "easeInOut",
+            },
+            x: {
+              duration: 2.6 + index * 0.35,
+              repeat: Infinity,
+              ease: "easeInOut",
+            },
+          },
+        },
+      }}
+      initial="idle"
+      animate={phase}
+    >
+      {bubble.text}
+    </motion.span>
+  )
+}
+
+function AbuelaFloatingWords() {
+  const containerRef = useRef<HTMLDivElement>(null)
+  const inView = useInView(containerRef, { once: true, amount: 0.15, margin: "0px 0px -80px 0px" })
+
+  return (
+    <div
+      ref={containerRef}
+      className="pointer-events-none absolute inset-0 top-20 overflow-visible"
+      aria-hidden
+    >
+      {ABUELA_BUBBLE_WORDS.map((bubble, i) => (
+        <AbuelaBubble key={`${bubble.text}-${i}`} bubble={bubble} index={i} inView={inView} />
+      ))}
+    </div>
+  )
+}
 
 const PICTO_HALO =
   "drop-shadow-[0_0_1px_#fff] drop-shadow-[0_0_2px_#fff]"
 
 const PODER_ADQUISITIVO_TOOLTIP =
   "Promedio del cambio en cuántos álbumes, asados de parrilla (5 kg) y viajes en colectivo alcanza con la jubilación mínima entre 2022 y 2026."
-
-const INFO_TOOLTIP_CLASS =
-  "pointer-events-none z-[100] max-w-xs rounded-md border border-border bg-card px-3 py-2 text-xs leading-relaxed text-card-foreground shadow-lg"
 
 function formatPctChange(pct: number) {
   const rounded = Math.round(pct)
@@ -102,21 +232,6 @@ function PurchaseCompare({
 
 export function JubilacionSection() {
   const { getIndicador, loading } = useData()
-  const [poderTip, setPoderTip] = useState(CLOSED_FOLLOW_TIP)
-  const poderTipRef = useRef<HTMLSpanElement>(null)
-  const closePoderTip = () => setPoderTip(CLOSED_FOLLOW_TIP)
-
-  useCloseOnScroll(poderTip.open, closePoderTip)
-
-  useEffect(() => {
-    const handleOutsideTouch = (e: PointerEvent) => {
-      if (e.pointerType === "touch" && !poderTipRef.current?.contains(e.target as Node)) {
-        closePoderTip()
-      }
-    }
-    document.addEventListener("pointerdown", handleOutsideTouch)
-    return () => document.removeEventListener("pointerdown", handleOutsideTouch)
-  }, [])
 
   const jubilacion = getIndicador("JUBILACION_MIN_DOLARES")
   const asado = getIndicador("ASADO_FINAL")
@@ -155,7 +270,11 @@ export function JubilacionSection() {
   const titleImage = {
     src: `${BASE_PATH}/abuela.png`,
     alt: "Abuela festejando",
+    width: ABUELA_IMAGE_WIDTH,
+    height: ABUELA_IMAGE_HEIGHT,
+    wrapperClassName: ABUELA_IMAGE_WRAPPER_CLASS,
     className: ABUELA_IMAGE_CLASS,
+    decoration: <AbuelaFloatingWords />,
   }
 
   if (loading) {
@@ -215,25 +334,9 @@ export function JubilacionSection() {
               >
                 {formatPctChange(poderAdquisitivoPct)}
               </p>
-              <span
-                ref={poderTipRef}
-                className="inline-flex touch-manipulation"
-                {...bindFollowTooltip(setPoderTip, () => {})}
-              >
-                <InfoIconButton
-                  size="sm"
-                  label="Cómo se calcula el cambio en poder adquisitivo"
-                />
-              </span>
-              <FollowCursorTooltip
-                open={poderTip.open}
-                x={poderTip.x}
-                y={poderTip.y}
-                placement={poderTip.placement}
-                className={INFO_TOOLTIP_CLASS}
-              >
+              <InfoTooltip label="Cómo se calcula el cambio en poder adquisitivo">
                 {PODER_ADQUISITIVO_TOOLTIP}
-              </FollowCursorTooltip>
+              </InfoTooltip>
             </div>
             <p className="text-[10px] text-muted-foreground uppercase tracking-wide">
               poder adquisitivo
