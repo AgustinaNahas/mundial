@@ -111,20 +111,24 @@ export function SourcesPanel({ items = [], extraRows = [], hideValues = false }:
             transition={{ duration: 0.25 }}
             className="mt-2 overflow-hidden overflow-x-auto"
           >
-            <table className="w-full min-w-[280px] md:mt-6 text-xs text-muted-foreground/85 border-collapse">
+            <div className="rounded-lg border border-border/50 bg-card overflow-hidden">
+            <table className="w-full min-w-[280px] md:mt-0 text-xs text-muted-foreground/85 border-collapse">
               <thead>
                 <tr className="border-b border-border/50 text-left text-[10px] 
-                uppercase tracking-[0.12em] text-muted-foreground bg-muted/50">
+                uppercase tracking-[0.12em] text-muted-foreground bg-muted/60">
                   <th className="py-1.5 pr-3 font-bold pl-4">Indicador</th>
                   <th className="py-1.5 pr-3 font-bold whitespace-nowrap">Valor</th>
                   <th className="py-1.5 font-bold">Fuente</th>
                 </tr>
               </thead>
               <tbody>
-                {sortedRows.map((row) => (
+                {sortedRows.map((row, index) => (
                   <tr
                     key={row.key}
-                    className="border-b border-border/30 last:border-0 align-top even:bg-muted/50"
+                    className={cn(
+                      "border-b border-border/30 last:border-0 align-top",
+                      index % 2 === 1 && "bg-muted/45",
+                    )}
                   >
                     <td className="py-1.5 pr-3 leading-snug pl-4">{row.descripcion}</td>
                     <td className="py-1.5 pr-3 whitespace-nowrap tabular-nums">
@@ -141,6 +145,7 @@ export function SourcesPanel({ items = [], extraRows = [], hideValues = false }:
                 ))}
               </tbody>
             </table>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>

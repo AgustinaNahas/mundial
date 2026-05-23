@@ -306,7 +306,7 @@ export function NinosSection() {
   const nombres = getIndicador("NOMBRES")
 
   return (
-    <SectionWrapper
+    <SectionWrapper progressSection="ninos"
       number={copy.number}
       title={copy.title}
       intro={copy.intro}

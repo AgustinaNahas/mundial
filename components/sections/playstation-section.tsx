@@ -21,7 +21,7 @@ export function PlayStationSection() {
 
   if (loading) {
     return (
-      <SectionWrapper
+      <SectionWrapper progressSection="playstation"
         number={copy.number}
         title={copy.title}
         intro={LOADING_INTRO}
@@ -32,7 +32,7 @@ export function PlayStationSection() {
   }
 
   return (
-    <SectionWrapper
+    <SectionWrapper progressSection="playstation"
       number={copy.number}
       title={copy.title}
       intro={copy.intro}

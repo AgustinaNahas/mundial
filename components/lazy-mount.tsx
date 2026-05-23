@@ -1,20 +1,47 @@
 "use client"
 
 import type { ReactNode } from "react"
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import { useIntersectionMount } from "@/hooks/use-intersection-mount"
+import {
+  resolveBreakpoint,
+  sectionSkeletonMinHeight,
+  type LazySectionId,
+} from "@/lib/progress-layout"
 import { cn } from "@/lib/utils"
 import { debugLog } from "@/lib/debug-log"
 
-export function LazySectionSkeleton({ className }: { className?: string }) {
+export function LazySectionSkeleton({
+  className,
+  sectionId,
+}: {
+  className?: string
+  sectionId?: LazySectionId
+}) {
+  const [minHeight, setMinHeight] = useState<string | undefined>(undefined)
+
+  useEffect(() => {
+    if (!sectionId) return
+    const sync = () => {
+      setMinHeight(
+        sectionSkeletonMinHeight(sectionId, resolveBreakpoint(window.innerWidth)),
+      )
+    }
+    sync()
+    window.addEventListener("resize", sync)
+    return () => window.removeEventListener("resize", sync)
+  }, [sectionId])
+
   return (
     <div
       role="presentation"
       aria-hidden
       className={cn(
-        "min-h-[min(32vh,22rem)] w-full rounded-2xl bg-muted/25 animate-pulse",
+        "w-full rounded-2xl bg-muted/25 animate-pulse",
+        !minHeight && "min-h-[min(32vh,22rem)]",
         className,
       )}
+      style={minHeight ? { minHeight } : undefined}
     />
   )
 }
@@ -26,7 +53,7 @@ export function LazyMount({
   fallback,
 }: {
   children: ReactNode
-  sectionId?: string
+  sectionId?: LazySectionId | "unknown"
   rootMargin?: string
   fallback?: ReactNode
 }) {
@@ -47,7 +74,13 @@ export function LazyMount({
 
   return (
     <div ref={ref} className="w-full">
-      {isVisible ? children : fallback ?? <LazySectionSkeleton />}
+      {isVisible
+        ? children
+        : fallback ?? (
+            <LazySectionSkeleton
+              sectionId={sectionId === "unknown" ? undefined : sectionId}
+            />
+          )}
     </div>
   )
 }

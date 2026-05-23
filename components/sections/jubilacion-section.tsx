@@ -279,7 +279,7 @@ export function JubilacionSection() {
 
   if (loading) {
     return (
-      <SectionWrapper
+      <SectionWrapper progressSection="jubilacion"
         number={copy.number}
         title={copy.title}
         intro={LOADING_INTRO}
@@ -292,7 +292,7 @@ export function JubilacionSection() {
   }
 
   return (
-    <SectionWrapper
+    <SectionWrapper progressSection="jubilacion"
       number={copy.number}
       title={copy.title}
       intro={copy.intro}

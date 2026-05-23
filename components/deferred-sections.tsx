@@ -7,7 +7,7 @@ import { debugLog } from "@/lib/debug-log"
 import { withConcurrentImport } from "@/lib/concurrent-import"
 
 function deferred(
-  sectionId: string,
+  sectionId: import("@/lib/progress-layout").LazySectionId,
   importFn: () => Promise<{ default: ComponentType<object> }>,
 ) {
   return dynamic(
@@ -49,7 +49,7 @@ function deferred(
     },
     {
       ssr: false,
-      loading: () => <LazySectionSkeleton />,
+      loading: () => <LazySectionSkeleton sectionId={sectionId} />,
     },
   )
 }
@@ -123,6 +123,12 @@ const NinosSectionDyn = deferred("ninos", () =>
 const DerechosSectionDyn = deferred("derechos", () =>
   import("@/components/sections/derechos-section").then((m) => ({
     default: m.DerechosSection,
+  })),
+)
+
+const ResumenSectionDyn = deferred("resumen", () =>
+  import("@/components/sections/resumen-section").then((m) => ({
+    default: m.ResumenSection,
   })),
 )
 
@@ -224,6 +230,14 @@ export function DeferredDerechosSection() {
   return (
     <LazyMount sectionId="derechos">
       <DerechosSectionDyn />
+    </LazyMount>
+  )
+}
+
+export function DeferredResumenSection() {
+  return (
+    <LazyMount sectionId="resumen">
+      <ResumenSectionDyn />
     </LazyMount>
   )
 }

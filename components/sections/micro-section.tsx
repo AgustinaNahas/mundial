@@ -555,7 +555,7 @@ export function MicroSection() {
 
   if (loading) {
     return (
-      <SectionWrapper number={copy.number} title={copy.title} intro={LOADING_INTRO}>
+      <SectionWrapper progressSection="micro" number={copy.number} title={copy.title} intro={LOADING_INTRO}>
         <div className="h-48 animate-pulse bg-muted rounded-lg" />
       </SectionWrapper>
     )
@@ -563,7 +563,7 @@ export function MicroSection() {
 
   if (prefersReducedMotion) {
     return (
-      <SectionWrapper
+      <SectionWrapper progressSection="micro"
         number={copy.number}
         title={copy.title}
         intro={copy.intro}
@@ -581,7 +581,7 @@ export function MicroSection() {
     snackIndex !== null ? getSeatPos(snackIndex) : null
 
   return (
-    <SectionWrapper
+    <SectionWrapper progressSection="micro"
       number={copy.number}
       title={copy.title}
       intro={copy.intro}

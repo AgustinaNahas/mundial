@@ -543,7 +543,7 @@ export function DerechosSection() {
   }, [selectedCountry, clearCountrySelection])
 
   return (
-    <SectionWrapper
+    <SectionWrapper progressSection="derechos"
       number={copy.number}
       title={copy.title}
       intro={copy.intro}

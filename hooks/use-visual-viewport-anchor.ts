@@ -8,6 +8,16 @@ export type VisualViewportAnchor = {
   bleed: number
 }
 
+/** Safari iOS necesita seguir el visual viewport; en Android Chrome el scroll del vv desplaza la barra. */
+export function needsVisualViewportAnchor(): boolean {
+  if (typeof navigator === "undefined") return false
+  const ua = navigator.userAgent
+  return (
+    /iPad|iPhone|iPod/.test(ua) ||
+    (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1)
+  )
+}
+
 /**
  * Ancla un elemento fixed al borde inferior del visual viewport (Safari iOS).
  * Usa `top` en lugar de `bottom` porque es más fiable cuando la barra del navegador aparece/desaparece.
@@ -18,7 +28,10 @@ export function useVisualViewportAnchor(ref: RefObject<HTMLElement | null>) {
   useEffect(() => {
     const el = ref.current
     const vv = window.visualViewport
-    if (!el || !vv) return
+    if (!el || !vv || !needsVisualViewportAnchor()) {
+      setAnchor(null)
+      return
+    }
 
     const update = () => {
       const height = el.getBoundingClientRect().height

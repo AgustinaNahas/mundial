@@ -729,13 +729,13 @@ export function AlbumSection() {
 
   if (loading) {
     return (
-      <SectionWrapper
+      <SectionWrapper progressSection="album"
         number={copy.number}
         title={copy.title}
         intro={LOADING_INTRO}
         bgColor="muted"
       >
-        <LazySectionSkeleton className="min-h-[min(48vh,28rem)]" />
+        <LazySectionSkeleton sectionId="album" />
       </SectionWrapper>
     )
   }
@@ -745,7 +745,7 @@ export function AlbumSection() {
       {confettiBurst && <AlbumConfettiBurst onDone={endAlbumConfetti} />}
       <FiguraCursor visible={!isMobile && inAlbum && !allFilled} cursorX={cursorX} cursorY={cursorY} src={cursorSrc} />
 
-      <SectionWrapper
+      <SectionWrapper progressSection="album"
         number={copy.number}
         title={copy.title}
         intro={copy.intro}

@@ -211,14 +211,14 @@ export function CamisetaSection() {
 
   if (loading) {
     return (
-      <SectionWrapper number={copy.number} title={copy.title} intro={LOADING_INTRO}>
+      <SectionWrapper progressSection="camiseta" number={copy.number} title={copy.title} intro={LOADING_INTRO}>
         <div className="h-48 animate-pulse bg-muted rounded-lg" />
       </SectionWrapper>
     )
   }
 
   return (
-    <SectionWrapper
+    <SectionWrapper progressSection="camiseta"
       number={copy.number}
       title={copy.title}
       intro={copy.intro}

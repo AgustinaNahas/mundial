@@ -7,7 +7,7 @@ import { useCloseOnScroll } from "@/hooks/use-close-on-scroll"
 import { cn } from "@/lib/utils"
 
 export const INFO_TOOLTIP_CLASS =
-  "z-[100] max-w-xs rounded-md border border-border bg-card px-3 py-2 text-xs leading-relaxed text-card-foreground shadow-lg"
+  "z-[100] w-max max-w-xs rounded-md border border-border bg-card px-3 py-2 text-xs leading-relaxed text-card-foreground shadow-lg"
 
 type InfoTooltipProps = {
   children: ReactNode
@@ -15,14 +15,32 @@ type InfoTooltipProps = {
   size?: InfoIconButtonProps["size"]
   /** `above-left`: ancla en la (i) y se extiende hacia la izquierda. */
   placement?: Extract<TooltipPlacement, "above" | "above-left">
-  /** ~80% del ancho de pantalla (útil para textos largos). */
+  /** En mobile, ~80% del ancho de pantalla (textos largos). En desktop ignora esto. */
   wide?: boolean
   className?: string
   buttonClassName?: string
   contentClassName?: string
 }
 
-/** Tooltip de la (i): tap/click abre arriba del botón y queda hasta repetir, Escape o scroll. */
+function useCanHover() {
+  const [canHover, setCanHover] = useState(
+    () =>
+      typeof window !== "undefined" &&
+      window.matchMedia("(hover: hover) and (pointer: fine)").matches,
+  )
+
+  useEffect(() => {
+    const mq = window.matchMedia("(hover: hover) and (pointer: fine)")
+    const update = () => setCanHover(mq.matches)
+    update()
+    mq.addEventListener("change", update)
+    return () => mq.removeEventListener("change", update)
+  }, [])
+
+  return canHover
+}
+
+/** Desktop: hover. Mobile: tap/click hasta repetir, Escape o scroll. */
 export function InfoTooltip({
   children,
   label,
@@ -33,6 +51,7 @@ export function InfoTooltip({
   buttonClassName,
   contentClassName,
 }: InfoTooltipProps) {
+  const canHover = useCanHover()
   const [open, setOpen] = useState(false)
   const [pos, setPos] = useState({ x: 0, y: 0 })
   const wrapRef = useRef<HTMLSpanElement>(null)
@@ -49,7 +68,12 @@ export function InfoTooltip({
 
   const close = useCallback(() => setOpen(false), [])
 
-  const toggle = useCallback(
+  const openAtButton = useCallback(() => {
+    updatePosition()
+    setOpen(true)
+  }, [updatePosition])
+
+  const toggleClick = useCallback(
     (e: React.MouseEvent<HTMLButtonElement>) => {
       e.stopPropagation()
       e.preventDefault()
@@ -57,16 +81,15 @@ export function InfoTooltip({
         close()
         return
       }
-      updatePosition()
-      setOpen(true)
+      openAtButton()
     },
-    [open, close, updatePosition],
+    [open, close, openAtButton],
   )
 
-  useCloseOnScroll(open, close)
+  useCloseOnScroll(open && !canHover, close)
 
   useEffect(() => {
-    if (!open) return
+    if (!open || canHover) return
     const onPointerDown = (e: PointerEvent) => {
       if (wrapRef.current?.contains(e.target as Node)) return
       close()
@@ -82,17 +105,22 @@ export function InfoTooltip({
       document.removeEventListener("pointerdown", onPointerDown, true)
       document.removeEventListener("keydown", onKeyDown)
     }
-  }, [open, close, updatePosition])
+  }, [open, canHover, close, updatePosition])
 
   return (
-    <span ref={wrapRef} className={cn("inline-flex shrink-0 touch-manipulation", className)}>
+    <span
+      ref={wrapRef}
+      className={cn("inline-flex shrink-0 touch-manipulation", className)}
+      onMouseEnter={canHover ? openAtButton : undefined}
+      onMouseLeave={canHover ? close : undefined}
+    >
       <InfoIconButton
         type="button"
         size={size}
         label={label}
         className={buttonClassName}
         aria-expanded={open}
-        onClick={toggle}
+        onClick={canHover ? undefined : toggleClick}
       />
       <FollowCursorTooltip
         open={open}
@@ -101,7 +129,7 @@ export function InfoTooltip({
         placement={placement}
         className={cn(
           INFO_TOOLTIP_CLASS,
-          wide && "w-[80vw] max-w-[80vw]",
+          wide && !canHover && "w-[80vw] max-w-[80vw]",
           contentClassName,
         )}
       >

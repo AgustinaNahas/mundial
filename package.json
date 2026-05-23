@@ -9,6 +9,7 @@
     "lint": "eslint .",
     "optimize-images": "node scripts/optimize-public-images.mjs",
     "sync-data": "node scripts/sync-data.mjs",
+    "measure-progress-layout": "node scripts/measure-progress-layout.mjs",
     "dev:webpack": "next dev --webpack"
   },
   "dependencies": {
@@ -32,6 +33,7 @@
     "@types/node": "^22",
     "@types/react": "19.2.14",
     "@types/react-dom": "19.2.3",
+    "playwright": "^1.52.0",
     "postcss": "^8.5",
     "sharp": "^0.33.5",
     "tailwindcss": "^4.2.0",

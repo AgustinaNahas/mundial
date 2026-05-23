@@ -109,6 +109,7 @@ export function CartaRevealSection({ unlocked, onUnlock }: CartaRevealSectionPro
     <section
       id="carta"
       data-progress-anchor=""
+      data-progress-section="carta"
       className={cn(
         "relative flex flex-col items-center justify-center overflow-hidden bg-background",
         unlocked ? "min-h-[min(72vh,40rem)] py-16 md:py-20" : "min-h-[100dvh]",

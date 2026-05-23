@@ -25,7 +25,7 @@ export function MateSection() {
 
   if (loading) {
     return (
-      <SectionWrapper
+      <SectionWrapper progressSection="mate"
         number={copy.number}
         title={copy.title}
         intro={LOADING_INTRO}
@@ -37,7 +37,7 @@ export function MateSection() {
   }
 
   return (
-    <SectionWrapper
+    <SectionWrapper progressSection="mate"
       number={copy.number}
       title={copy.title}
       intro={copy.intro}

@@ -8,6 +8,7 @@ import {
   DeferredCamisetaSection,
   DeferredCanchaSection,
   DeferredCierreSection,
+  DeferredResumenSection,
   DeferredDerechosSection,
   DeferredFernetSection,
   DeferredJubilacionSection,
@@ -74,11 +75,12 @@ export default function HomeSections() {
               <DeferredJubilacionSection />
               <DeferredDerechosSection />
             </section>
+
+            <DeferredResumenSection />
+            <DeferredCierreSection />
           </motion.div>
         )}
       </AnimatePresence>
-
-      <DeferredCierreSection />
     </>
   )
 }

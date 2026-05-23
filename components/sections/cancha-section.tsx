@@ -448,14 +448,14 @@ export function CanchaSection() {
 
   if (loading) {
     return (
-      <section data-progress-anchor="" className="py-20 md:py-28 bg-background">
+      <section data-progress-anchor="" data-progress-section="cancha" className="py-20 md:py-28 bg-background">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
           className="container mx-auto px-6 md:px-12 max-w-6xl"
         >
-          <LazySectionSkeleton className="min-h-[min(70vh,40rem)]" />
+          <LazySectionSkeleton sectionId="cancha" />
         </motion.div>
       </section>
     )
@@ -527,7 +527,7 @@ export function CanchaSection() {
   ]
 
   return (
-    <section data-progress-anchor="" className="py-20 md:py-28 bg-background">
+    <section data-progress-anchor="" data-progress-section="cancha" className="py-20 md:py-28 bg-background">
       {/* ── Header ── */}
       <div className="container mx-auto px-6 md:px-12 max-w-5xl mb-16">
         <motion.div
@@ -554,7 +554,7 @@ export function CanchaSection() {
           ["--cancha-desktop-acc-h" as string]: `${desktopAccH}px`,
         }}
       >
-        <div className="hidden lg:block lg:sticky lg:top-3 z-[700] mb-5">
+        <div className="hidden lg:block lg:sticky lg:top-3 z-40 mb-5">
           <div
             ref={desktopAccRef}
             className="relative rounded-xl border border-border/30 bg-background/65 backdrop-blur px-3 py-2"
@@ -572,10 +572,10 @@ export function CanchaSection() {
           </div>
         </div>
 
-        {/* Barra acumulado mobile: sticky + z alto; el mapa va en contexto aislado para que no tape la barra */}
+        {/* Barra acumulado mobile: sticky; z-40 queda sobre mapa/pasos pero bajo la barra de progreso (z-50) */}
         <div
           ref={mobileBarRef}
-          className="sticky top-0 z-[120] pt-2 pb-1.5 bg-background border-b border-border/25 shadow-sm lg:hidden"
+          className="sticky top-0 z-40 pt-2 pb-1.5 bg-background border-b border-border/25 shadow-sm lg:hidden"
         >
           <MobileAccumulatorBar
             qatarTotal={qatarTotal}

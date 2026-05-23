@@ -1,4 +1,4 @@
-/** Texto mientras carga data.json */
+/** Texto mientras carga la planilla */
 export const LOADING_INTRO = "Cargando datos..."
 
 /** Los 4 bloques narrativos de la home */
@@ -7,22 +7,22 @@ export const BLOCKS = {
     number: "01",
     title: "La Previa del Mundial",
     subtitle:
-      "Antes de que empiece el partido, el bolsillo ya sintió el golpe. Todo lo que rodea al torneo tiene precio.",
+      "Antes de que empiece el partido, ya nos sentimos adentro de la cancha. Pero, ¿cuánto nos cuesta el precalentamiento?",
   },
   mundial: {
     number: "02",
     title: "El Mundial",
-    subtitle: "Vivirlo desde adentro o seguirlo de lejos: en cualquier caso, cuesta.",
+    subtitle: "Vivirlo desde adentro o seguirlo de lejos..",
   },
   festejo: {
     number: "03",
     title: "El Festejo",
-    subtitle: "Si Argentina vuelve a ser campeona, ¿cuánto sale salir a la calle a celebrarlo?",
+    subtitle: "¿Cuánto cuesta salir a la calle a celebrar el triunfo?",
   },
   gente: {
     number: "04",
     title: "La Gente",
-    subtitle: "Más allá de los goles: bebés, jubilados y derechos que también forman parte del cuadro.",
+    subtitle: "22 campeones que representan a todo un país.",
   },
 } as const
 
@@ -51,33 +51,33 @@ export const SECTIONS = {
     number: "02",
     title: "La Play en la previa",
     intro:
-      "Antes de que suene el primer silbato, muchos argentinos ya jugaron el Mundial en casa. La consola subió en pesos, pero lo que cambió de verdad es cuántos meses de trabajo vale.",
+      "Antes de que suene el primer silbato, muchos argentinos ya le ganaron a Mbappé en su casa.",
     closing:
-      "La Play sigue siendo la misma; lo que se encogió es la porción de sueldo que alcanza para comprarla.",
+      "La Play sigue siendo la misma; lo que se encogió es el sueldo.",
   },
   pelota: {
     number: "03",
     title: "La pelota",
     intro:
-      "La pelota oficial del torneo siempre fue cara, pero pasó de ser un gasto que se justificaba a uno que se piensa dos veces.",
+      "La pelota oficial del torneo siempre fue cara, pero ¿en qué momento se hizo un lujo?",
     closing:
-      "Patear la pelota del Mundial cuesta hoy más días de trabajo que en Qatar.",
+      "Ganamos el partido, nos llevamos la pelota... ¿por qué entonces cuesta tanto?",
   },
   camiseta: {
     number: "03",
     title: "La camiseta",
     intro:
-      "Vestir los colores de la Selección lleva más días de laburo que en 2022. El celeste y blanco no bajó de precio: subió de valor.",
+      "El celeste y blanco no bajó de precio: subió de valor.",
     closing:
-      "Ponerse la camiseta pasó de un gasto a un gesto que se siente en el sueldo.",
+      "Ponerse la camiseta quizás sea la cábala más costosa este año.",
   },
   cancha: {
     number: "04",
     title: "El precio de la cancha",
     intro:
-      "De los estadios de Primera a los estadios del mundo: llegar hasta donde juega la Selección tiene un costo que pocos pueden calcular de antemano.",
+      "De los estadios de Primera a los estadios del mundo: Entrar al estadio cuesta más que nunca.",
     closing:
-      "Entre entrada, vuelo y estadio, cada paso del camino al Mundial pesa más en horas de trabajo.",
+      "Qatar puede estar más lejos, pero Miami sigue costando más.",
   },
   mate: {
     number: "06",
@@ -92,7 +92,7 @@ export const SECTIONS = {
     number: "07",
     title: "El asado de la final",
     intro:
-      "La parrilla encendida antes del partido es una constante argentina. Lo que varía es cuántos kilos de carne compra un salario desde 2022 a hoy.",
+      "¿Cuánto cuesta prender la parrilla el día de la final del mundo?",
     closing:
       "El asado no cambió de gusto, pero el sueldo cada vez sabe a menos.",
   },
@@ -100,7 +100,7 @@ export const SECTIONS = {
     number: "09",
     title: "El fernet del campeón",
     intro:
-      "El brindis del festejo también se mide en salarios. Comparado con Qatar, una botella de fernet pesa más sobre el bolsillo del trabajador.",
+      "La copa del mundo (que parece que solo podia llenarse con fernet) está más costosa que nunca.",
     closing:
       "El 'viajero' en cualquier momento nos cuesta como si fuese un viaje a Miami.",
   },
@@ -108,7 +108,7 @@ export const SECTIONS = {
     number: "11",
     title: "El micro del festejo",
     intro:
-      "Si los campeones del mundo hubieran viajado en colectivo, ¿cuánto les hubiera costado el recorrido del festejo? El boleto también registró el paso del tiempo.",
+      "Si los campeones del mundo hubieran viajado en colectivo, ¿cuánto les hubiera costado el recorrido del festejo?",
     closing:
       "🕯️ Si pasa lo que queremos que pase 🕯️, este 2026 ir al obelisco nos costaría casi 4 veces más que en 2022.",
   },
@@ -117,13 +117,13 @@ export const SECTIONS = {
     title: "Los hinchas más chiquitos...",
     intro:
       "Después del título, algunos nombres de la Scaloneta explotaron en los registros civiles. ¿Podés adivinar cuántos bebés de cada 1.000 nacidos en 2023 se llamaron así?",
-    body: "Pasá el cursor por los bebés: se van pintando de izquierda a derecha. Cada uno representa 1 niño cada 1.000 nacidos. Elegí tu estimación y tocá Ver respuesta.",
+    body: "Cada bebé representa 1 niño cada 1.000 nacidos. Intentá estimar cuántos se llamaron así en el 2023.",
     closing:
       "El Mundial también dejó huella en los padrones: algunos nombres crecieron junto con la copa.",
   },
   jubilacion: {
     number: "13",
-    title: "Los hinchas más grandes",
+    title: "Los hinchas más grandes...",
     intro:
       "Nos emocionamos con la abuela la la la la la, ¿pero cómo vivieron y viven los hinchas más longevos?",
     closing:
@@ -133,7 +133,7 @@ export const SECTIONS = {
     number: "13",
     title: "Derechos: Qatar vs. EEUU, Canadá y México",
     intro:
-      "El Mundial no se juega solo en la cancha. Las sedes dicen algo sobre prensa, libertades civiles y condiciones laborales que los goles no muestran.",
+      "El Mundial no se juega solo en la cancha. Todas las sedes se paran distinto respecto derechos de sus hinchas.",
     closing:
       "Cambiar de sede no es solo cambiar de continente: también cambia qué derechos garantiza el anfitrión.",
   },
@@ -187,15 +187,35 @@ export const HERO_COPY = {
 export const SPREADSHEET_URL =
   "https://docs.google.com/spreadsheets/d/e/2PACX-1vSzYyEETGt1UHh8grdJj-q4dO63InOpLTQ-La74Jx-AT9QTdS3qlxNECjcpD7DW_d_2M3JA_mN1Jz_S/pubhtml"
 
-export const CIERRE_COPY = {
+export const REPO_URL = "https://github.com/AgustinaNahas/mundial"
+
+export const PROJECT_INFO_COPY = {
+  title: "Sobre este proyecto",
+  description:
+    "Precios, sueldos y rituales entre Qatar 2022 y el Mundial 2026, con datos abiertos y visualizaciones.",
+  spreadsheetLabel: "Ver datos",
+  repoLabel: "Ver código en GitHub",
+  aboutTitle: "Sobre mí",
+  closeLabel: "Cerrar",
+} as const
+
+export const RESUMEN_COPY = {
+  title: "Entre pitada y pitada",
+  intro:
+    "Recorrimos precios, sueldos y rituales entre Qatar 2022 y el Mundial 2026. Estas barras muestran cuánto alcanza hoy un salario mínimo frente a lo que alcanzaba entonces: cuando la barra de 2026 es más corta, el poder adquisitivo se achicó.",
+  methodologyNote:
+    "Cada barra compara lo que compraba un salario mínimo en diciembre 2022 vs. marzo 2026. El porcentaje indica la variación de esa cantidad (no del precio en pesos).",
   closing:
     "Argentina sabe lo que es ser campeona. La pregunta de 2026 es cuánto trabajo hay detrás de poder vivirlo.",
   spreadsheetLabel: "Ver todos los datos en la planilla",
+} as const
+
+export const CIERRE_COPY = {
   about: {
     title: "Sobre mí",
     name: "Agustina Nahas",
     photo: "/mundial/author.jpg",
-    bio: "Desarrolladora de visualizaciones de datos. Fan de Argentina, de Güemes y de las visualizaciones de datos.",
+    bio: "Desarrolladora de visualizaciones de datos. Fan de la Patria 🇦🇷, de Güemes 🐎 y de las visualizaciones de datos 📊.",
     portfolio: {
       label: "Portfolio",
       href: "https://www.notion.so/agusnahas/Agustina-Nahas-75b175948cf0415a885f8a148e94b1b7",
@@ -212,8 +232,8 @@ export const CIERRE_COPY = {
     projectsLabel: "Otros proyectos",
     projects: [
       {
-        label: "El Ratón Pérez",
-        href: "https://agustinanahas.github.io/raton-perez/",
+        label: "El Alquilista",
+        href: "https://agustinanahas.github.io/el-alquilista/",
       },
       {
         label: "Gastos",

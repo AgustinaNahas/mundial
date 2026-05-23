@@ -3,7 +3,6 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from "react"
 import { debugLog } from "@/lib/debug-log"
 
-const LOCAL_DATA_URL = "/mundial/data.json"
 const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSzYyEETGt1UHh8grdJj-q4dO63InOpLTQ-La74Jx-AT9QTdS3qlxNECjcpD7DW_d_2M3JA_mN1Jz_S/pub?gid=0&single=true&output=csv"
 
 export interface FuenteInfo {
@@ -136,80 +135,14 @@ export function DataProvider({ children }: { children: ReactNode }) {
 
     async function load() {
       const loadT0 = Date.now()
-      let hasData = false
 
       // #region agent log
       debugLog("data-context.tsx", "data load start", { loadT0 }, "H2")
       // #endregion
 
       try {
-        const localT0 = Date.now()
-        const local = await fetch(LOCAL_DATA_URL)
-        if (local.ok) {
-          const json = (await local.json()) as { raw: RawDataRow[] }
-          if (!cancelled && json.raw?.length) {
-            applyRaw(json.raw)
-            hasData = true
-            setLoading(false)
-            // #region agent log
-            debugLog(
-              "data-context.tsx",
-              "local data ok",
-              { rows: json.raw.length, ms: Date.now() - localT0 },
-              "H2",
-            )
-            // #endregion
-          }
-        }
-      } catch {
-        // JSON local opcional
-      }
-
-      if (hasData) {
-        // #region agent log
-        debugLog(
-          "data-context.tsx",
-          "data load finished (local only, remote deferred)",
-          { hasData, totalMs: Date.now() - loadT0 },
-          "H2",
-        )
-        // #endregion
-        void (async () => {
-          try {
-            const remoteT0 = Date.now()
-            const response = await fetch(CSV_URL)
-            if (!response.ok) throw new Error("Failed to fetch data")
-            const text = await response.text()
-            const parsed = parseCSV(text)
-            if (!cancelled) {
-              applyRaw(parsed)
-              setError(null)
-              // #region agent log
-              debugLog(
-                "data-context.tsx",
-                "remote CSV ok (background)",
-                { rows: parsed.length, ms: Date.now() - remoteT0 },
-                "H2",
-              )
-              // #endregion
-            }
-          } catch (err) {
-            // #region agent log
-            debugLog(
-              "data-context.tsx",
-              "remote CSV failed (background)",
-              { err: String(err) },
-              "H2",
-            )
-            // #endregion
-          }
-        })()
-        return
-      }
-
-      try {
         const remoteT0 = Date.now()
-        const response = await fetch(CSV_URL)
+        const response = await fetch(CSV_URL, { cache: "no-store" })
         if (!response.ok) throw new Error("Failed to fetch data")
         const text = await response.text()
         const parsed = parseCSV(text)
@@ -246,7 +179,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
           debugLog(
             "data-context.tsx",
             "data load finished",
-            { hasData, totalMs: Date.now() - loadT0 },
+            { totalMs: Date.now() - loadT0 },
             "H2",
           )
           // #endregion
@@ -320,6 +253,8 @@ function getFallbackData(): { raw: RawDataRow[], grouped: DataItem[] } {
     { indicador: "ALQUILER_FESTEJO", descripcion: "Alquiler", periodo: 2026, valor: 429953, unidad: "ARS", fuente: "", fuente_corta: "", fecha_fuente: "" },
     { indicador: "BOLETO_AMBA", descripcion: "Boleto AMBA", periodo: 2022, valor: 25.2, unidad: "ARS", fuente: "", fuente_corta: "", fecha_fuente: "" },
     { indicador: "BOLETO_AMBA", descripcion: "Boleto AMBA", periodo: 2026, valor: 681, unidad: "ARS", fuente: "", fuente_corta: "", fecha_fuente: "" },
+    { indicador: "LITRO_LECHE", descripcion: "Litro de leche", periodo: 2022, valor: 210.21, unidad: "ARS", fuente: "", fuente_corta: "", fecha_fuente: "" },
+    { indicador: "LITRO_LECHE", descripcion: "Litro de leche", periodo: 2026, valor: 1819.68, unidad: "ARS", fuente: "", fuente_corta: "", fecha_fuente: "" },
     { indicador: "SUELDO_MIN_PESOS", descripcion: "Sueldo minimo", periodo: 2022, valor: 61953, unidad: "ARS", fuente: "", fuente_corta: "", fecha_fuente: "" },
     { indicador: "SUELDO_MIN_PESOS", descripcion: "Sueldo minimo", periodo: 2026, valor: 346800, unidad: "ARS", fuente: "", fuente_corta: "", fecha_fuente: "" },
     { indicador: "JUBILACION_MIN_DOLARES", descripcion: "Jubilacion minima", periodo: 2022, valor: 50124, unidad: "ARS", fuente: "", fuente_corta: "", fecha_fuente: "" },

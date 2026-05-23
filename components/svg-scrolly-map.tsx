@@ -94,11 +94,12 @@ export function SvgScrollyMap({ step, stepRefs }: SvgScrollyMapProps) {
   const cameraTweenRef = useRef<gsap.core.Tween | null>(null)
   const labelTweenRef = useRef<gsap.core.Tween | null>(null)
   const prevCameraStepRef = useRef<number | null>(null)
+  const step0 = CAMERA_BY_STEP[0]
   const cameraStateRef = useRef({
-    scale: 1,
-    center: BSAS as [number, number],
-    centerLon: BSAS[0],
-    centerLat: BSAS[1],
+    scale: step0.scale.wide,
+    center: step0.center,
+    centerLon: step0.center[0],
+    centerLat: step0.center[1],
   })
   const scrollTriggersRef = useRef<ScrollTrigger[]>([])
   const planeTweensRef = useRef<gsap.core.Tween[]>([])

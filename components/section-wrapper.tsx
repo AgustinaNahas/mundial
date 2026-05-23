@@ -7,6 +7,7 @@ import { SectionClosing } from "@/components/section-closing"
 import { SourcesPanel, type SourceRow } from "@/components/sources-panel"
 import { DataItem } from "@/lib/data-context"
 import { sendGaEvent } from "@/lib/analytics"
+import type { ProgressSectionId } from "@/lib/progress-layout"
 
 interface SectionWrapperProps {
   children: React.ReactNode
@@ -19,6 +20,8 @@ interface SectionWrapperProps {
   extraSources?: SourceRow[]
   /** Oculta valores numéricos en el panel de fuentes. */
   sourcesHideValues?: boolean
+  /** Id para sincronizar medidor de avance con el DOM. */
+  progressSection?: ProgressSectionId
   /** Imagen decorativa a la derecha del título (mobile y desktop). */
   titleImage?: {
     src: string
@@ -53,6 +56,7 @@ export function SectionWrapper({
   extraSources,
   sourcesHideValues,
   titleImage,
+  progressSection,
 }: SectionWrapperProps) {
   const sectionRef = useRef<HTMLElement | null>(null)
   const sectionName = useMemo(() => slugify(title), [title])
@@ -87,6 +91,7 @@ export function SectionWrapper({
     <section
       ref={sectionRef}
       data-progress-anchor=""
+      {...(progressSection ? { "data-progress-section": progressSection } : {})}
       className={`py-20 md:py-28 ${bgColor === "muted" ? "bg-muted" : "bg-background"}`}
     >
       <div className="container mx-auto px-6 md:px-12 max-w-5xl">

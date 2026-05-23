@@ -1,6 +1,6 @@
 /**
- * Descarga el CSV de Google Sheets y escribe public/data.json
- * (servido como /mundial/data.json con basePath).
+ * Descarga el CSV de Google Sheets y escribe public/data.json (opcional).
+ * La app consume el CSV en vivo; este script sirve solo como respaldo estático.
  *
  * Uso: node scripts/sync-data.mjs
  */
