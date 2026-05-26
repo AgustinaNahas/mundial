@@ -1,0 +1,7 @@
+1:"$Sreact.fragment"
+2:I[20133,["/mundial/_next/static/chunks/52777f30ce1c75cc.js","/mundial/_next/static/chunks/22a776550fedec83.js","/mundial/_next/static/chunks/5c34274abd07df7c.js","/mundial/_next/static/chunks/b430df1032fb22ee.js","/mundial/_next/static/chunks/81986a882ba598f4.js","/mundial/_next/static/chunks/354f9246328236b6.js"],"DataProvider"]
+3:I[83676,["/mundial/_next/static/chunks/52777f30ce1c75cc.js","/mundial/_next/static/chunks/22a776550fedec83.js","/mundial/_next/static/chunks/5c34274abd07df7c.js","/mundial/_next/static/chunks/b430df1032fb22ee.js","/mundial/_next/static/chunks/81986a882ba598f4.js","/mundial/_next/static/chunks/354f9246328236b6.js"],"DebugSectionPage"]
+4:I[97367,["/mundial/_next/static/chunks/ff1a16fafef87110.js","/mundial/_next/static/chunks/d2be314c3ece3fbe.js"],"OutletBoundary"]
+5:"$Sreact.suspense"
+0:{"buildId":"oq9UiISSRufvu7xRVvtKI","rsc":["$","$1","c",{"children":[["$","$L2",null,{"children":["$","$L3",null,{"section":"jubilacion"}]}],[["$","script","script-0",{"src":"/mundial/_next/static/chunks/5c34274abd07df7c.js","async":true}],["$","script","script-1",{"src":"/mundial/_next/static/chunks/b430df1032fb22ee.js","async":true}],["$","script","script-2",{"src":"/mundial/_next/static/chunks/81986a882ba598f4.js","async":true}],["$","script","script-3",{"src":"/mundial/_next/static/chunks/354f9246328236b6.js","async":true}]],["$","$L4",null,{"children":["$","$5",null,{"name":"Next.MetadataOutlet","children":"$@6"}]}]]}],"loading":null,"isPartial":false}
+6:null

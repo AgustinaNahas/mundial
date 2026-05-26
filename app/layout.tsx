@@ -2,8 +2,15 @@ import type { Metadata, Viewport } from "next"
 import { Analytics } from "@vercel/analytics/next"
 import { DM_Sans, Barlow_Condensed } from "next/font/google"
 import Script from "next/script"
-import { fontHand } from "@/lib/fonts"
 import { AppProviders } from "@/components/app-providers"
+import { fontHand } from "@/lib/fonts"
+import {
+  getMetadataBase,
+  OG_IMAGES,
+  SITE_DESCRIPTION,
+  SITE_OG_HEADLINE,
+  SITE_TITLE,
+} from "@/lib/site-metadata"
 import "./globals.css"
 
 const dmSans = DM_Sans({ subsets: ["latin"], variable: "--font-dm-sans" })
@@ -18,25 +25,30 @@ export const viewport: Viewport = {
 }
 
 export const metadata: Metadata = {
-  title: '¿Cuánto cuesta ser campeón del mundo? | Argentina Qatar 2022 vs EEUU 2026',
-  description: 'Visualización de datos: El costo económico de vivir un Mundial como argentino, comparando Qatar 2022 y EEUU 2026',
-  generator: 'v0.app',
-  icons: {
-    icon: [
-      {
-        url: '/icon-light-32x32.png',
-        media: '(prefers-color-scheme: light)',
-      },
-      {
-        url: '/icon-dark-32x32.png',
-        media: '(prefers-color-scheme: dark)',
-      },
-      {
-        url: '/icon.svg',
-        type: 'image/svg+xml',
-      },
+  metadataBase: getMetadataBase(),
+  title: SITE_TITLE,
+  description: SITE_DESCRIPTION,
+  generator: "v0.app",
+  openGraph: {
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
+    type: "website",
+    locale: "es_AR",
+    siteName: "¿Cuánto cuesta ser campeón del mundo?",
+    images: [
+      { ...OG_IMAGES.wide, alt: SITE_OG_HEADLINE },
+      { ...OG_IMAGES.tall, alt: SITE_OG_HEADLINE },
     ],
-    apple: '/apple-icon.png',
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
+    images: [OG_IMAGES.wide.url],
+  },
+  icons: {
+    icon: [{ url: "/favicon.png", type: "image/png", sizes: "320x320" }],
+    apple: "/favicon.png",
   },
 }
 
