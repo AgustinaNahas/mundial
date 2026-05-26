@@ -1,61 +1,17 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react"
-import { motion } from "framer-motion"
+import { useEffect, useRef } from "react"
+import { ArrowRight } from "lucide-react"
+import { motion, useReducedMotion } from "framer-motion"
+import { ProjectInfoButton } from "@/components/project-info-button"
+import { SpreadsheetIconLink } from "@/components/spreadsheet-icon-link"
 import { fontHand } from "@/lib/fonts"
 import { HERO_COPY } from "@/lib/site-copy"
 import { cn } from "@/lib/utils"
 
-type HeroEra = "2022" | "2026"
-
 const STAR_TRANSITION = { duration: 0.4, ease: [0.4, 0, 0.2, 1] as const }
-const HANDWRITTEN_START_DELAY_MS = 2000
-const HANDWRITTEN_CHAR_MS = 85
 
-function HeroInsertLine() {
-  const text = HERO_COPY.handwrittenInsert
-  const [started, setStarted] = useState(false)
-  const [charIndex, setCharIndex] = useState(0)
-
-  useEffect(() => {
-    const timer = window.setTimeout(() => setStarted(true), HANDWRITTEN_START_DELAY_MS)
-    return () => window.clearTimeout(timer)
-  }, [])
-
-  useEffect(() => {
-    if (!started || charIndex >= text.length) return
-    const timer = window.setTimeout(() => setCharIndex((i) => i + 1), HANDWRITTEN_CHAR_MS)
-    return () => window.clearTimeout(timer)
-  }, [started, charIndex, text.length])
-
-  const visible = started ? text.slice(0, charIndex) : ""
-  const typing = started && charIndex < text.length
-
-  return (
-    <p
-      className="flex flex-wrap items-baseline justify-center w-full gap-x-[0.2em] sm:gap-x-3 leading-none 
-      pointer-events-auto min-h-[1.4rem] sm:min-h-[2rem] md:min-h-[2.5rem] -mt-0 sm:-mt-2 md:-mt-2.5"
-      aria-live="polite"
-      aria-label={started && charIndex >= text.length ? `v ${text}` : undefined}
-    >
-      <span
-        className={cn(
-          fontHand.className,
-          "normal-case text-[1.5rem] sm:text-[2.25rem] md:text-[3rem] text-secondary ",
-          "leading-none -rotate-1 shrink-0",
-          "transition-opacity duration-300",
-          started ? "opacity-100" : "opacity-0"
-        )}
-      >
-        {visible}
-      </span>
-    </p>
-  )
-}
-
-function HeroStars({ era }: { era: HeroEra }) {
-  const showFourth = era === "2026"
-
+function HeroStars() {
   return (
     <motion.div
       layout
@@ -72,96 +28,57 @@ function HeroStars({ era }: { era: HeroEra }) {
           transition={{ delay: 0.15 + i * 0.08, duration: 0.45, type: "spring", stiffness: 320 }}
           className={cn(
             "text-xl sm:text-2xl md:text-4xl text-secondary leading-none select-none",
-            i > 0 && "ml-1.5 sm:ml-2"
+            i > 0 && "ml-1.5 sm:ml-2",
           )}
           aria-hidden
         >
           ⭐
         </motion.span>
       ))}
-      <motion.div
-        layout
-        initial={false}
-        className="overflow-hidden flex items-center justify-center shrink-0"
-        animate={{
-          width: showFourth ? "3rem" : 0,
-          marginLeft: showFourth ? "0.375rem" : 0,
-        }}
-        transition={STAR_TRANSITION}
-      >
-        <motion.span
-          initial={false}
-          animate={{
-            opacity: showFourth ? 1 : 0,
-            scale: showFourth ? 1 : 0.4,
-            rotate: showFourth ? 0 : -24,
-          }}
-          transition={STAR_TRANSITION}
-          className="text-xl sm:text-2xl md:text-4xl leading-none select-none text-muted-foreground/45 
-          grayscale"
-          aria-hidden
-        >
-          ⭐
-        </motion.span>
-      </motion.div>
+
     </motion.div>
   )
 }
 
-function EraBadgeButton({
-  active,
-  onClick,
+function EraBadge({
   emoji,
   emojis,
   label,
   place,
 }: {
-  active: boolean
-  onClick: () => void
   emoji?: string
   emojis?: readonly string[]
   label: string
   place: string
 }) {
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      aria-pressed={active}
-      className={cn(
-        "flex w-full flex-col items-center gap-1.5 px-4 sm:px-7 py-4 transition-colors duration-300 cursor-pointer",
-        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary/60 focus-visible:ring-offset-2 focus-visible:ring-offset-background",
-        active ? "bg-secondary/25" : "bg-transparent hover:bg-card/25"
-      )}
-    >
+    <div className="flex w-full flex-col items-center gap-1 px-3 sm:px-5 py-3">
       {emojis ? (
-        <span className="text-xl leading-relaxed flex items-center gap-1">
+        <span className="text-lg leading-relaxed flex items-center gap-1 opacity-90">
           {emojis.map((flag) => (
             <span key={flag}>{flag}</span>
           ))}
         </span>
       ) : (
-        <span className="text-xl leading-relaxed">{emoji}</span>
+        <span className="text-lg leading-relaxed opacity-90">{emoji}</span>
       )}
-      <span className="font-display font-black text-2xl md:text-3xl text-foreground tracking-[0.04em] leading-none">
+      <span className="font-display font-bold text-xl md:text-2xl tracking-[0.04em] leading-none text-foreground/90">
         {label}
       </span>
-      <span
-        className={cn(
-          "text-[9px] uppercase tracking-[0.18em] transition-colors duration-300",
-          active ? "text-secondary" : "text-muted-foreground"
-        )}
-      >
+      <span className="text-[9px] uppercase tracking-[0.16em] text-center leading-snug max-w-[8rem] text-muted-foreground">
         {place}
       </span>
-    </button>
+    </div>
   )
 }
 
 function HeroParticles() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
+  const reducedMotion = useReducedMotion()
 
   useEffect(() => {
+    if (reducedMotion) return
+
     const canvas = canvasRef.current
     if (!canvas) return
     const ctx = canvas.getContext("2d")
@@ -201,7 +118,7 @@ function HeroParticles() {
         flipRot: Math.random() * Math.PI * 2,
         flipSpeed: (Math.random() - 0.5) * 0.1,
         baseVy: 1.5 + Math.random() * 2.5,
-        borderRadius: 10
+        borderRadius: 10,
       })
     }
 
@@ -225,7 +142,7 @@ function HeroParticles() {
           flipSpeed: (Math.random() - 0.5) * 0.15,
           life: maxLife,
           maxLife,
-          borderRadius: 10
+          borderRadius: 10,
         })
       }
     }
@@ -257,7 +174,7 @@ function HeroParticles() {
       parent?.addEventListener("touchstart", handleTouchStart, { passive: true })
     }
 
-    const RADIUS = 80 // Distancia desde el vértice del mouse (radio generoso)
+    const RADIUS = 80
     const PUSH_FORCE = 3.5
 
     let animationId: number
@@ -266,42 +183,33 @@ function HeroParticles() {
       ctx.clearRect(0, 0, width, height)
 
       for (const p of particles) {
-        p.vy += 0.1 // Gravedad muy mínima
+        p.vy += 0.1
         p.y += p.vy
         p.x += p.vx
         p.rot += p.rotSpeed
         p.flipRot += p.flipSpeed
-
-        // Fricción horizontal para que dejen de moverse hacia los costados
         p.vx *= 0.96
-
-        // Retornar a la velocidad vertical base gentilmente
         p.vy = p.vy * 0.98 + p.baseVy * 0.02
 
         if (!isMobile && isMouseActive) {
           const dx = p.x - mouseX
           const dy = p.y - mouseY
-          // Añadimos un offset en Y para que el centro del "círculo colisionador" esté un poco más arriba (apuntando al puntero del mouse real)
           const dist = Math.sqrt(dx * dx + (dy + 10) * (dy + 10))
 
           if (dist < RADIUS) {
             const force = (RADIUS - dist) / RADIUS
-            // Normalizar
             const dirX = dx / dist
             const dirY = (dy + 10) / dist
-
             p.vx += dirX * force * PUSH_FORCE
             p.vy += dirY * force * PUSH_FORCE
           }
         }
 
-        // Tope máximo de velocidad
         if (p.vx > 30) p.vx = 30
         if (p.vx < -30) p.vx = -30
         if (p.vy > 10) p.vy = 10
         if (p.vy < -10) p.vy = -10
 
-        // Reciclar partículas cuando se caen del tacho
         if (p.y > height + 20) {
           p.y = -20
           p.x = Math.random() * width
@@ -314,19 +222,15 @@ function HeroParticles() {
         ctx.save()
         ctx.translate(p.x, p.y)
         ctx.rotate(p.rot)
-
         const scaleY = Math.abs(Math.cos(p.flipRot))
         ctx.scale(1, scaleY)
-
         ctx.fillStyle = p.color
-
         ctx.beginPath()
         ctx.roundRect(-p.w / 2, -p.h / 2, p.w, p.h, p.borderRadius || 20)
         ctx.fill()
         ctx.restore()
       }
 
-      // Renderizar partículas de explosión (tap)
       for (let i = burstParticles.length - 1; i >= 0; i--) {
         const p = burstParticles[i]
         p.vy += 0.18
@@ -370,7 +274,9 @@ function HeroParticles() {
       }
       cancelAnimationFrame(animationId)
     }
-  }, [])
+  }, [reducedMotion])
+
+  if (reducedMotion) return null
 
   return (
     <canvas
@@ -381,25 +287,26 @@ function HeroParticles() {
 }
 
 export function HeroSection() {
-  const [era, setEra] = useState<HeroEra>("2022")
-
   return (
     <section className="relative overflow-hidden h-screen flex items-center justify-center bg-background">
-      {/* Glow celeste desde arriba */}
       <div className="pointer-events-none absolute inset-0">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_55%_at_50%_-5%,oklch(0.65_0.18_222/0.35),transparent)]" />
         <div className="absolute inset-x-0 bottom-0 h-40 bg-linear-to-t from-background to-transparent" />
       </div>
 
-      {/* Partículas puras en Canvas */}
       <HeroParticles />
 
-      <div className="pointer-events-none absolute top-0 left-0 w-full h-full bg-linear-to-b 
+      <div
+        className="pointer-events-none absolute top-0 left-0 w-full h-full bg-linear-to-b 
       from-[#00000090] to-[#000000ee] 
-      md:from-[#00000070] md:to-[#000000cc]" />
- 
+      md:from-[#00000070] md:to-[#000000cc]"
+      />
 
-      {/* Contenido principal */}
+      <div className="absolute top-4 right-4 sm:top-6 sm:right-6 z-20 flex items-center gap-2 pointer-events-auto">
+        <SpreadsheetIconLink />
+        <ProjectInfoButton />
+      </div>
+
       <div className="container relative z-10 mx-auto px-6 md:px-12 pointer-events-none">
         <motion.div
           initial={{ opacity: 0, y: 40 }}
@@ -409,40 +316,48 @@ export function HeroSection() {
         >
           <div className="space-y-3 overflow-visible">
             <div className="flex flex-col items-center gap-0.5 sm:gap-1">
-              <h1 className="font-display font-black text-5xl 
+              <h1
+                className="font-display font-black text-5xl 
               sm:text-6xl md:text-8xl lg:text-9xl text-foreground tracking-[0.04em] 
-              leading-none uppercase pointer-events-auto">
+              leading-none uppercase pointer-events-auto"
+              >
                 {HERO_COPY.titleLine1}
               </h1>
-              <HeroInsertLine />
-              <h2 className="font-display font-bold text-3xl sm:text-4xl md:text-6xl lg:text-7xl text-primary tracking-[0.06em] leading-none uppercase pointer-events-auto">
+              <h2 className="font-display mt-6 font-bold text-3xl sm:text-4xl md:text-6xl lg:text-7xl text-primary tracking-[0.06em] leading-none uppercase pointer-events-auto">
                 {HERO_COPY.titleLine2}
               </h2>
             </div>
-            <HeroStars era={era} />
-            <p className="mt-6 md:mt-12 max-w-3xl mx-auto text-sm sm:text-base md:text-lg text-foreground/80 
-            leading-relaxed pointer-events-auto">
+            <HeroStars />
+            <p
+              className="mt-6 md:mt-12 max-w-3xl mx-auto text-sm sm:text-base md:text-lg text-foreground/80 
+            leading-relaxed pointer-events-auto"
+            >
               {HERO_COPY.subtitle}
+            </p>
+            <p className="max-w-2xl mx-auto text-sm text-muted-foreground pointer-events-auto">
+              {HERO_COPY.deckline}
             </p>
           </div>
 
-          {/* Badge 2022 → 2026 */}
           <motion.div
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.5, duration: 0.8 }}
-            className="grid grid-cols-2 mx-auto w-full max-w-[17rem] sm:max-w-[20rem] rounded-2xl overflow-hidden border border-border/30 bg-card/40 backdrop-blur-sm pointer-events-auto"
+            className="mx-auto flex w-full max-w-md items-stretch justify-center gap-0 border-y border-border/25 py-1 pointer-events-none"
+            aria-label="Mundiales comparados"
           >
-            <EraBadgeButton
-              active={era === "2022"}
-              onClick={() => setEra("2022")}
+            <EraBadge
               emoji={HERO_COPY.badge2022.emoji}
               label={HERO_COPY.badge2022.label}
               place={HERO_COPY.badge2022.place}
             />
-            <EraBadgeButton
-              active={era === "2026"}
-              onClick={() => setEra("2026")}
+            <div
+              className="flex shrink-0 items-center justify-center self-center px-1 text-muted-foreground/50"
+              aria-hidden
+            >
+              <ArrowRight className="size-5 sm:size-6" strokeWidth={2} />
+            </div>
+            <EraBadge
               emojis={HERO_COPY.badge2026.emojis}
               label={HERO_COPY.badge2026.label}
               place={HERO_COPY.badge2026.place}
@@ -451,14 +366,15 @@ export function HeroSection() {
         </motion.div>
       </div>
 
-      {/* Scroll indicator */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 1.3, duration: 0.8 }}
         className="absolute bottom-8 sm:bottom-24 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 z-10"
       >
-        <span className="text-[9px] uppercase tracking-[0.3em] text-foreground/40 hidden sm:inline-block">Deslizá</span>
+        <span className="text-[9px] uppercase tracking-[0.3em] text-foreground/40 hidden sm:inline-block">
+          Deslizá
+        </span>
         <div className="w-5 h-8 rounded-full border-2 border-foreground/25 flex justify-center pt-1.5">
           <motion.div
             className="w-0.5 h-1.5 rounded-full bg-foreground/50"

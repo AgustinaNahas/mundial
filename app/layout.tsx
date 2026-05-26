@@ -28,13 +28,12 @@ export const metadata: Metadata = {
   metadataBase: getMetadataBase(),
   title: SITE_TITLE,
   description: SITE_DESCRIPTION,
-  generator: "v0.app",
   openGraph: {
     title: SITE_TITLE,
     description: SITE_DESCRIPTION,
     type: "website",
     locale: "es_AR",
-    siteName: "¿Cuánto cuesta ser campeón del mundo?",
+    siteName: "¿Cuánto cuesta alentar al equipo campeón del mundo?",
     images: [
       { ...OG_IMAGES.wide, alt: SITE_OG_HEADLINE },
       { ...OG_IMAGES.tall, alt: SITE_OG_HEADLINE },

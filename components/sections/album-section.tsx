@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useEffect, useRef, useMemo } from "react"
 import { createPortal } from "react-dom"
-import { motion, AnimatePresence, useMotionValue, useSpring, useReducedMotion } from "framer-motion"
+import { motion, AnimatePresence, useMotionValue, useReducedMotion } from "framer-motion"
 import Image from "next/image"
 import { formatCurrency } from "@/lib/utils"
 import { SectionWrapper } from "@/components/section-wrapper"
@@ -50,6 +50,33 @@ const ROWS = 3
 const TOTAL = COLS * ROWS
 /** Índice en SLOTS / celda del álbum de Messi (siempre el cierre). */
 const MESSI_INDEX = 0
+
+/** Las dos 🍬 comparten pista: cualquier celda caramelos vale para De Paul o Paredes. */
+const CANDY_SLOT_INDICES = [
+  SLOTS.findIndex(s => s.player === "Rodrigo De Paul"),
+  SLOTS.findIndex(s => s.player === "Leandro Paredes"),
+].filter(i => i >= 0)
+
+function isCandySlot(idx: number) {
+  return CANDY_SLOT_INDICES.includes(idx)
+}
+
+/** Celda donde pegar y qué figurita mostrar (la del turno actual en slotOrder). */
+function resolveAlbumPlacement(
+  targetSlot: number,
+  clickedIdx: number,
+  placed: readonly (SlotData | null)[],
+): { placeAt: number; figuIdx: number } | null {
+  if (placed[clickedIdx]) return null
+
+  if (isCandySlot(targetSlot)) {
+    if (!isCandySlot(clickedIdx)) return null
+    return { placeAt: clickedIdx, figuIdx: targetSlot }
+  }
+
+  if (clickedIdx !== targetSlot) return null
+  return { placeAt: clickedIdx, figuIdx: clickedIdx }
+}
 /** Primeras figuritas posibles: uno de estos sale primero (al azar). */
 const PRIORITY_FIRST_INDICES = [
   SLOTS.findIndex(s => s.player === "Julián Álvarez"),
@@ -118,39 +145,62 @@ function CursorPortal({ children }: { children: React.ReactNode }) {
   return createPortal(children, document.body)
 }
 
+const FIGU_CURSOR_W = 96
+const FIGU_CURSOR_H = 125
+
+function centerSpawnPosition() {
+  if (typeof window === "undefined") return { x: 0, y: 0 }
+  return {
+    x: Math.round(window.innerWidth / 2 - FIGU_CURSOR_W / 2),
+    y: Math.round(window.innerHeight / 2 - FIGU_CURSOR_H / 2),
+  }
+}
+
 /* ─── Cursor figurita ─── */
-function FiguraCursor({ visible, cursorX, cursorY, src }: { visible: boolean; cursorX: any; cursorY: any; src: string }) {
+function FiguraCursor({
+  visible,
+  cursorX,
+  cursorY,
+  src,
+  emerging,
+}: {
+  visible: boolean
+  cursorX: ReturnType<typeof useMotionValue<number>>
+  cursorY: ReturnType<typeof useMotionValue<number>>
+  src: string
+  emerging: boolean
+}) {
+  if (!visible) return null
+
   return (
     <CursorPortal>
-      <AnimatePresence>
-        {visible && (
+      <motion.div
+        className="pointer-events-none fixed z-[9999]"
+        style={{ left: cursorX, top: cursorY }}
+      >
+        <motion.div
+          initial={emerging ? { scale: 0.35, opacity: 0 } : false}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={emerging ? { type: "spring", stiffness: 380, damping: 24 } : { duration: 0 }}
+          className="origin-center"
+        >
           <motion.div
-            key="cursor"
-            className="pointer-events-none fixed z-[9999] top-0 left-0"
-            style={{ x: cursorX, y: cursorY }}
-            initial={{ opacity: 0, scale: 0.6 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.5 }}
-            transition={{ duration: 0.18 }}
+            animate={{ rotate: [-12, -8, -12] }}
+            transition={{ repeat: Infinity, duration: 2.5, ease: "easeInOut" }}
+            className="origin-bottom-left"
           >
-            <motion.div
-              animate={{ rotate: [-12, -8, -12] }}
-              transition={{ repeat: Infinity, duration: 2.5, ease: "easeInOut" }}
-              className="origin-bottom-left"
-            >
-              <Image
-                src={src}
-                alt="figurita"
-                width={96}
-                height={125}
-                loading="eager"
-                fetchPriority="high"
-                className="w-24 h-[125px] object-cover rounded-md shadow-2xl border border-white/20"
-              />
-            </motion.div>
+          <Image
+            src={src}
+            alt="figurita"
+            width={FIGU_CURSOR_W}
+            height={FIGU_CURSOR_H}
+            loading="eager"
+            fetchPriority="high"
+            className="w-24 h-[125px] object-cover rounded-md shadow-2xl border border-white/20"
+          />
           </motion.div>
-        )}
-      </AnimatePresence>
+        </motion.div>
+      </motion.div>
     </CursorPortal>
   )
 }
@@ -500,12 +550,12 @@ export function AlbumSection() {
   const albumCompleteConfettiRef = useRef(false)
 
   const [inAlbum, setInAlbum] = useState(false)
+  const [cursorEmerging, setCursorEmerging] = useState(false)
   const [slotFlash, setSlotFlash] = useState<Partial<Record<number, SlotFlash>>>({})
   const flashTimeoutRef = useRef<Record<number, number>>({})
-  const rawX = useMotionValue(-200)
-  const rawY = useMotionValue(-200)
-  const cursorX = useSpring(rawX, { stiffness: 420, damping: 30 })
-  const cursorY = useSpring(rawY, { stiffness: 420, damping: 30 })
+  const cursorFollowingRef = useRef(false)
+  const rawX = useMotionValue(0)
+  const rawY = useMotionValue(0)
 
   useEffect(() => {
     if (typeof window === "undefined") return
@@ -515,10 +565,53 @@ export function AlbumSection() {
     }
   }, [])
 
-  const handleMouseMove = useCallback((e: React.MouseEvent) => {
-    rawX.set(e.clientX + 8)
-    rawY.set(e.clientY - 24)
+  const placeCursorAt = useCallback(
+    (clientX: number, clientY: number) => {
+      rawX.jump(clientX + 8)
+      rawY.jump(clientY - 24)
+    },
+    [rawX, rawY],
+  )
+
+  const spawnCursorAtCenter = useCallback(() => {
+    const { x, y } = centerSpawnPosition()
+    rawX.jump(x)
+    rawY.jump(y)
   }, [rawX, rawY])
+
+  const revealCursorAtCenter = useCallback(() => {
+    spawnCursorAtCenter()
+    setInAlbum(true)
+    setCursorEmerging(true)
+    cursorFollowingRef.current = false
+  }, [spawnCursorAtCenter])
+
+  const handleMouseMove = useCallback(
+    (e: React.MouseEvent) => {
+      if (!inAlbum) {
+        revealCursorAtCenter()
+        return
+      }
+      if (!cursorFollowingRef.current) {
+        cursorFollowingRef.current = true
+        setCursorEmerging(false)
+        placeCursorAt(e.clientX, e.clientY)
+        return
+      }
+      placeCursorAt(e.clientX, e.clientY)
+    },
+    [inAlbum, placeCursorAt, revealCursorAtCenter],
+  )
+
+  const handleAlbumMouseEnter = useCallback(() => {
+    if (!inAlbum) revealCursorAtCenter()
+  }, [inAlbum, revealCursorAtCenter])
+
+  const handleAlbumMouseLeave = useCallback(() => {
+    setInAlbum(false)
+    setCursorEmerging(false)
+    cursorFollowingRef.current = false
+  }, [])
 
   const pushMobileSnack = useCallback((side: "left" | "right", amount: number) => {
     const id = ++snackCounter.current
@@ -556,17 +649,19 @@ export function AlbumSection() {
 
   const placeSticker = useCallback((clickedIdx: number) => {
     const targetSlot = slotOrder[orderIdx]
-    if (placed[clickedIdx] || allFilled) return
-    if (clickedIdx !== targetSlot) {
-      pulseSlotFlash(clickedIdx, "err")
+    if (allFilled) return
+
+    const resolved = resolveAlbumPlacement(targetSlot, clickedIdx, placed)
+    if (!resolved) {
+      if (!placed[clickedIdx]) pulseSlotFlash(clickedIdx, "err")
       return
     }
 
-    pulseSlotFlash(clickedIdx, "ok")
+    const { placeAt, figuIdx } = resolved
+    pulseSlotFlash(placeAt, "ok")
 
     const newPlaced = [...placed]
-    const figuIdx = clickedIdx
-    newPlaced[clickedIdx] = {
+    newPlaced[placeAt] = {
       src: SLOTS[figuIdx].src,
       price2022: pricePerFigu2022,
       price2026: pricePerFigu2026,
@@ -598,7 +693,7 @@ export function AlbumSection() {
 
     sendGaEvent("album_sticker_click", {
       section_name: "album",
-      slot_index: clickedIdx,
+      slot_index: placeAt,
       sticker_index: figuIdx,
       sticker_player: SLOTS[figuIdx].player,
       stickers_completed: newPlaced.filter(Boolean).length,
@@ -743,7 +838,13 @@ export function AlbumSection() {
   return (
     <>
       {confettiBurst && <AlbumConfettiBurst onDone={endAlbumConfetti} />}
-      <FiguraCursor visible={!isMobile && inAlbum && !allFilled} cursorX={cursorX} cursorY={cursorY} src={cursorSrc} />
+      <FiguraCursor
+        visible={!isMobile && inAlbum && !allFilled}
+        cursorX={rawX}
+        cursorY={rawY}
+        src={cursorSrc}
+        emerging={cursorEmerging}
+      />
 
       <SectionWrapper progressSection="album"
         number={copy.number}
@@ -785,8 +886,8 @@ export function AlbumSection() {
           {/* Álbum central */}
           <div
             onMouseMove={handleMouseMove}
-            onMouseEnter={() => setInAlbum(true)}
-            onMouseLeave={() => setInAlbum(false)}
+            onMouseEnter={handleAlbumMouseEnter}
+            onMouseLeave={handleAlbumMouseLeave}
             style={{ cursor: !isMobile && inAlbum && !allFilled ? "none" : "auto" }}
             className="relative isolate rounded-xl overflow-hidden border border-border/40 bg-card"
           >

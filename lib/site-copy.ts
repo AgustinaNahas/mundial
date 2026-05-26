@@ -12,7 +12,8 @@ export const BLOCKS = {
   mundial: {
     number: "02",
     title: "El Mundial",
-    subtitle: "Vivirlo desde adentro o seguirlo de lejos..",
+    subtitle:
+      "Entradas, viajes y rituales del torneo: cuánto cuesta estar en la cancha o seguirlo desde casa.",
   },
   festejo: {
     number: "03",
@@ -64,7 +65,7 @@ export const SECTIONS = {
       "Ganamos el partido, nos llevamos la pelota... ¿por qué entonces cuesta tanto?",
   },
   camiseta: {
-    number: "03",
+    number: "04",
     title: "La camiseta",
     intro:
       "El celeste y blanco no bajó de precio: subió de valor.",
@@ -72,7 +73,7 @@ export const SECTIONS = {
       "Ponerse la camiseta quizás sea la cábala más costosa este año.",
   },
   cancha: {
-    number: "04",
+    number: "05",
     title: "El precio de la cancha",
     intro:
       "De los estadios de Primera a los estadios del mundo: Entrar al estadio cuesta más que nunca.",
@@ -97,7 +98,7 @@ export const SECTIONS = {
       "El asado no cambió de gusto, pero el sueldo cada vez sabe a menos.",
   },
   fernet: {
-    number: "09",
+    number: "08",
     title: "El fernet del campeón",
     intro:
       "La copa del mundo (que parece que solo podia llenarse con fernet) está más costosa que nunca.",
@@ -105,7 +106,7 @@ export const SECTIONS = {
       "El 'viajero' en cualquier momento nos cuesta como si fuese un viaje a Miami.",
   },
   micro: {
-    number: "11",
+    number: "09",
     title: "El micro del festejo",
     intro:
       "Si los campeones del mundo hubieran viajado en colectivo, ¿cuánto les hubiera costado el recorrido del festejo?",
@@ -113,7 +114,7 @@ export const SECTIONS = {
       "🕯️ Si pasa lo que queremos que pase 🕯️, este 2026 ir al obelisco nos costaría casi 4 veces más que en 2022.",
   },
   ninos: {
-    number: "12",
+    number: "10",
     title: "Los hinchas más chiquitos...",
     intro:
       "Después del título, algunos nombres de la Scaloneta explotaron en los registros civiles. ¿Podés adivinar cuántos bebés de cada 1.000 nacidos en 2023 se llamaron así?",
@@ -122,7 +123,7 @@ export const SECTIONS = {
       "El Mundial también dejó huella en los padrones: algunos nombres crecieron junto con la copa.",
   },
   jubilacion: {
-    number: "13",
+    number: "11",
     title: "Los hinchas más grandes...",
     intro:
       "Nos emocionamos con la abuela la la la la la, ¿pero cómo vivieron y viven los hinchas más longevos?",
@@ -130,7 +131,7 @@ export const SECTIONS = {
       "La jubilación aleja a los adultos mayores de la cancha y de la calle",
   },
   derechos: {
-    number: "13",
+    number: "12",
     title: "Derechos: Qatar vs. EEUU, Canadá y México",
     intro:
       "El Mundial no se juega solo en la cancha. Todas las sedes se paran distinto respecto derechos de sus hinchas.",
@@ -169,19 +170,27 @@ export function formatViajeIntro(salarios2022: string, salarios2026: string): st
 }
 
 export const HERO_COPY = {
-  handwrittenInsert: "hincha del",
-  titleLine1: "¿Cuánto cuesta ser",
-  titleLine2: "campeón del mundo?",
+  titleLine1: "¿Cuánto cuesta",
+  titleLine2: "alentar al campeón del mundo?",
+  deckline: "Precios y sueldos mínimos en Argentina: Qatar 2022 vs. Mundial 2026.",
   subtitle:
     "Argentina se coronó en Qatar mientras sus ciudadanos contaban con un sueldo mínimo" + 
     " que ya no alcanzaba para mucho. " + 
     "Hoy, con el mismo torneo a la vuelta de la esquina, ¿qué tan lejos quedó ese precio?",
+  spreadsheetLabel: "Ver datos",
   badge2022: { label: "2022", place: "Qatar", emoji: "🇶🇦" },
   badge2026: {
     label: "2026",
-    place: "EEUU · Can · Méx",
+    place: "EEUU · Canadá · México",
     emojis: ["🇺🇸", "🇨🇦", "🇲🇽"],
   },
+} as const
+
+export const CHART_LEGEND_COPY = {
+  ariaLabel: "Leyenda: precio, sueldo mínimo y porcentaje",
+  price: "Precio · 2022 y 2026",
+  salary: "Sueldo mínimo",
+  percent: "% = suba en pesos",
 } as const
 
 export const SPREADSHEET_URL =
@@ -204,7 +213,7 @@ export const RESUMEN_COPY = {
   intro:
     "Recorrimos precios, sueldos y rituales entre Qatar 2022 y el Mundial 2026. Estas barras muestran cuánto alcanza hoy un salario mínimo frente a lo que alcanzaba entonces: cuando la barra de 2026 es más corta, el poder adquisitivo se achicó.",
   methodologyNote:
-    "Cada barra compara lo que compraba un salario mínimo en diciembre 2022 vs. marzo 2026. El porcentaje indica la variación de esa cantidad (no del precio en pesos).",
+    "Cada barra muestra cuántas unidades (asados, viajes en colectivo, etc.) compraba un salario mínimo en diciembre 2022 y en marzo 2026.",
   closing:
     "Argentina sabe lo que es ser campeona. La pregunta de 2026 es cuánto trabajo hay detrás de poder vivirlo.",
   spreadsheetLabel: "Ver todos los datos en la planilla",

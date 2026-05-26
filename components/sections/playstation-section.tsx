@@ -1,5 +1,6 @@
 "use client"
 
+import { ChartLegend } from "@/components/chart-legend"
 import { SectionWrapper } from "@/components/section-wrapper"
 import { ComparisonBar } from "@/components/comparison-bar"
 import { FifaPitchAnimation } from "@/components/fifa-pitch-animation"
@@ -40,6 +41,7 @@ export function PlayStationSection() {
       sources={[ps5, salario]}
     >
       <div className="space-y-8">
+        <ChartLegend />
         <ComparisonBar
           label="PlayStation 5"
           value2022={ps5_2022}

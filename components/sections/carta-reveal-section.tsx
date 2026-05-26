@@ -11,11 +11,19 @@ import { cn } from "@/lib/utils"
 
 const BASE_PATH = "/mundial"
 const CARTA_DORSO_SRC = `${BASE_PATH}/carta.png`
-const CUATRO_COPAS_SRC = `${BASE_PATH}/4copas.png`
 
-/** Proporción real de carta.png y 4copas.jpg (~247×375) */
+/** Proporción real de carta.png (~247×375) */
 const CARD_WIDTH = 247
 const CARD_HEIGHT = 375
+
+const CARD_OPTIONS = [
+  { id: "1bastos", label: "Ancho de bastos", src: `${BASE_PATH}/1bastos.png` },
+  { id: "7espadas", label: "7 de espadas", src: `${BASE_PATH}/7espadas.png` },
+  { id: "6bastos", label: "6 de bastos", src: `${BASE_PATH}/6bastos.png` },
+  { id: "5copas", label: "5 de copas", src: `${BASE_PATH}/5copas.png` },
+] as const
+
+type CardOption = (typeof CARD_OPTIONS)[number]
 
 interface CartaRevealSectionProps {
   unlocked: boolean
@@ -77,14 +85,19 @@ function CardFace({
 
 export function CartaRevealSection({ unlocked, onUnlock }: CartaRevealSectionProps) {
   const prefersReducedMotion = useReducedMotion()
-  const [flipped, setFlipped] = useState(false)
+  const [selectedCard, setSelectedCard] = useState<CardOption | null>(null)
   const [isFlipping, setIsFlipping] = useState(false)
 
-  const handleDraw = useCallback(() => {
-    if (flipped || isFlipping || unlocked) return
-    setIsFlipping(true)
-    setFlipped(true)
-  }, [flipped, isFlipping, unlocked])
+  const flipped = selectedCard !== null
+
+  const handleSelectCard = useCallback(
+    (option: CardOption) => {
+      if (flipped || isFlipping || unlocked) return
+      setIsFlipping(true)
+      setSelectedCard(option)
+    },
+    [flipped, isFlipping, unlocked],
+  )
 
   useEffect(() => {
     if (!flipped || unlocked) return
@@ -104,6 +117,7 @@ export function CartaRevealSection({ unlocked, onUnlock }: CartaRevealSectionPro
   }, [flipped, prefersReducedMotion])
 
   const canDraw = !flipped && !unlocked
+  const showChoices = canDraw || isFlipping
 
   return (
     <section
@@ -112,7 +126,9 @@ export function CartaRevealSection({ unlocked, onUnlock }: CartaRevealSectionPro
       data-progress-section="carta"
       className={cn(
         "relative flex flex-col items-center justify-center overflow-hidden bg-background",
-        unlocked ? "min-h-[min(72vh,40rem)] py-16 md:py-20" : "min-h-[100dvh]",
+        unlocked
+          ? "min-h-[min(72vh,40rem)] py-16 md:py-20"
+          : "min-h-[100dvh] md:min-h-[70vh]",
       )}
     >
       <motion.div
@@ -127,88 +143,55 @@ export function CartaRevealSection({ unlocked, onUnlock }: CartaRevealSectionPro
       />
 
       <motion.div
-        className="relative z-10 flex w-full max-w-lg flex-col items-center px-6"
+        className="relative z-10 flex w-full max-w-lg flex-col items-center px-4 sm:px-6"
         initial={{ opacity: 0, y: 24 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, margin: "-80px" }}
         transition={{ duration: 0.7 }}
       >
-        <AnimatePresence mode="wait">
-          {!flipped ? (
-            <motion.p
-              key="hint"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0, y: -8 }}
-              className="mb-10 text-center text-sm uppercase tracking-[0.28em] text-muted-foreground"
-            >
-              Algo viene después del mundial…
-            </motion.p>
-          ) : (
-            <motion.p
-              key="revealed"
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: prefersReducedMotion ? 0 : 0.5, duration: 0.6 }}
-              className="mb-8 text-center font-display text-xl md:text-2xl font-light tracking-tight text-foreground"
-            >
-              Cuatro de copas
-            </motion.p>
-          )}
-        </AnimatePresence>
+        <motion.p
+          animate={{ opacity: flipped ? 0 : 1 }}
+          transition={{ duration: 0.4 }}
+          aria-hidden={flipped}
+          className="mb-4 sm:mb-6 text-center text-xs sm:text-sm uppercase tracking-[0.28em] text-muted-foreground pointer-events-none select-none"
+        >
+          Algo viene después del mundial…
+        </motion.p>
 
         {/* Mazo + carta activa */}
         <motion.div
-          className={cn(
-            "relative w-[min(68vw,14.5rem)] sm:w-[min(52vw,16rem)] md:w-[min(36vw,17.5rem)]",
-            canDraw && "cursor-pointer",
-          )}
+          className="relative w-[min(42vw,9.5rem)] sm:w-[min(44vw,12rem)] md:w-[min(36vw,17.5rem)]"
           style={{ aspectRatio: `${CARD_WIDTH} / ${CARD_HEIGHT}` }}
-          role={canDraw ? "button" : undefined}
-          tabIndex={canDraw ? 0 : undefined}
-          aria-label={canDraw ? "Sacar una carta del mazo" : "Cuatro de copas"}
-          onClick={canDraw ? handleDraw : undefined}
-          onKeyDown={
-            canDraw
-              ? (e) => {
-                  if (e.key === "Enter" || e.key === " ") {
-                    e.preventDefault()
-                    handleDraw()
-                  }
-                }
-              : undefined
-          }
+          aria-label={selectedCard ? selectedCard.label : "Mazo de cartas"}
         >
-          {!flipped && (
-            <>
-              <motion.div
-                className="pointer-events-none absolute inset-0 z-0 origin-center"
-                style={{ transform: "rotate(-10deg) translate(-6%, 4%)" }}
-                aria-hidden
-              >
-                <CardPhoto
-                  src={CARTA_DORSO_SRC}
-                  alt=""
-                  width={CARD_WIDTH}
-                  height={CARD_HEIGHT}
-                  className="opacity-75"
-                />
-              </motion.div>
-              <motion.div
-                className="pointer-events-none absolute inset-0 z-[1] origin-center"
-                style={{ transform: "rotate(7deg) translate(5%, 2%)" }}
-                aria-hidden
-              >
-                <CardPhoto
-                  src={CARTA_DORSO_SRC}
-                  alt=""
-                  width={CARD_WIDTH}
-                  height={CARD_HEIGHT}
-                  className="opacity-90"
-                />
-              </motion.div>
-            </>
-          )}
+          <motion.div
+            className="pointer-events-none absolute inset-0 z-0 origin-center"
+            style={{ transform: "rotate(-10deg) translate(-6%, 4%)" }}
+            animate={{ opacity: flipped ? 0.55 : 0.75 }}
+            transition={{ duration: 0.5 }}
+            aria-hidden
+          >
+            <CardPhoto
+              src={CARTA_DORSO_SRC}
+              alt=""
+              width={CARD_WIDTH}
+              height={CARD_HEIGHT}
+            />
+          </motion.div>
+          <motion.div
+            className="pointer-events-none absolute inset-0 z-[1] origin-center"
+            style={{ transform: "rotate(7deg) translate(5%, 2%)" }}
+            animate={{ opacity: flipped ? 0.7 : 0.9 }}
+            transition={{ duration: 0.5 }}
+            aria-hidden
+          >
+            <CardPhoto
+              src={CARTA_DORSO_SRC}
+              alt=""
+              width={CARD_WIDTH}
+              height={CARD_HEIGHT}
+            />
+          </motion.div>
 
           <div
             className="relative z-10 h-full w-full"
@@ -241,48 +224,80 @@ export function CartaRevealSection({ unlocked, onUnlock }: CartaRevealSectionPro
                 />
               </CardFace>
               <CardFace side="front">
-                <CardPhoto
-                  src={CUATRO_COPAS_SRC}
-                  alt="4 de copas"
-                  width={671}
-                  height={1025}
-                />
+                {selectedCard && (
+                  <CardPhoto
+                    src={selectedCard.src}
+                    alt={selectedCard.label}
+                    width={671}
+                    height={1025}
+                  />
+                )}
               </CardFace>
             </motion.div>
           </div>
         </motion.div>
 
-        <AnimatePresence mode="wait">
-          {canDraw ? (
-            <motion.p
-              key="cta"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="mt-10 max-w-xs text-center text-base md:text-lg text-muted-foreground leading-relaxed"
-            >
-              <span className="text-primary/90">Hacé click</span> para sacar una carta…
-            </motion.p>
-          ) : flipped && !unlocked ? (
-            <motion.p
-              key="suspense"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="mt-10 text-center text-sm text-muted-foreground/80 tracking-wide"
-            >
-              {prefersReducedMotion ? "Continuá bajando…" : "Un momento…"}
-            </motion.p>
-          ) : unlocked ? (
-            <motion.p
-              key="unlocked"
-              initial={{ opacity: 0, y: 6 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="mt-8 text-center text-sm uppercase tracking-[0.22em] text-muted-foreground"
-            >
-              Seguí bajando
-            </motion.p>
-          ) : null}
-        </AnimatePresence>
+        <div className="mt-4 sm:mt-6 flex w-full max-w-sm min-h-[9.25rem] sm:min-h-[10.25rem] flex-col items-center justify-start">
+          <AnimatePresence mode="wait">
+            {showChoices ? (
+              <motion.div
+                key="choices"
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: flipped ? 0.35 : 1, y: 0 }}
+                exit={{ opacity: 0 }}
+                className="w-full pointer-events-none"
+                aria-hidden={flipped}
+              >
+                <p className="mb-3 sm:mb-4 text-center text-sm sm:text-base text-muted-foreground leading-relaxed">
+                  <span className="text-primary/90">Adiviná</span> qué carta sale…
+                </p>
+                <div
+                  className="pointer-events-auto grid grid-cols-2 gap-2 sm:gap-3"
+                  role="group"
+                  aria-label="Elegí una carta"
+                >
+                  {CARD_OPTIONS.map((option) => (
+                    <button
+                      key={option.id}
+                      type="button"
+                      disabled={isFlipping}
+                      onClick={() => handleSelectCard(option)}
+                      className={cn(
+                        "cursor-pointer rounded-lg border border-border/60 bg-card/40 px-2 py-2.5 sm:px-3 sm:py-3",
+                        "text-center text-xs sm:text-sm leading-snug text-foreground/90",
+                        "transition-colors hover:border-primary/40 hover:bg-primary/5 hover:text-foreground",
+                        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50",
+                        "disabled:pointer-events-none disabled:opacity-50",
+                      )}
+                    >
+                      {option.label}
+                    </button>
+                  ))}
+                </div>
+              </motion.div>
+            ) : flipped && !unlocked ? (
+              <motion.p
+                key="suspense"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="pt-2 text-center text-sm text-muted-foreground/80 tracking-wide"
+              >
+                {prefersReducedMotion ? "Continuá bajando…" : "Un momento…"}
+              </motion.p>
+            ) : unlocked ? (
+              <motion.p
+                key="unlocked"
+                initial={{ opacity: 0, y: 6 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0 }}
+                className="pt-6 sm:pt-8 text-center text-sm uppercase tracking-[0.22em] text-muted-foreground"
+              >
+                Seguí bajando
+              </motion.p>
+            ) : null}
+          </AnimatePresence>
+        </div>
       </motion.div>
     </section>
   )
