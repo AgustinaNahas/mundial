@@ -47,8 +47,8 @@ export const metadata: Metadata = {
     images: [OG_IMAGES.wide.url],
   },
   icons: {
-    icon: [{ url: "/favicon.png", type: "image/png", sizes: "320x320" }],
-    apple: "/favicon.png",
+    icon: [{ url: "./favicon.png", type: "image/png", sizes: "320x320" }],
+    apple: "./favicon.png",
   },
 }
 
