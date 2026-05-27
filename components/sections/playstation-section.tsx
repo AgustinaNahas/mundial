@@ -4,8 +4,9 @@ import { ChartLegend } from "@/components/chart-legend"
 import { SectionWrapper } from "@/components/section-wrapper"
 import { ComparisonBar } from "@/components/comparison-bar"
 import { FifaPitchAnimation } from "@/components/fifa-pitch-animation"
+import { SectionLoadingShell } from "@/components/section-skeletons"
 import { useData } from "@/lib/data-context"
-import { LOADING_INTRO, SECTIONS } from "@/lib/site-copy"
+import { SECTIONS } from "@/lib/site-copy"
 
 const copy = SECTIONS.playstation
 
@@ -22,13 +23,12 @@ export function PlayStationSection() {
 
   if (loading) {
     return (
-      <SectionWrapper progressSection="playstation"
+      <SectionLoadingShell
+        sectionId="playstation"
         number={copy.number}
         title={copy.title}
-        intro={LOADING_INTRO}
-      >
-        <div className="h-48 animate-pulse bg-muted rounded-lg" />
-      </SectionWrapper>
+        intro={copy.intro}
+      />
     )
   }
 

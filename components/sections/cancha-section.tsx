@@ -14,7 +14,7 @@ import { SECTIONS } from "@/lib/site-copy"
 const copy = SECTIONS.cancha
 const BASE_PATH = "/mundial"
 import { InfoTooltip } from "@/components/info-tooltip"
-import { LazySectionSkeleton } from "@/components/lazy-mount"
+import { MapChartSkeleton, SectionLazySkeleton } from "@/components/section-skeletons"
 import { loadCountriesGeo } from "@/lib/countries-geo"
 import { debugLog } from "@/lib/debug-log"
 
@@ -22,7 +22,7 @@ const ScrollyMap = dynamic(
   () => import("@/components/scrolly-map").then((m) => m.ScrollyMapInner),
   {
     ssr: false,
-    loading: () => <div className="w-full h-full rounded-2xl bg-[#080e1c] animate-pulse" />,
+    loading: () => <MapChartSkeleton className="min-h-[240px]" />,
   },
 )
 
@@ -447,18 +447,7 @@ export function CanchaSection() {
   }, [loading, activeStep])
 
   if (loading) {
-    return (
-      <section data-progress-anchor="" data-progress-section="cancha" className="py-20 md:py-28 bg-background">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="container mx-auto px-6 md:px-12 max-w-6xl"
-        >
-          <LazySectionSkeleton sectionId="cancha" />
-        </motion.div>
-      </section>
-    )
+    return <SectionLazySkeleton sectionId="cancha" progressSection="cancha" />
   }
 
   /* ── Cálculos ── */

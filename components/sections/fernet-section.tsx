@@ -5,8 +5,9 @@ import { formatCurrency } from "@/lib/utils"
 import { SectionWrapper } from "@/components/section-wrapper"
 import { ComparisonBar } from "@/components/comparison-bar"
 import { PurchasingPowerPictogram } from "@/components/purchasing-power-pictogram"
+import { SectionLoadingShell } from "@/components/section-skeletons"
 import { useData } from "@/lib/data-context"
-import { LOADING_INTRO, SECTIONS } from "@/lib/site-copy"
+import { SECTIONS } from "@/lib/site-copy"
 
 const copy = SECTIONS.fernet
 
@@ -26,9 +27,12 @@ export function FernetSection() {
 
   if (loading) {
     return (
-      <SectionWrapper progressSection="fernet" number={copy.number} title={copy.title} intro={LOADING_INTRO}>
-        <div className="h-48 animate-pulse bg-muted rounded-lg" />
-      </SectionWrapper>
+      <SectionLoadingShell
+        sectionId="fernet"
+        number={copy.number}
+        title={copy.title}
+        intro={copy.intro}
+      />
     )
   }
 

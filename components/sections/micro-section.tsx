@@ -9,7 +9,8 @@ import {
   useScroll,
 } from "framer-motion"
 import { SectionWrapper } from "@/components/section-wrapper"
-import { LOADING_INTRO, SECTIONS } from "@/lib/site-copy"
+import { SectionLoadingShell } from "@/components/section-skeletons"
+import { SECTIONS } from "@/lib/site-copy"
 
 const copy = SECTIONS.micro
 import { useData } from "@/lib/data-context"
@@ -555,9 +556,12 @@ export function MicroSection() {
 
   if (loading) {
     return (
-      <SectionWrapper progressSection="micro" number={copy.number} title={copy.title} intro={LOADING_INTRO}>
-        <div className="h-48 animate-pulse bg-muted rounded-lg" />
-      </SectionWrapper>
+      <SectionLoadingShell
+        sectionId="micro"
+        number={copy.number}
+        title={copy.title}
+        intro={copy.intro}
+      />
     )
   }
 

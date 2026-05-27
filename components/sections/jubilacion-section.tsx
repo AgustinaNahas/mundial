@@ -4,10 +4,11 @@ import { useEffect, useRef, useState } from "react"
 import { motion, useInView } from "framer-motion"
 import { InfoTooltip } from "@/components/info-tooltip"
 import { SectionWrapper } from "@/components/section-wrapper"
+import { SectionLoadingShell } from "@/components/section-skeletons"
 import { useData } from "@/lib/data-context"
 import { formatCurrency } from "@/lib/utils"
 import { useIsMobile } from "@/hooks/use-mobile"
-import { LOADING_INTRO, SECTIONS } from "@/lib/site-copy"
+import { SECTIONS } from "@/lib/site-copy"
 
 const copy = SECTIONS.jubilacion
 const BASE_PATH = "/mundial"
@@ -279,15 +280,14 @@ export function JubilacionSection() {
 
   if (loading) {
     return (
-      <SectionWrapper progressSection="jubilacion"
+      <SectionLoadingShell
+        sectionId="jubilacion"
         number={copy.number}
         title={copy.title}
-        intro={LOADING_INTRO}
+        intro={copy.intro}
         bgColor="muted"
         titleImage={titleImage}
-      >
-        <div className="h-48 animate-pulse bg-muted rounded-lg" />
-      </SectionWrapper>
+      />
     )
   }
 

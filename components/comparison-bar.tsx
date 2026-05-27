@@ -1,6 +1,6 @@
 "use client"
 
-import { motion } from "framer-motion"
+import { motion, useReducedMotion } from "framer-motion"
 import { useEffect, useRef, useState } from "react"
 import {
   CLOSED_FOLLOW_TIP,
@@ -8,6 +8,15 @@ import {
   bindFollowTooltip,
 } from "@/components/follow-cursor-tooltip"
 import { useCloseOnScroll } from "@/hooks/use-close-on-scroll"
+import {
+  MOTION_OFFSET,
+  contentEnterInitial,
+  contentEnterVisible,
+  contentTransition,
+  dataTransition,
+  fadeInitial,
+  fadeVisible,
+} from "@/lib/motion"
 import { formatCurrency } from "@/lib/utils"
 
 const HATCH_OPACITY = 0.6
@@ -45,6 +54,7 @@ export function ComparisonBar({
   referenceValue2026,
   referenceLabel,
 }: ComparisonBarProps) {
+  const reducedMotion = useReducedMotion() ?? false
   const max = maxValue || Math.max(value2022, value2026)
 
   const MIN_WIDTH = 12 // % de ancho mínimo para que se vea el número
@@ -133,13 +143,22 @@ export function ComparisonBar({
     return () => document.removeEventListener("pointerdown", handleOutsideTouch)
   }, [])
 
+  const barBaseDelay = delay + 0.12
+  const bar2026Delay = barBaseDelay + 0.08
+
   return (
     <motion.div
       ref={containerRef}
-      initial={{ opacity: 0, x: -20 }}
-      whileInView={{ opacity: 1, x: 0 }}
+      initial={
+        reducedMotion
+          ? fadeInitial
+          : { ...contentEnterInitial, x: -MOTION_OFFSET.slideX }
+      }
+      whileInView={
+        reducedMotion ? fadeVisible : { ...contentEnterVisible, x: 0 }
+      }
       viewport={{ once: true }}
-      transition={{ delay, duration: 0.6 }}
+      transition={contentTransition(delay, reducedMotion)}
       className="space-y-4"
     >
       <div className="flex items-baseline justify-between">
@@ -165,7 +184,7 @@ export function ComparisonBar({
                 initial={{ width: 0 }}
                 whileInView={{ width: `${width2022}%` }}
                 viewport={{ once: true }}
-                transition={{ delay: delay + 0.3, duration: 0.8, ease: "easeOut" }}
+                transition={dataTransition(barBaseDelay, reducedMotion)}
                 className="flex h-full shrink-0 items-center justify-end bg-accent pr-0 md:pr-3"
               >
                 {!compact2022 && (
@@ -191,7 +210,7 @@ export function ComparisonBar({
                     opacity: 1,
                   }}
                   viewport={{ once: true }}
-                  transition={{ delay: delay + 0.9, duration: 0.6, ease: "easeOut" }}
+                  transition={dataTransition(barBaseDelay, reducedMotion)}
                   className="pointer-events-none absolute top-0 left-0 z-10 h-full rounded-l"
                   style={{ backgroundImage: HATCH_PATTERN_CELESTE }}
                 />
@@ -227,7 +246,7 @@ export function ComparisonBar({
                 initial={{ width: 0 }}
                 whileInView={{ width: `${width2026}%` }}
                 viewport={{ once: true }}
-                transition={{ delay: delay + 0.5, duration: 0.8, ease: "easeOut" }}
+                transition={dataTransition(bar2026Delay, reducedMotion)}
                 className="flex h-full shrink-0 items-center justify-end bg-primary pr-3"
               >
                 {!compact2026 && (
@@ -249,7 +268,7 @@ export function ComparisonBar({
                     opacity: 1,
                   }}
                   viewport={{ once: true }}
-                  transition={{ delay: delay + 1.1, duration: 0.6, ease: "easeOut" }}
+                  transition={dataTransition(bar2026Delay, reducedMotion)}
                   className="pointer-events-none absolute top-0 left-0 z-10 h-full rounded-l"
                   style={{ backgroundImage: HATCH_PATTERN_WHITE }}
                 />

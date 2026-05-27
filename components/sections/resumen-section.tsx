@@ -4,8 +4,9 @@ import { motion } from "framer-motion"
 import { ExternalLink } from "lucide-react"
 import { ComparisonBar } from "@/components/comparison-bar"
 import { SourcesPanel } from "@/components/sources-panel"
+import { SectionLazySkeleton } from "@/components/section-skeletons"
 import { type DataItem, useData } from "@/lib/data-context"
-import { LOADING_INTRO, RESUMEN_COPY, SPREADSHEET_URL } from "@/lib/site-copy"
+import { RESUMEN_COPY, SPREADSHEET_URL } from "@/lib/site-copy"
 
 const KILOS_POR_ASADO = 5
 
@@ -94,13 +95,7 @@ export function ResumenSection() {
   )
 
   if (loading) {
-    return (
-      <section id="resumen" className="py-20 md:py-28 bg-muted">
-        <div className="container mx-auto px-6 md:px-12 max-w-3xl text-center text-muted-foreground">
-          {LOADING_INTRO}
-        </div>
-      </section>
-    )
+    return <SectionLazySkeleton sectionId="resumen" id="resumen" />
   }
 
   return (

@@ -5,9 +5,10 @@ import { motion } from "framer-motion"
 import Image from "next/image"
 import { cn, formatCurrency } from "@/lib/utils"
 import { SectionWrapper } from "@/components/section-wrapper"
+import { SectionLoadingShell } from "@/components/section-skeletons"
 import { useData } from "@/lib/data-context"
 import { useIsMobile } from "@/hooks/use-mobile"
-import { LOADING_INTRO, SECTIONS } from "@/lib/site-copy"
+import { SECTIONS } from "@/lib/site-copy"
 
 const copy = SECTIONS.pelota
 
@@ -250,9 +251,12 @@ export function PelotaSection() {
 
   if (loading) {
     return (
-      <SectionWrapper progressSection="pelota" number={copy.number} title={copy.title} intro={LOADING_INTRO}>
-        <div className="h-48 animate-pulse bg-muted rounded-lg" />
-      </SectionWrapper>
+      <SectionLoadingShell
+        sectionId="pelota"
+        number={copy.number}
+        title={copy.title}
+        intro={copy.intro}
+      />
     )
   }
 

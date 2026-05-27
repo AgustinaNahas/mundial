@@ -5,6 +5,7 @@ import { useEffect, useState, useCallback, useRef } from "react"
 import { ProjectInfoButton } from "@/components/project-info-button"
 import { useVisualViewportAnchor } from "@/hooks/use-visual-viewport-anchor"
 import { useProgressLayoutContext } from "@/components/progress-layout-provider"
+import { contentTransition } from "@/lib/motion"
 import {
   computeProgressFromLayout,
   dotBarPosition,
@@ -104,7 +105,7 @@ export function ProgressTracker() {
           opacity: isVisible ? 1 : 0,
           y: isVisible ? 0 : 24,
         }}
-        transition={{ duration: 0.3, ease: "easeOut" }}
+        transition={contentTransition(0)}
         className="bg-card/90 backdrop-blur-md border-t border-border/50"
         style={{
           pointerEvents: isVisible ? "auto" : "none",
@@ -170,7 +171,7 @@ export function ProgressTracker() {
                               ? "oklch(0.65 0.18 222)"
                               : "oklch(0.24 0.09 252)",
                           }}
-                          transition={{ duration: 0.3 }}
+                          transition={contentTransition(0)}
                           style={{
                             left: `${left}%`,
                             transform: "translate(-50%, -50%)",
@@ -184,7 +185,7 @@ export function ProgressTracker() {
                 <motion.span
                   className="absolute text-base select-none"
                   animate={{ rotate: ballRotate }}
-                  transition={{ duration: 0.05, ease: "easeInOut" }}
+                  transition={{ type: "spring", stiffness: 120, damping: 22, mass: 0.8 }}
                   style={{
                     left: `${normalizePos(progress / 100)}%`,
                     top: "20%",
@@ -198,7 +199,7 @@ export function ProgressTracker() {
               </div>
             </div>
 
-            <ProjectInfoButton />
+            <ProjectInfoButton className="ml-1.5 sm:ml-4" />
           </div>
         </div>
       </motion.div>

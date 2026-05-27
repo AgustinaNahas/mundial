@@ -1,18 +1,28 @@
 "use client"
 
-import { motion } from "framer-motion"
+import { motion, useReducedMotion } from "framer-motion"
+import {
+  MOTION_VIEWPORT,
+  contentEnterInitial,
+  contentEnterVisible,
+  contentTransition,
+  fadeInitial,
+  fadeVisible,
+} from "@/lib/motion"
 
 interface SectionClosingProps {
   children: string
 }
 
 export function SectionClosing({ children }: SectionClosingProps) {
+  const reducedMotion = useReducedMotion() ?? false
+
   return (
     <motion.p
-      initial={{ opacity: 0, y: 12 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-80px" }}
-      transition={{ duration: 0.6 }}
+      initial={reducedMotion ? fadeInitial : contentEnterInitial}
+      whileInView={reducedMotion ? fadeVisible : contentEnterVisible}
+      viewport={{ ...MOTION_VIEWPORT, margin: "-80px" }}
+      transition={contentTransition(0, reducedMotion)}
       className="mt-12 md:mt-16 pt-8 border-t border-border/40 text-lg md:text-2xl 
       font-light italic text-foreground/90 leading-snug 
       max-w-3xl text-balance text-center mx-auto"

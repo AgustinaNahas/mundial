@@ -4,8 +4,9 @@ import { motion } from "framer-motion"
 import { SectionWrapper } from "@/components/section-wrapper"
 import { ComparisonBar } from "@/components/comparison-bar"
 import { PurchasingPowerPictogram } from "@/components/purchasing-power-pictogram"
+import { SectionLoadingShell } from "@/components/section-skeletons"
 import { useData } from "@/lib/data-context"
-import { LOADING_INTRO, SECTIONS } from "@/lib/site-copy"
+import { SECTIONS } from "@/lib/site-copy"
 
 const copy = SECTIONS.mate
 
@@ -25,14 +26,13 @@ export function MateSection() {
 
   if (loading) {
     return (
-      <SectionWrapper progressSection="mate"
+      <SectionLoadingShell
+        sectionId="mate"
         number={copy.number}
         title={copy.title}
-        intro={LOADING_INTRO}
+        intro={copy.intro}
         bgColor="muted"
-      >
-        <div className="h-48 animate-pulse bg-muted rounded-lg" />
-      </SectionWrapper>
+      />
     )
   }
 

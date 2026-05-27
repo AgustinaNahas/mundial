@@ -20,6 +20,7 @@ import {
 } from "@/components/deferred-sections"
 import { BlockHeader } from "@/components/block-header"
 import { CartaRevealSection } from "@/components/sections/carta-reveal-section"
+import { MOTION_EASE } from "@/lib/motion"
 import { BLOCKS } from "@/lib/site-copy"
 
 export default function HomeSections() {
@@ -61,7 +62,7 @@ export default function HomeSections() {
             key="post-carta"
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
-            transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
+            transition={{ duration: 0.55, ease: [...MOTION_EASE] }}
           >
             <section id="festejo">
               <BlockHeader {...BLOCKS.festejo} />

@@ -6,7 +6,8 @@ import { motion, AnimatePresence, useMotionValue, useReducedMotion } from "frame
 import Image from "next/image"
 import { formatCurrency } from "@/lib/utils"
 import { SectionWrapper } from "@/components/section-wrapper"
-import { LOADING_INTRO, SECTIONS } from "@/lib/site-copy"
+import { SectionLoadingShell } from "@/components/section-skeletons"
+import { SECTIONS } from "@/lib/site-copy"
 
 const copy = SECTIONS.album
 import { useData } from "@/lib/data-context"
@@ -14,7 +15,6 @@ import { cn } from "@/lib/utils"
 import { InfoTooltip } from "@/components/info-tooltip"
 import { useIsMobile } from "@/hooks/use-mobile"
 import { MonthStack } from "@/components/month-stack"
-import { LazySectionSkeleton } from "@/components/lazy-mount"
 import { sendGaEvent } from "@/lib/analytics"
 
 /* ─── Constantes ────────────────────────────────────────────── */
@@ -97,10 +97,14 @@ const ALBUM_ERA_2026 = {
   flags: ["🇺🇸", "🇨🇦", "🇲🇽"] as const,
 } as const
 
-const SLOT_FLASH_MS = 700
-
 /* ─── Types ──────────────────────────────────────────────────── */
 type SlotFlash = "ok" | "err"
+
+const SLOT_FLASH_MS: Record<SlotFlash, number> = {
+  ok: 700,
+  err: 380,
+}
+
 interface PlacedFigu { src: string; price2022: number; price2026: number }
 type SlotData = PlacedFigu | null
 interface StickerEntry {
@@ -220,20 +224,30 @@ function Slot({
   onPlace: () => void
 }) {
   return (
-    <div
+    <motion.div
       onClick={figu === null ? onPlace : undefined}
+      animate={
+        flash === "err"
+          ? { x: [0, -5, 5, -4, 4, 0] }
+          : { x: 0 }
+      }
+      transition={
+        flash === "err"
+          ? { duration: 0.26, ease: "easeOut" }
+          : { duration: 0 }
+      }
       className={cn(
-        "relative aspect-[10/13] rounded-md transition-[border-color,box-shadow] duration-200",
+        "relative aspect-[10/13] rounded-md",
         figu
           ? "overflow-visible"
           : cn(
               "overflow-hidden cursor-pointer group border border-dashed",
               flash === "ok" &&
-                "border-solid border-emerald-500 shadow-[0_0_0_2px_rgba(16,185,129,0.4)]",
+                "border-solid border-emerald-500 shadow-[0_0_0_2px_rgba(16,185,129,0.4)] transition-[border-color,box-shadow] duration-150",
               flash === "err" &&
-                "border-solid border-red-500 shadow-[0_0_0_2px_rgba(239,68,68,0.4)]",
+                "border-solid border-red-500 shadow-[0_0_0_2px_rgba(239,68,68,0.55)] transition-none",
               flash == null &&
-                "border-border/40 hover:border-primary/60",
+                "border-border/40 hover:border-primary/60 transition-[border-color,box-shadow] duration-200",
             ),
       )}
     >
@@ -245,21 +259,18 @@ function Slot({
             alt="figurita"
             fill
             sizes="(max-width: 768px) 25vw, 110px"
-            className="absolute inset-0 object-cover rounded-md shadow-lg"
-            // Viene de arriba-izquierda rotada, cae con overshoot y se pega
-            initial={{ y: -28, x: -6, rotate: -22, scale: 1.08, opacity: 0 }}
+            className="absolute inset-0 origin-center object-cover rounded-md shadow-lg"
+            // Emerge desde el centro: entra un poco grande y se asienta al tamaño final
+            initial={{ scale: 1.14, opacity: 0 }}
             animate={{
-              y:      [null, 7,    -3,   0],
-              x:      [null, 1,     0,   0],
-              rotate: [null, 1.5, -0.8,  0],
-              scale:  [null, 1.0,  0.98, 1],
+              scale: [1.14, 0.96, 1],
               opacity: 1,
             }}
             transition={{
-              duration: 0.42,
-              times: [0, 0.52, 0.76, 1],
+              duration: 0.34,
+              times: [0, 0.52, 1],
               ease: "easeOut",
-              opacity: { duration: 0.12 },
+              opacity: { duration: 0.08 },
             }}
           />
         ) : (
@@ -275,7 +286,7 @@ function Slot({
           </motion.div>
         )}
       </AnimatePresence>
-    </div>
+    </motion.div>
   )
 }
 
@@ -633,7 +644,7 @@ export function AlbumSection() {
         return next
       })
       delete flashTimeoutRef.current[idx]
-    }, SLOT_FLASH_MS)
+    }, SLOT_FLASH_MS[kind])
   }, [])
 
   useEffect(() => {
@@ -824,14 +835,13 @@ export function AlbumSection() {
 
   if (loading) {
     return (
-      <SectionWrapper progressSection="album"
+      <SectionLoadingShell
+        sectionId="album"
         number={copy.number}
         title={copy.title}
-        intro={LOADING_INTRO}
+        intro={copy.intro}
         bgColor="muted"
-      >
-        <LazySectionSkeleton sectionId="album" />
-      </SectionWrapper>
+      />
     )
   }
 

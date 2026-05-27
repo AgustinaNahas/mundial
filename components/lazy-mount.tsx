@@ -1,47 +1,43 @@
 "use client"
 
 import type { ReactNode } from "react"
-import { useEffect, useState } from "react"
+import { useEffect } from "react"
+import { SectionLazySkeleton } from "@/components/section-skeletons"
 import { useIntersectionMount } from "@/hooks/use-intersection-mount"
-import {
-  resolveBreakpoint,
-  sectionSkeletonMinHeight,
-  type LazySectionId,
-} from "@/lib/progress-layout"
+import type { LazySectionId } from "@/lib/progress-layout"
 import { cn } from "@/lib/utils"
 import { debugLog } from "@/lib/debug-log"
 
+/** Reexportado para compatibilidad con imports existentes. */
 export function LazySectionSkeleton({
   className,
   sectionId,
+  id,
+  progressSection,
 }: {
   className?: string
   sectionId?: LazySectionId
+  id?: string
+  progressSection?: import("@/lib/progress-layout").ProgressSectionId
 }) {
-  const [minHeight, setMinHeight] = useState<string | undefined>(undefined)
-
-  useEffect(() => {
-    if (!sectionId) return
-    const sync = () => {
-      setMinHeight(
-        sectionSkeletonMinHeight(sectionId, resolveBreakpoint(window.innerWidth)),
-      )
-    }
-    sync()
-    window.addEventListener("resize", sync)
-    return () => window.removeEventListener("resize", sync)
-  }, [sectionId])
-
+  if (!sectionId) {
+    return (
+      <div
+        role="presentation"
+        aria-hidden
+        className={cn(
+          "w-full min-h-[min(32vh,22rem)] rounded-2xl bg-muted/25 animate-pulse",
+          className,
+        )}
+      />
+    )
+  }
   return (
-    <div
-      role="presentation"
-      aria-hidden
-      className={cn(
-        "w-full rounded-2xl bg-muted/25 animate-pulse",
-        !minHeight && "min-h-[min(32vh,22rem)]",
-        className,
-      )}
-      style={minHeight ? { minHeight } : undefined}
+    <SectionLazySkeleton
+      sectionId={sectionId}
+      className={className}
+      id={id}
+      progressSection={progressSection}
     />
   )
 }
@@ -77,9 +73,16 @@ export function LazyMount({
       {isVisible
         ? children
         : fallback ?? (
-            <LazySectionSkeleton
-              sectionId={sectionId === "unknown" ? undefined : sectionId}
-            />
+            sectionId !== "unknown" ? (
+              <SectionLazySkeleton
+                sectionId={sectionId}
+                progressSection={
+                  sectionId === "resumen" || sectionId === "cierre" ? undefined : sectionId
+                }
+              />
+            ) : (
+              <LazySectionSkeleton />
+            )
           )}
     </div>
   )

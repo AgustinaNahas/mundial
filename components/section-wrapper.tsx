@@ -2,7 +2,15 @@
 
 import { useEffect, useMemo, useRef } from "react"
 import Image from "next/image"
-import { motion } from "framer-motion"
+import { motion, useReducedMotion } from "framer-motion"
+import {
+  MOTION_VIEWPORT,
+  contentEnterInitial,
+  contentEnterVisible,
+  contentTransition,
+  fadeInitial,
+  fadeVisible,
+} from "@/lib/motion"
 import { SectionClosing } from "@/components/section-closing"
 import { SourcesPanel, type SourceRow } from "@/components/sources-panel"
 import { DataItem } from "@/lib/data-context"
@@ -58,6 +66,7 @@ export function SectionWrapper({
   titleImage,
   progressSection,
 }: SectionWrapperProps) {
+  const reducedMotion = useReducedMotion() ?? false
   const sectionRef = useRef<HTMLElement | null>(null)
   const sectionName = useMemo(() => slugify(title), [title])
   const showSources = (sources && sources.length > 0) || (extraSources && extraSources.length > 0)
@@ -96,10 +105,10 @@ export function SectionWrapper({
     >
       <div className="container mx-auto px-6 md:px-12 max-w-5xl">
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-100px" }}
-          transition={{ duration: 0.6 }}
+          initial={reducedMotion ? fadeInitial : contentEnterInitial}
+          whileInView={reducedMotion ? fadeVisible : contentEnterVisible}
+          viewport={MOTION_VIEWPORT}
+          transition={contentTransition(0, reducedMotion)}
           className="mb-12"
         >
           <span className="text-accent text-sm font-medium tracking-wide">{number}</span>

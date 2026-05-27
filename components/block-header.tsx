@@ -1,6 +1,14 @@
 "use client"
 
-import { motion } from "framer-motion"
+import { motion, useReducedMotion } from "framer-motion"
+import {
+  MOTION_VIEWPORT,
+  contentEnterInitial,
+  contentEnterVisible,
+  contentTransition,
+  fadeInitial,
+  fadeVisible,
+} from "@/lib/motion"
 
 interface BlockHeaderProps {
   number: string
@@ -9,12 +17,14 @@ interface BlockHeaderProps {
 }
 
 export function BlockHeader({ number, title, subtitle }: BlockHeaderProps) {
+  const reducedMotion = useReducedMotion() ?? false
+
   return (
-    <motion.section 
-      initial={{ opacity: 0 }}
-      whileInView={{ opacity: 1 }}
-      viewport={{ once: true, margin: "-100px" }}
-      transition={{ duration: 0.8 }}
+    <motion.section
+      initial={reducedMotion ? fadeInitial : contentEnterInitial}
+      whileInView={reducedMotion ? fadeVisible : contentEnterVisible}
+      viewport={MOTION_VIEWPORT}
+      transition={contentTransition(0, reducedMotion)}
       className="py-16 md:py-24 bg-primary text-primary-foreground"
     >
       <div className="container mx-auto px-6 md:px-12 max-w-5xl">

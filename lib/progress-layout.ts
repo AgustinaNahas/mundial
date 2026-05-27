@@ -123,6 +123,24 @@ export function sectionSkeletonMinHeight(
   return px != null ? `${px}px` : undefined
 }
 
+/** Cabecera típica de SectionWrapper (número + título + intro) — para reservar alto del contenido. */
+export const SECTION_HEADER_ESTIMATE_PX: Record<ProgressBreakpoint, number> = {
+  mobile: 248,
+  desktop: 312,
+}
+
+/** Alto mínimo del área de contenido (sin header) para evitar saltos al cargar datos. */
+export function sectionContentMinHeight(
+  sectionId: LazySectionId,
+  breakpoint: ProgressBreakpoint,
+): number | undefined {
+  const totalPx =
+    SECTION_HEIGHT_PX[sectionId as ProgressSectionId]?.[breakpoint] ??
+    SKELETON_EXTRA_HEIGHT_PX[sectionId as keyof typeof SKELETON_EXTRA_HEIGHT_PX]?.[breakpoint]
+  if (totalPx == null) return undefined
+  return Math.max(totalPx - SECTION_HEADER_ESTIMATE_PX[breakpoint], 280)
+}
+
 type StackEntry = {
   sectionId: ProgressSectionId | "carta-locked"
   blockId: NarrativeBlockId | "mundial"

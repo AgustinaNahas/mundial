@@ -5,27 +5,38 @@ import { ArrowRight } from "lucide-react"
 import { motion, useReducedMotion } from "framer-motion"
 import { ProjectInfoButton } from "@/components/project-info-button"
 import { SpreadsheetIconLink } from "@/components/spreadsheet-icon-link"
-import { fontHand } from "@/lib/fonts"
+import {
+  MOTION_DURATION,
+  MOTION_EASE,
+  heroContainerVariants,
+  heroItemVariants,
+  heroTransition,
+} from "@/lib/motion"
 import { HERO_COPY } from "@/lib/site-copy"
 import { cn } from "@/lib/utils"
 
-const STAR_TRANSITION = { duration: 0.4, ease: [0.4, 0, 0.2, 1] as const }
+const PARTICLE_OPACITY = 0.60
 
-function HeroStars() {
+function HeroStars({ reduced }: { reduced: boolean }) {
   return (
-    <motion.div
-      layout
+    <div
       className="flex items-center justify-center mt-4 md:mt-6 pointer-events-auto"
-      transition={{ layout: STAR_TRANSITION }}
       aria-label="Tres estrellas del mundial ganado"
     >
       {[0, 1, 2].map((i) => (
         <motion.span
           key={i}
-          layout
-          initial={{ opacity: 0, scale: 0 }}
+          initial={reduced ? { opacity: 0 } : { opacity: 0, scale: 0.85 }}
           animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.15 + i * 0.08, duration: 0.45, type: "spring", stiffness: 320 }}
+          transition={
+            reduced
+              ? { duration: 0.2, delay: 0.12 + i * 0.05 }
+              : {
+                  delay: 0.28 + i * 0.06,
+                  duration: 0.45,
+                  ease: [...MOTION_EASE],
+                }
+          }
           className={cn(
             "text-xl sm:text-2xl md:text-4xl text-secondary leading-none select-none",
             i > 0 && "ml-1.5 sm:ml-2",
@@ -35,8 +46,7 @@ function HeroStars() {
           ⭐
         </motion.span>
       ))}
-
-    </motion.div>
+    </div>
   )
 }
 
@@ -84,6 +94,9 @@ function HeroParticles() {
     const ctx = canvas.getContext("2d")
     if (!ctx) return
 
+    const interactionLayer = canvas.closest("section")
+    if (!interactionLayer) return
+
     let width = canvas.parentElement?.clientWidth || window.innerWidth
     let height = canvas.parentElement?.clientHeight || window.innerHeight
     canvas.width = width
@@ -101,8 +114,37 @@ function HeroParticles() {
 
     const TOTAL = isMobile ? Math.round(500 * 0.4) : 500
     const COLORS = ["#80c4db", "#ffffff", "#00a4dc"]
-    const particles: any[] = []
-    const burstParticles: any[] = []
+    const particles: {
+      x: number
+      y: number
+      w: number
+      h: number
+      color: string
+      vy: number
+      vx: number
+      rot: number
+      rotSpeed: number
+      flipRot: number
+      flipSpeed: number
+      baseVy: number
+      borderRadius: number
+    }[] = []
+    const burstParticles: {
+      x: number
+      y: number
+      w: number
+      h: number
+      color: string
+      vx: number
+      vy: number
+      rot: number
+      rotSpeed: number
+      flipRot: number
+      flipSpeed: number
+      life: number
+      maxLife: number
+      borderRadius: number
+    }[] = []
 
     for (let i = 0; i < TOTAL; i++) {
       particles.push({
@@ -167,11 +209,10 @@ function HeroParticles() {
       spawnBurst(touch.clientX - rect.left, touch.clientY - rect.top)
     }
 
-    const parent = canvas.parentElement
-    parent?.addEventListener("mousemove", handleMouseMove)
-    parent?.addEventListener("mouseleave", handleMouseLeave)
+    interactionLayer.addEventListener("mousemove", handleMouseMove)
+    interactionLayer.addEventListener("mouseleave", handleMouseLeave)
     if (isMobile) {
-      parent?.addEventListener("touchstart", handleTouchStart, { passive: true })
+      interactionLayer.addEventListener("touchstart", handleTouchStart, { passive: true })
     }
 
     const RADIUS = 80
@@ -220,6 +261,7 @@ function HeroParticles() {
         if (p.x < -20) p.x = width + 20
 
         ctx.save()
+        ctx.globalAlpha = PARTICLE_OPACITY
         ctx.translate(p.x, p.y)
         ctx.rotate(p.rot)
         const scaleY = Math.abs(Math.cos(p.flipRot))
@@ -247,7 +289,7 @@ function HeroParticles() {
           continue
         }
 
-        const alpha = p.life / p.maxLife
+        const alpha = (p.life / p.maxLife) * PARTICLE_OPACITY
         ctx.save()
         ctx.globalAlpha = alpha
         ctx.translate(p.x, p.y)
@@ -267,10 +309,10 @@ function HeroParticles() {
 
     return () => {
       window.removeEventListener("resize", handleResize)
-      parent?.removeEventListener("mousemove", handleMouseMove)
-      parent?.removeEventListener("mouseleave", handleMouseLeave)
+      interactionLayer.removeEventListener("mousemove", handleMouseMove)
+      interactionLayer.removeEventListener("mouseleave", handleMouseLeave)
       if (isMobile) {
-        parent?.removeEventListener("touchstart", handleTouchStart)
+        interactionLayer.removeEventListener("touchstart", handleTouchStart)
       }
       cancelAnimationFrame(animationId)
     }
@@ -279,27 +321,36 @@ function HeroParticles() {
   if (reducedMotion) return null
 
   return (
-    <canvas
-      ref={canvasRef}
-      className="pointer-events-none absolute inset-0 w-full h-full z-0 block"
-    />
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ delay: 0.45, duration: 0.8, ease: [...MOTION_EASE] }}
+      className="pointer-events-none absolute inset-0 z-0"
+    >
+      <canvas
+        ref={canvasRef}
+        className="absolute inset-0 w-full h-full block"
+      />
+    </motion.div>
   )
 }
 
 export function HeroSection() {
+  const reducedMotion = useReducedMotion() ?? false
+
   return (
     <section className="relative overflow-hidden h-screen flex items-center justify-center bg-background">
       <div className="pointer-events-none absolute inset-0">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_55%_at_50%_-5%,oklch(0.65_0.18_222/0.35),transparent)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_55%_at_50%_-5%,oklch(0.65_0.18_222/0.28),transparent)]" />
         <div className="absolute inset-x-0 bottom-0 h-40 bg-linear-to-t from-background to-transparent" />
       </div>
 
       <HeroParticles />
 
       <div
-        className="pointer-events-none absolute top-0 left-0 w-full h-full bg-linear-to-b 
-      from-[#00000090] to-[#000000ee] 
-      md:from-[#00000070] md:to-[#000000cc]"
+        className="pointer-events-none absolute top-0 left-0 w-full h-full bg-linear-to-b
+      from-[#00000080] to-[#000000e0]
+      md:from-[#00000060] md:to-[#000000c0]"
       />
 
       <div className="absolute top-4 right-4 sm:top-6 sm:right-6 z-20 flex items-center gap-2 pointer-events-auto">
@@ -309,40 +360,50 @@ export function HeroSection() {
 
       <div className="container relative z-10 mx-auto px-6 md:px-12 pointer-events-none">
         <motion.div
-          initial={{ opacity: 0, y: 40 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.9, ease: "easeOut" }}
-          className="max-w-6xl mx-auto text-center space-y-10"
+          variants={heroContainerVariants(reducedMotion)}
+          initial="hidden"
+          animate="visible"
+          className="md:max-w-6xl mx-auto text-center space-y-10"
         >
           <div className="space-y-3 overflow-visible">
-            <div className="flex flex-col items-center gap-0.5 sm:gap-1">
+            <motion.div
+              variants={heroItemVariants(reducedMotion)}
+              className="flex flex-col items-center gap-0.5 sm:gap-1"
+            >
               <h1
-                className="font-display font-black text-5xl 
-              sm:text-6xl md:text-8xl lg:text-9xl text-foreground tracking-[0.04em] 
+                className="font-display font-black text-5xl
+              sm:text-6xl md:text-8xl lg:text-9xl text-foreground tracking-[0.04em]
               leading-none uppercase pointer-events-auto"
               >
                 {HERO_COPY.titleLine1}
               </h1>
-              <h2 className="font-display mt-6 font-bold text-3xl sm:text-4xl md:text-6xl lg:text-7xl text-primary tracking-[0.06em] leading-none uppercase pointer-events-auto">
+              <h2 className="font-display mt-2 md:mt-6 font-bold md:mx-0 mx-6 text-3xl sm:text-4xl md:text-6xl lg:text-7xl text-primary tracking-[0.06em] leading-none uppercase pointer-events-auto">
                 {HERO_COPY.titleLine2}
               </h2>
-            </div>
-            <HeroStars />
-            <p
-              className="mt-6 md:mt-12 max-w-3xl mx-auto text-sm sm:text-base md:text-lg text-foreground/80 
+            </motion.div>
+
+            <motion.div variants={heroItemVariants(reducedMotion)}>
+              <HeroStars reduced={reducedMotion} />
+            </motion.div>
+
+            <motion.p
+              variants={heroItemVariants(reducedMotion)}
+              className="mt-6 md:mt-12 max-w-3xl mx-auto text-sm sm:text-base md:text-lg text-foreground/80
             leading-relaxed pointer-events-auto"
             >
               {HERO_COPY.subtitle}
-            </p>
-            <p className="max-w-2xl mx-auto text-sm text-muted-foreground pointer-events-auto">
+            </motion.p>
+
+            <motion.p
+              variants={heroItemVariants(reducedMotion)}
+              className="max-w-2xl mx-auto text-sm text-muted-foreground pointer-events-auto"
+            >
               {HERO_COPY.deckline}
-            </p>
+            </motion.p>
           </div>
 
           <motion.div
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5, duration: 0.8 }}
+            variants={heroItemVariants(reducedMotion)}
             className="mx-auto flex w-full max-w-md items-stretch justify-center gap-0 border-y border-border/25 py-1 pointer-events-none"
             aria-label="Mundiales comparados"
           >
@@ -367,19 +428,27 @@ export function HeroSection() {
       </div>
 
       <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 1.3, duration: 0.8 }}
-        className="absolute bottom-8 sm:bottom-24 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 z-10"
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={heroTransition(0.58, reducedMotion)}
+        className="absolute bottom-8 sm:bottom-16 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 z-10"
       >
-        <span className="text-[9px] uppercase tracking-[0.3em] text-foreground/40 hidden sm:inline-block">
+        <span className="text-[9px] uppercase tracking-[0.28em] text-foreground/45">
           Deslizá
         </span>
-        <div className="w-5 h-8 rounded-full border-2 border-foreground/25 flex justify-center pt-1.5">
+        <div className="w-5 h-8 rounded-full border-2 border-foreground/30 flex justify-center pt-1.5">
           <motion.div
-            className="w-0.5 h-1.5 rounded-full bg-foreground/50"
-            animate={{ y: [0, 10, 0], opacity: [1, 0.2, 1] }}
-            transition={{ repeat: Infinity, duration: 1.6, ease: "easeInOut" }}
+            className="w-0.5 h-1.5 rounded-full bg-foreground/55"
+            animate={reducedMotion ? { opacity: 0.6 } : { y: [0, 8, 0], opacity: [0.85, 0.25, 0.85] }}
+            transition={
+              reducedMotion
+                ? { duration: 0.2 }
+                : {
+                    repeat: Infinity,
+                    duration: MOTION_DURATION.loop,
+                    ease: [...MOTION_EASE],
+                  }
+            }
           />
         </div>
       </motion.div>
