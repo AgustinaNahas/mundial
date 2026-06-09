@@ -16,3 +16,5 @@ node_modules/
 # Datos locales / artefactos de build
 .data/
 tsconfig.tsbuildinfo
+
+out/

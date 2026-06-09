@@ -223,7 +223,7 @@ export const CIERRE_COPY = {
   about: {
     title: "Sobre mí",
     name: "Agustina Nahas",
-    photo: "/mundial/author.jpg",
+    photo: "/author.jpg",
     bio: "Desarrolladora de visualizaciones de datos. Fan de la Patria 🇦🇷, de Güemes 🐎 y de las visualizaciones de datos 📊.",
     portfolio: {
       label: "Portfolio",

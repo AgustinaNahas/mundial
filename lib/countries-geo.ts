@@ -3,8 +3,8 @@ import type { GeoJsonObject } from "geojson"
 export type CountriesGeoDetail = "lite" | "full"
 
 const GEO_PATHS: Record<CountriesGeoDetail, string[]> = {
-  lite: ["/mundial/countries-110m.geojson", "/countries-110m.geojson"],
-  full: ["/mundial/countries-50m.geojson", "/countries-50m.geojson", "/mundial/countries.geojson", "/countries.geojson"],
+  lite: ["/countries-110m.geojson"],
+  full: ["/countries-50m.geojson", "/countries.geojson"],
 }
 
 const cache: Partial<Record<CountriesGeoDetail, GeoJsonObject>> = {}

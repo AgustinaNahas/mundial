@@ -9,10 +9,10 @@ import { cn, formatCurrency } from "@/lib/utils"
 import { useData } from "@/lib/data-context"
 import { SectionClosing } from "@/components/section-closing"
 import { SourcesPanel } from "@/components/sources-panel"
+import { BASE_PATH } from "@/lib/base-path"
 import { SECTIONS } from "@/lib/site-copy"
 
 const copy = SECTIONS.cancha
-const BASE_PATH = "/mundial"
 import { InfoTooltip } from "@/components/info-tooltip"
 import { MapChartSkeleton, SectionLazySkeleton } from "@/components/section-skeletons"
 import { loadCountriesGeo } from "@/lib/countries-geo"

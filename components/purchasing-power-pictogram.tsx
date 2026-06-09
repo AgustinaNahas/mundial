@@ -9,7 +9,7 @@ import {
 } from "@/components/follow-cursor-tooltip"
 import { useCloseOnScroll } from "@/hooks/use-close-on-scroll"
 
-const BASE_PATH = "/mundial"
+import { BASE_PATH } from "@/lib/base-path"
 
 /** Contorno blanco para separar íconos densos (mobile y desktop). */
 const PICTO_HALO =
@@ -26,7 +26,7 @@ export interface PurchasingPowerPictogramProps {
   /** Etiqueta plural para el texto de pérdida, ej. "kilos", "asados", "fernets" */
   unitLabel: string
   emoji?: string
-  /** Relativo a `public` con basePath, ej. `viajero.webp` → `/mundial/viajero.webp` */
+  /** Relativo a `public`, ej. `viajero.webp` → `/viajero.webp` */
   imageFile?: string
   imageAlt?: string
   /** Nota metodológica mostrada junto al texto descriptivo sobre el pictograma */

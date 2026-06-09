@@ -4,7 +4,7 @@
  */
 import { chromium, devices } from "playwright"
 
-const BASE = process.env.MEASURE_URL ?? "http://localhost:3000/mundial"
+const BASE = process.env.MEASURE_URL ?? "http://localhost:3000"
 
 async function measurePage(browser, label, viewport) {
   const context = await browser.newContext({ ...viewport, locale: "es-AR" })

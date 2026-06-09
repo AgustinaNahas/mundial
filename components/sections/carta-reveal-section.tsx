@@ -9,7 +9,7 @@ import {
 } from "framer-motion"
 import { cn } from "@/lib/utils"
 
-const BASE_PATH = "/mundial"
+import { BASE_PATH } from "@/lib/base-path"
 const CARTA_DORSO_SRC = `${BASE_PATH}/carta.png`
 
 /** Proporción real de carta.png (~247×375) */

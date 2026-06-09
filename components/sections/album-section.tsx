@@ -27,21 +27,21 @@ type AlbumSlot = {
 }
 
 const SLOTS: readonly AlbumSlot[] = [
-  { player: "Lionel Messi",       emoji: "🐐", src: "/mundial/album/figu1.webp"  },
-  { player: "Rodrigo De Paul",    emoji: "🍬", src: "/mundial/album/figu3.webp"  },
-  { player: "Ángel Di María",     emoji: "🍝", src: "/mundial/album/figu10.webp" },
-  { player: "Nicolás Otamendi",   emoji: "🪖", src: "/mundial/album/figu7.webp"  },
-  { player: "Marcos Acuña",       emoji: "🥚", src: "/mundial/album/figu8.webp"  },
-  { player: "Julián Álvarez",     emoji: "🕷️", src: "/mundial/album/figu4.webp"  },
-  { player: "Lautaro Martínez",   emoji: "🐂", src: "/mundial/album/figu12.webp" },
-  { player: "Alejandro Gómez",    emoji: "🕺", src: "/mundial/album/figu5.webp"  },
-  { player: "Emiliano Martínez",  emoji: "🧤", src: "/mundial/album/figu2.webp"  },
-  { player: "Nahuel Molina",      emoji: "🚀", src: "/mundial/album/figu6.webp"  },
-  { player: "Cristian Romero",    emoji: "🪓", src: "/mundial/album/figu9.webp"  },
+  { player: "Lionel Messi",       emoji: "🐐", src: "/album/figu1.webp"  },
+  { player: "Rodrigo De Paul",    emoji: "🍬", src: "/album/figu3.webp"  },
+  { player: "Ángel Di María",     emoji: "🍝", src: "/album/figu10.webp" },
+  { player: "Nicolás Otamendi",   emoji: "🪖", src: "/album/figu7.webp"  },
+  { player: "Marcos Acuña",       emoji: "🥚", src: "/album/figu8.webp"  },
+  { player: "Julián Álvarez",     emoji: "🕷️", src: "/album/figu4.webp"  },
+  { player: "Lautaro Martínez",   emoji: "🐂", src: "/album/figu12.webp" },
+  { player: "Alejandro Gómez",    emoji: "🕺", src: "/album/figu5.webp"  },
+  { player: "Emiliano Martínez",  emoji: "🧤", src: "/album/figu2.webp"  },
+  { player: "Nahuel Molina",      emoji: "🚀", src: "/album/figu6.webp"  },
+  { player: "Cristian Romero",    emoji: "🪓", src: "/album/figu9.webp"  },
   {
     player: "Leandro Paredes",
     emoji: "🍬",
-    src: "/mundial/album/figu11.webp",
+    src: "/album/figu11.webp",
     emojiClassName: "inline-block [filter:hue-rotate(155deg)_saturate(1.15)]",
   },
 ]

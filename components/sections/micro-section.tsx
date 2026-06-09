@@ -16,7 +16,7 @@ const copy = SECTIONS.micro
 import { useData } from "@/lib/data-context"
 import { formatCurrency } from "@/lib/utils"
 
-const BASE_PATH = "/mundial"
+import { BASE_PATH } from "@/lib/base-path"
 
 // ─── Player data ──────────────────────────────────────────────
 

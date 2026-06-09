@@ -8,11 +8,10 @@ import { SectionWrapper } from "@/components/section-wrapper"
 import { SectionLoadingShell } from "@/components/section-skeletons"
 import { useData } from "@/lib/data-context"
 import { useIsMobile } from "@/hooks/use-mobile"
+import { BASE_PATH } from "@/lib/base-path"
 import { SECTIONS } from "@/lib/site-copy"
 
 const copy = SECTIONS.camiseta
-
-const BASE_PATH = "/mundial"
 
 const CAMISETA_BG_PEAK_SCALE = 2.5
 const CAMISETA_TAP_TOTAL_S = 2.5

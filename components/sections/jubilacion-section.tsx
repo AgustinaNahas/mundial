@@ -8,10 +8,10 @@ import { SectionLoadingShell } from "@/components/section-skeletons"
 import { useData } from "@/lib/data-context"
 import { formatCurrency } from "@/lib/utils"
 import { useIsMobile } from "@/hooks/use-mobile"
+import { BASE_PATH } from "@/lib/base-path"
 import { SECTIONS } from "@/lib/site-copy"
 
 const copy = SECTIONS.jubilacion
-const BASE_PATH = "/mundial"
 const KILOS_POR_ASADO = 5
 /** Desktop: +60% respecto a 220×134px. */
 const ABUELA_IMAGE_WIDTH = 300

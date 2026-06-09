@@ -8,11 +8,10 @@ import { SectionWrapper } from "@/components/section-wrapper"
 import { SectionLoadingShell } from "@/components/section-skeletons"
 import { useData } from "@/lib/data-context"
 import { useIsMobile } from "@/hooks/use-mobile"
+import { BASE_PATH } from "@/lib/base-path"
 import { SECTIONS } from "@/lib/site-copy"
 
 const copy = SECTIONS.pelota
-
-const BASE_PATH = "/mundial"
 
 const PELOTA_ROTATION_SLOW_S = 14
 const PELOTA_ROTATION_FAST_HOVER_S = 4
