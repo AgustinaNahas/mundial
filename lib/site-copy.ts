@@ -226,8 +226,8 @@ export const CIERRE_COPY = {
     photo: "/author.jpg",
     bio: "Desarrolladora de visualizaciones de datos. Fan de la Patria 🇦🇷, de Güemes 🐎 y de las visualizaciones de datos 📊.",
     portfolio: {
-      label: "Portfolio",
-      href: "https://www.notion.so/agusnahas/Agustina-Nahas-75b175948cf0415a885f8a148e94b1b7",
+      label: "Mi sitio web",
+      href: "https://agustinanahas.com",
     },
     email: "m.agustina.nahas@gmail.com",
     social: [
