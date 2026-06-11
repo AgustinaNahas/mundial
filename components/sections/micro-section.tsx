@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useRef, useState, type ReactNode } from "react"
 import {
   AnimatePresence,
   motion,
@@ -53,6 +53,9 @@ const PLAYERS: PlayerData[] = [
   { label: "N. González",  nombre: "Nicolás González" },
   { label: "Papu",         nombre: "Alejandro Gómez" },
 ]
+
+const SCALONI: PlayerData = { label: "Scaloni", nombre: "Lionel Scaloni" }
+const TOTAL_BOARDED = PLAYERS.length + 1
 
 function splitNombreEnDosLineas(nombre: string): [string, string] {
   const parts = nombre.trim().split(/\s+/)
@@ -183,12 +186,28 @@ function getSeatPosV(index: number): { x: number; y: number; col: number } {
   return { x, y, col }
 }
 
-function nameBelowSeat(col: number, vertical: boolean) {
+function getDriverSeatPos(vertical: boolean): { x: number; y: number; col: number } {
+  if (vertical) {
+    return {
+      x: DRIVER_SEAT_X_V + DRIVER_SEAT_W_V / 2,
+      y: DRIVER_SEAT_Y_V + DRIVER_SEAT_H_V / 2,
+      col: -1,
+    }
+  }
+  return {
+    x: DRIVER_SEAT_X + DRIVER_SEAT_W / 2,
+    y: DRIVER_SEAT_Y + DRIVER_SEAT_H / 2,
+    col: -1,
+  }
+}
+
+function nameBelowSeat(col: number, vertical: boolean, isDriver = false) {
+  if (isDriver) return vertical
   if (vertical) return false
   return col === 1
 }
 
-/** Fracción de scroll hasta completar los 26; el resto es margen con el Obelisco. */
+/** Fracción de scroll hasta completar los 27 (26 + Scaloni); el resto es margen con el Obelisco. */
 const BOARDING_SCROLL_END = 0.8
 const SCROLL_MIN_HEIGHT_DESKTOP = "500vh"
 const SCROLL_MIN_HEIGHT_MOBILE = "380vh"
@@ -399,6 +418,42 @@ function BusVerticalView({ showObelisco }: { showObelisco?: boolean }) {
   )
 }
 
+// ─── Subtle seat bounce ───────────────────────────────────────
+
+const BOUNCE_PX = 3.5
+const BOUNCE_DURATION = 1
+
+function PlayerBounce({
+  active,
+  phaseDelay = 0,
+  children,
+}: {
+  active: boolean
+  phaseDelay?: number
+  children: ReactNode
+}) {
+  return (
+    <motion.div
+      className="relative h-full w-full"
+      animate={active ? { y: [0, -BOUNCE_PX, 0] } : { y: 0 }}
+      transition={
+        active
+          ? {
+              y: {
+                duration: BOUNCE_DURATION,
+                repeat: Infinity,
+                ease: "easeInOut",
+                delay: phaseDelay,
+              },
+            }
+          : { duration: 0.2 }
+      }
+    >
+      {children}
+    </motion.div>
+  )
+}
+
 // ─── Price pop (snackbar) ─────────────────────────────────────
 
 function PricePop({
@@ -536,7 +591,7 @@ export function MicroSection() {
   useMotionValueEvent(scrollYProgress, "change", (v) => {
     if (prefersReducedMotion) return
     const boardingV = Math.min(1, v / BOARDING_SCROLL_END)
-    const next = Math.min(26, Math.floor(boardingV * 27.5))
+    const next = Math.min(TOTAL_BOARDED, Math.floor(boardingV * (TOTAL_BOARDED + 1.5)))
     if (next > prevBoarded.current) {
       setSnackIndex(next - 1)
     } else if (next < prevBoarded.current) {
@@ -552,7 +607,8 @@ export function MicroSection() {
     return () => clearTimeout(t)
   }, [snackIndex])
 
-  const allBoarded = boarded >= 26
+  const allBoarded = boarded >= TOTAL_BOARDED
+  const scaloniBoarded = boarded > PLAYERS.length
 
   if (loading) {
     return (
@@ -575,14 +631,18 @@ export function MicroSection() {
         sources={[micro, salario]}
       >
         <p className="text-sm text-muted-foreground text-center py-8 border border-border/40 rounded-xl bg-muted/30">
-          26 jugadores, un solo colectivo.
+          26 jugadores y Scaloni al volante, un solo colectivo.
         </p>
       </SectionWrapper>
     )
   }
 
   const snackPos =
-    snackIndex !== null ? getSeatPos(snackIndex) : null
+    snackIndex !== null
+      ? snackIndex < PLAYERS.length
+        ? getSeatPos(snackIndex)
+        : getDriverSeatPos(isNarrow)
+      : null
 
   return (
     <SectionWrapper progressSection="micro"
@@ -628,9 +688,11 @@ export function MicroSection() {
           >
             {boarded === 0
               ? "Scrolleá para subir al micro 🚌"
-              : boarded < 26
-              ? `${boarded} de 26 jugadores en el micro`
-              : "¡Los 26 campeones están en el micro! 🏆"}
+              : boarded < PLAYERS.length
+              ? `${boarded} de ${PLAYERS.length} jugadores en el micro`
+              : !scaloniBoarded
+              ? `${PLAYERS.length} jugadores a bordo — Scaloni toma el volante`
+              : "¡Plantel completo en el micro! 🏆"}
           </motion.p>
 
           <motion.div
@@ -690,40 +752,112 @@ export function MicroSection() {
                   }
                   transition={{ duration: 0.7, ease: "easeInOut" }}
                 >
-                  <div
-                    className={`absolute left-1/2 z-30 -translate-x-1/2 flex flex-col items-center text-center pointer-events-none leading-tight max-w-[4.25rem] ${
-                      nameBelow ? "top-full mt-0.5" : "bottom-full mb-0.5"
-                    } ${isNarrow ? "rounded px-1 py-0.5 bg-black/35" : ""}`}
-                    style={
-                      isNarrow
-                        ? { textShadow: "0 0 2px #000, 0 1px 3px #000" }
-                        : { textShadow: "0 1px 4px rgba(0,0,0,0.95)" }
-                    }
-                  >
-                    <span
-                      className={`font-bold text-white ${isNarrow ? "text-[13px]" : "text-[10px]"}`}
+                  <PlayerBounce active={isBoarded} phaseDelay={(i % 8) * 0.18}>
+                    <div
+                      className={`absolute left-1/2 z-30 -translate-x-1/2 flex flex-col items-center text-center pointer-events-none leading-tight max-w-[4.25rem] ${
+                        nameBelow ? "top-full mt-0.5" : "bottom-full mb-0.5"
+                      } ${isNarrow ? "rounded px-1 py-0.5 bg-black/35" : ""}`}
+                      style={
+                        isNarrow
+                          ? { textShadow: "0 0 2px #000, 0 1px 3px #000" }
+                          : { textShadow: "0 1px 4px rgba(0,0,0,0.95)" }
+                      }
                     >
-                      {linea1}
-                    </span>
-                    <span
-                      className={`font-semibold text-white/90 ${isNarrow ? "text-[12px]" : "text-[9px]"}`}
-                    >
-                      {linea2}
-                    </span>
-                  </div>
+                      <span
+                        className={`font-bold text-white ${isNarrow ? "text-[13px]" : "text-[10px]"}`}
+                      >
+                        {linea1}
+                      </span>
+                      <span
+                        className={`font-semibold text-white/90 ${isNarrow ? "text-[12px]" : "text-[9px]"}`}
+                      >
+                        {linea2}
+                      </span>
+                    </div>
 
-                  <div
-                    className="bg-primary border-2 border-white"
-                    style={{
-                      width: "100%",
-                      height: "100%",
-                      borderRadius: "50%",
-                      boxShadow: "0 2px 6px rgba(0,0,0,0.55)",
-                    }}
-                  />
+                    <div
+                      className="bg-primary border-2 border-white"
+                      style={{
+                        width: "100%",
+                        height: "100%",
+                        borderRadius: "50%",
+                        boxShadow: "0 2px 6px rgba(0,0,0,0.55)",
+                      }}
+                    />
+                  </PlayerBounce>
                 </motion.div>
               )
             })}
+
+            {(() => {
+              const { x: sx, y: sy } = getDriverSeatPos(isNarrow)
+              const [nombreLinea1, nombreLinea2] = splitNombreEnDosLineas(SCALONI.nombre)
+              const linea1 = nombreLinea2 ? nombreLinea1 : SCALONI.label
+              const linea2 = nombreLinea2 || SCALONI.nombre
+              const nameBelow = nameBelowSeat(-1, isNarrow, true)
+
+              return (
+                <motion.div
+                  key="scaloni"
+                  style={{
+                    position: "absolute",
+                    left: 0,
+                    top: 0,
+                    width: CIRCLE_D,
+                    height: CIRCLE_D,
+                  }}
+                  initial={{
+                    x: entranceCx - CIRCLE_D / 2,
+                    y: entranceCy - CIRCLE_D / 2,
+                    opacity: 0,
+                    scale: 0.4,
+                  }}
+                  animate={
+                    scaloniBoarded
+                      ? { x: sx - CIRCLE_D / 2, y: sy - CIRCLE_D / 2, opacity: 1, scale: 1 }
+                      : { x: entranceCx - CIRCLE_D / 2, y: entranceCy - CIRCLE_D / 2, opacity: 0, scale: 0.4 }
+                  }
+                  transition={{ duration: 0.7, ease: "easeInOut" }}
+                >
+                  <PlayerBounce
+                    active={scaloniBoarded}
+                    phaseDelay={(PLAYERS.length % 8) * 0.18 + 0.12}
+                  >
+                    <div
+                      className={`absolute left-1/2 z-30 -translate-x-1/2 flex flex-col items-center text-center pointer-events-none leading-tight max-w-[4.25rem] ${
+                        nameBelow ? "top-full mt-0.5" : "bottom-full mb-0.5"
+                      } ${isNarrow ? "rounded px-1 py-0.5 bg-black/35" : ""}`}
+                      style={
+                        isNarrow
+                          ? { textShadow: "0 0 2px #000, 0 1px 3px #000" }
+                          : { textShadow: "0 1px 4px rgba(0,0,0,0.95)" }
+                      }
+                    >
+                      <span
+                        className={`font-bold text-white ${isNarrow ? "text-[13px]" : "text-[10px]"}`}
+                      >
+                        {linea1}
+                      </span>
+                      <span
+                        className={`font-semibold text-white/90 ${isNarrow ? "text-[12px]" : "text-[9px]"}`}
+                      >
+                        {linea2}
+                      </span>
+                    </div>
+
+                    <div
+                      className="bg-primary border-2 border-white"
+                      style={{
+                        width: "100%",
+                        height: "100%",
+                        borderRadius: "50%",
+                        boxShadow: "0 2px 6px rgba(0,0,0,0.55)",
+                      }}
+                    />
+                  </PlayerBounce>
+                </motion.div>
+              )
+            })()}
 
             <AnimatePresence>
               {snackIndex !== null && !allBoarded && snackPos && (
@@ -734,7 +868,7 @@ export function MicroSection() {
                   boleto2022={boleto2022}
                   boleto2026={boleto2026}
                   unit={micro?.unidad}
-                  nameBelow={nameBelowSeat(snackPos.col, isNarrow)}
+                  nameBelow={nameBelowSeat(snackPos.col, isNarrow, snackIndex >= PLAYERS.length)}
                 />
               )}
             </AnimatePresence>
